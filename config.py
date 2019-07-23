@@ -10,6 +10,7 @@ class Config(object):
     # SQLALCHEMY_DATABASE_URI = os.environ.get(
     #     'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'db.sqlite'))
     # SQLALCHEMY_TRACK_MODIFICATION = False
+    REQUEST_STATS_WINDOW = 15
 
 
 class DevelopmentConfig(Config):

@@ -55,7 +55,8 @@ class ServerTests(unittest.TestCase):
         # get request_per_second
         r, s, h = self.get('/stats')
         self.assertEqual(s, 200)
-        print("\n\tRequest/sec: {:.3f} ... ".format(r['requests_per_second']), end='')
+        print("\n\tRequest/sec: {:.3f} ... ".format(
+            r['requests_per_second']), end='')
 
         # get message (i.e. mean and std. dev.)
         r, s, h = self.get('/api/stat/0')
