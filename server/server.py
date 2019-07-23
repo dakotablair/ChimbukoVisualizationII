@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, json
+from flask import Flask, request, jsonify
+# render_template, json
 
 from runstats import Statistics
 from collections import defaultdict
@@ -15,17 +16,27 @@ app = Flask(__name__)
 
 
 # run stats per rank
-stats = defaultdict(lambda : Statistics())
+stats = defaultdict(lambda: Statistics())
 lock = threading.Lock()
+
+
 def update_stats(rank, data):
     with lock:
         for num in data:
             stats[rank].push(num)
 
+
 def print_stats(rank):
     with lock:
-        print("Rank {} - mean: {}, std: {}".format(rank, stats[rank].mean(), stats[rank].stddev()))
+        print("Rank {} - mean: {}, std: {}".format(
+            rank, stats[rank].mean(), stats[rank].stddev()))
+
+
+def get_stats(rank):
+    with lock:
+        return stats[rank].mean(), stats[rank].stddev()
 # end of run stats
+
 
 @app.route('/api/messages', methods=['POST'])
 def new_message():
@@ -36,7 +47,7 @@ def new_message():
         # process message (running statistics)
         rank = int(msg['rank'])
         update_stats(rank, msg['data'])
-        #print_stats(rank)
+        # print_stats(rank)
         # end of process
 
         return "OK"
@@ -44,11 +55,15 @@ def new_message():
         return "415 Unsupported Media Type"
 
 
+@app.route('/api/stat/<int:rank>', methods=['GET'])
+def get_stat(rank):
+    """Return running statistics (mean and std. dev.)"""
+    mean, std = get_stats(int(rank))
+    return jsonify({'mean': mean, 'stddev': std})
+
+
 @app.route('/')
 def index():
     """Serve client-side application"""
-    #return render_template('index.html')
+    # return render_template('index.html')
     return "Hello World"
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
