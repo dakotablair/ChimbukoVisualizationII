@@ -2,6 +2,8 @@ import os
 from flask import Flask, request, jsonify
 # render_template, json
 
+from config import config
+
 from runstats import Statistics
 from collections import defaultdict
 import threading
@@ -9,11 +11,7 @@ import threading
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = '51f52814-0071-11e6-a2477-000ec6c2372c'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-#     'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'db.sqlite'))
-# app.config['SQLALCHMY_TRACK_MODIFICATIONS'] = False
-
+app.config.from_object(config[os.environ.get('FLACK_CONFIG', 'development')])
 
 # run stats per rank
 stats = defaultdict(lambda: Statistics())

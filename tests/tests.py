@@ -4,8 +4,6 @@ import json
 from server.server import app
 from server.utils import MessageGenerator
 
-app.config['TESTING'] = True
-
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
