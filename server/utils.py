@@ -4,6 +4,11 @@ import numpy as np
 from queue import Queue
 
 
+def timestamp():
+    """Return the current timestamp as an integer"""
+    return int(time.time())
+
+
 class MessageGenerator(object):
     def __init__(self, n=100, size=1024 * 1024, interval=1000):
         self.n = n                # total number of messages

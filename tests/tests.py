@@ -39,8 +39,8 @@ class ServerTests(unittest.TestCase):
         return body, rv.status_code, rv.headers
 
     def test_runstats(self):
-        n_messages = 10
-        msz_size = 4 * 1000
+        n_messages = 50
+        msz_size = 1024 * 1024
         interval = -1
 
         gen = MessageGenerator(n_messages, msz_size, interval)
@@ -52,6 +52,11 @@ class ServerTests(unittest.TestCase):
                                 data={'rank': 0, 'data': gen.get()})
             self.assertEqual(s, 200)
 
+        # get request_per_second
+        r, s, h = self.get('/stats')
+        self.assertEqual(s, 200)
+        print("\n\tRequest/sec: {:.3f} ... ".format(r['requests_per_second']), end='')
+
         # get message (i.e. mean and std. dev.)
         r, s, h = self.get('/api/stat/0')
         self.assertEqual(s, 200)
@@ -61,3 +66,4 @@ class ServerTests(unittest.TestCase):
 
         self.assertAlmostEqual(d_mean, 0.0, delta=1.0)
         self.assertAlmostEqual(d_stddev, 0.0, delta=1.0)
+        self.assertEqual(n_messages, r['count'])
