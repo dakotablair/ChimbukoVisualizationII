@@ -1,13 +1,9 @@
 from flask import Blueprint, jsonify
 # render_template, json, request, current_app
 
-from server.msgstats import MessageStats
 from . import stats as req_stats
 
 main = Blueprint('main', __name__)
-
-# run stats per rank
-stats = MessageStats()
 
 
 @main.before_app_first_request

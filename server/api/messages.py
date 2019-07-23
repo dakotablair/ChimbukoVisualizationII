@@ -1,9 +1,7 @@
-from flask import Blueprint, request, jsonify
-# g, abort
+from flask import request, jsonify
 
-from .server import stats
-
-api = Blueprint('api', __name__)
+from .. import msg_stats
+from . import api
 
 
 @api.route('/messages', methods=['POST'])
@@ -14,7 +12,7 @@ def new_message():
 
         # process message (running statistics)
         rank = int(msg['rank'])
-        stats.update(rank, msg['data'])
+        msg_stats.update(rank, msg['data'])
         # end of process
 
         return "OK"
@@ -25,5 +23,5 @@ def new_message():
 @api.route('/stat/<int:rank>', methods=['GET'])
 def get_stat(rank):
     """Return running statistics (mean and std. dev.)"""
-    mean, std, count = stats.get(int(rank))
+    mean, std, count = msg_stats.get(int(rank))
     return jsonify({'mean': mean, 'stddev': std, 'count': count})

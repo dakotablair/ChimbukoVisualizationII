@@ -4,7 +4,9 @@ from config import config
 
 # Flask extensions
 # (e.g.) SQLAlchemy
-
+# currently, use simple test class object
+from server.msgstats import MessageStats
+msg_stats = MessageStats()  # run stats per rank
 
 # Import models if there is (for SQLAlchemy)
 
