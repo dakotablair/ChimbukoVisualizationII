@@ -6,7 +6,7 @@ import coverage
 
 
 def run():
-    os.environ['FLACK_CONFIG'] = 'testing'
+    os.environ['SERVER_CONFIG'] = 'testing'
 
     # start coverage engine
     cov = coverage.Coverage(branch=True)

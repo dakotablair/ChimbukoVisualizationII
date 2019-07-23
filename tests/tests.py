@@ -1,16 +1,20 @@
 import unittest
 import json
 
-from server.server import app
+from server import create_app
 from server.utils import MessageGenerator
 
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
-        self.client = app.test_client()
+        self.app = create_app('testing')
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+
+        self.client = self.app.test_client()
 
     def tearDown(self):
-        pass
+        self.ctx.pop()
 
     def get_headers(self):
         headers = {

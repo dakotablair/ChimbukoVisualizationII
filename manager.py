@@ -2,9 +2,9 @@ import subprocess
 import sys
 from flask_script import Manager
 
-from server import app
+from server import create_app
 
-manager = Manager(app)
+manager = Manager(create_app)
 
 @manager.command
 def test():
