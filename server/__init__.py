@@ -1,14 +1,17 @@
 import os
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from config import config
 
 # Flask extensions
-# (e.g.) SQLAlchemy
 # currently, use simple test class object
 from server.msgstats import MessageStats
 msg_stats = MessageStats()  # run stats per rank
 
-# Import models if there is (for SQLAlchemy)
+db = SQLAlchemy()
+
+# Import models so that they are registered with SQLAlchemy
+from . import models  # noqa
 
 
 def create_app(config_name=None):
@@ -18,7 +21,7 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
 
     # Initialize flask extensions
-    # (e.g. database)
+    db.init_app(app)
 
     # Register web application routes
     from .server import main as main_blueprint
