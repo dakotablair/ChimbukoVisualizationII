@@ -48,8 +48,10 @@ def get_executions():
     """
     col = Execution.t_entry
     if request.args.get('time'):
-        if request.args.get('time') == 't_exit':      col = Execution.t_exit
-        elif request.args.get('time') == 't_runtime': col = Execution.t_runtime
+        if request.args.get('time') == 't_exit':
+            col = Execution.t_exit
+        elif request.args.get('time') == 't_runtime':
+            col = Execution.t_runtime
 
     o = request.args.get('order', default='asc')
     if o == 'asc':

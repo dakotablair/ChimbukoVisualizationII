@@ -31,7 +31,7 @@ class Execution(db.Model):
         _exec.from_dict(data, partial_update=False)
         return _exec
 
-    def from_dict(self, data:dict, partial_update=True):
+    def from_dict(self, data: dict, partial_update=True):
         """Import execution data from a dictionary"""
         for field in data.keys():
             try:

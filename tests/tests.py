@@ -2,7 +2,7 @@ import unittest
 import json
 
 from server import create_app, db
-from server.models import Execution
+# from server.models import Execution
 from server.utils import MessageGenerator
 
 
@@ -144,13 +144,15 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(r[0]['fname'], 'func_2')
 
         # get execution (use t_entry && desc order && label=0 && since=20)
-        r, s, h = self.get('/api/executions?time=t_entry&order=desc&label=0&since=20')
+        r, s, h = self.get(
+            '/api/executions?time=t_entry&order=desc&label=0&since=20')
         self.assertEqual(s, 200)
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0]['id'], 'id_3')
 
         # get execution (use t_entry && desc order && since=20 && until=100)
-        r, s, h = self.get('/api/executions?time=t_entry&order=desc&since=20&until=100')
+        r, s, h = self.get(
+            '/api/executions?time=t_entry&order=desc&since=20&until=100')
         self.assertEqual(s, 200)
         self.assertEqual(len(r), 2)
         self.assertEqual(r[0]['id'], 'id_3')
