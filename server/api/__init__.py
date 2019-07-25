@@ -2,4 +2,4 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-from . import messages, executions  # noqa
+from . import messages, executions, anomalystats  # noqa

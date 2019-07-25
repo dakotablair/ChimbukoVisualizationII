@@ -15,6 +15,7 @@ def new_message():
         msg_stats.update(rank, msg['data'])
         # end of process
 
+
         return "OK"
     else:
         return "415 Unsupported Media Type"

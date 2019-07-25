@@ -47,6 +47,12 @@ class ServerTests(unittest.TestCase):
                 pass
         return body, rv.status_code, rv.headers
 
+    def test_anomalystats(self):
+        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 10, 'val2': 100})
+        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 20, 'val2': 200})
+        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 30, 'val2': 300})
+
+
     def test_runstats(self):
         n_messages = 50
         msz_size = 1024

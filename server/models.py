@@ -3,6 +3,48 @@ from . import db
 from .utils import timestamp
 
 
+class AnomalyStat(db.Model):
+    """Anomaly statistics"""
+    __tablename__ = 'anomalystats'
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.Integer, default=timestamp)
+    updated_at = db.Column(db.Integer, default=timestamp, onupdate=timestamp)
+
+    val1 = db.Column(db.Integer, default=0)
+    val2 = db.Column(db.Integer, default=0)
+    sum  = db.Column(db.Float, default=0)
+
+    @staticmethod
+    def create(data):
+        """Create a new execution"""
+        st = AnomalyStat()
+        st.from_dict(data, partial_update=False)
+        return st
+
+    def from_dict(self, data, partial_update=True):
+        """Import execution data from a dictionary"""
+        for field in data.keys():
+            try:
+                setattr(self, field, data[field])
+            except KeyError:
+                if not partial_update:
+                    abort(400)
+
+    def to_dict(self):
+        pass
+
+    @staticmethod
+    def on_updated(mapper, connection, target):
+        tb = AnomalyStat.__table__
+        sum = target.val1 + target.val2 + target.sum
+        connection.execute(
+            tb.update().where(tb.c.id==target.id).values(sum=sum)
+        )
+
+db.event.listen(AnomalyStat, 'after_update', AnomalyStat.on_updated)
+db.event.listen(AnomalyStat, 'after_insert', AnomalyStat.on_updated)
+
+
 class Execution(db.Model):
     """The Execution model"""
     __tablename__ = 'executions'
