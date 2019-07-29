@@ -8,6 +8,7 @@ from . import api
 
 @api.route('/anomalystats', methods=['POST'])
 def new_anomalystats():
+    """Register new anaomaly stats"""
     payload = request.get_json()
 
     stat = AnomalyStat.create(payload)
@@ -20,4 +21,8 @@ def new_anomalystats():
 
 @api.route('/anomalystats/<int:id>', methods=['GET'])
 def get_anomalystats(id):
-    pass
+    """Return anomaly stat specified by id"""
+    stat = AnomalyStat.query.filter_by(id=id).first()
+    if stat is None:
+        abort(400)
+    return jsonify(stat.to_dict())

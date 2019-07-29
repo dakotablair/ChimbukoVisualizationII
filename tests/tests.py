@@ -48,9 +48,36 @@ class ServerTests(unittest.TestCase):
         return body, rv.status_code, rv.headers
 
     def test_anomalystats(self):
+        # get anomaly stat
+        r, s, h = self.get('/api/anomalystats/0')
+        self.assertEqual(s, 400)
+
+        # post an anomaly stat
         r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 10, 'val2': 100})
+        self.assertEqual(s, 200)
+
+        # check the first accumulation
+        r, s, h = self.get('/api/anomalystats/0')
+        self.assertEqual(s, 200)
+        self.assertEqual(r['sum'], 110)
+
+        # post another stat
         r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 20, 'val2': 200})
+        self.assertEqual(s, 200)
+
+        # check the accumulation
+        r, s, h = self.get('/api/anomalystats/0')
+        self.assertEqual(s, 200)
+        self.assertEqual(r['sum'], 330)
+
+        # post another stat
         r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 30, 'val2': 300})
+        self.assertEqual(s, 200)
+
+        # check the accumulation
+        r, s, h = self.get('/api/anomalystats/0')
+        self.assertEqual(s, 200)
+        self.assertEqual(r['sum'], 660)
 
 
     def test_runstats(self):

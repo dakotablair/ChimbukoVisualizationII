@@ -16,13 +16,13 @@ class AnomalyStat(db.Model):
 
     @staticmethod
     def create(data):
-        """Create a new execution"""
+        """Create a new anomaly statistics"""
         st = AnomalyStat()
         st.from_dict(data, partial_update=False)
         return st
 
     def from_dict(self, data, partial_update=True):
-        """Import execution data from a dictionary"""
+        """Import anomaly statistics from a dictionary"""
         for field in data.keys():
             try:
                 setattr(self, field, data[field])
@@ -31,7 +31,15 @@ class AnomalyStat(db.Model):
                     abort(400)
 
     def to_dict(self):
-        pass
+        """Export an anomaly statistics to a dictionary"""
+        return {
+            'id': self.id,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'val1': self.val1,
+            'val2': self.val2,
+            'sum': self.sum
+        }
 
     @staticmethod
     def on_updated(mapper, connection, target):
