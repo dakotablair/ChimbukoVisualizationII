@@ -6,10 +6,6 @@ from celery import Celery
 from config import config
 
 # Flask extensions
-# currently, use simple test class object
-from server.msgstats import MessageStats
-msg_stats = MessageStats()  # run stats per rank
-
 db = SQLAlchemy()
 celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
@@ -24,7 +20,6 @@ from .tasks import run_flask_request  # noqa
 
 
 def create_app(config_name=None):
-    print('create_app: ', config_name)
     if config_name is None:
         config_name = os.environ.get('SERVER_CONFIG', 'development')
 

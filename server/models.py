@@ -4,15 +4,18 @@ from .utils import timestamp
 
 
 class AnomalyStat(db.Model):
-    """Anomaly statistics"""
+    """
+    Anomaly statistics
+    measure of mean and standard deviation
+    """
     __tablename__ = 'anomalystats'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)  # rank id
     created_at = db.Column(db.Integer, default=timestamp)
     updated_at = db.Column(db.Integer, default=timestamp, onupdate=timestamp)
 
-    val1 = db.Column(db.Integer, default=0)
-    val2 = db.Column(db.Integer, default=0)
-    sum = db.Column(db.Float, default=0)
+    step = db.Column(db.Integer, default=0)  # current step
+    mean = db.Column(db.Float, default=0)  # mean
+    stddev = db.Column(db.Float, default=0)  # standard deviation
 
     @staticmethod
     def create(data):
@@ -36,22 +39,10 @@ class AnomalyStat(db.Model):
             'id': self.id,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
-            'val1': self.val1,
-            'val2': self.val2,
-            'sum': self.sum
+            'step': self.step,
+            'mean': self.mean,
+            'stddev': self.stddev
         }
-
-    @staticmethod
-    def on_updated(mapper, connection, target):
-        tb = AnomalyStat.__table__
-        sum = target.val1 + target.val2 + target.sum
-        connection.execute(
-            tb.update().where(tb.c.id == target.id).values(sum=sum)
-        )
-
-
-db.event.listen(AnomalyStat, 'after_update', AnomalyStat.on_updated)
-db.event.listen(AnomalyStat, 'after_insert', AnomalyStat.on_updated)
 
 
 class Execution(db.Model):
@@ -113,5 +104,3 @@ class Execution(db.Model):
             't_exit': self.t_exit,
             't_runtime': self.t_runtime
         }
-
-# db.event.listen(Execution.source, 'set', Execution.on_changed_source)

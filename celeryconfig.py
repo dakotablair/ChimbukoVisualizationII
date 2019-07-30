@@ -3,5 +3,5 @@
 # enable the pickle serializer
 task_serializer = 'pickle'
 result_rerializer = 'pickle'
-accept_content = ['pickle']
+accept_content = ['pickle', 'application/json']
 # result_accept_content = ['pickle']

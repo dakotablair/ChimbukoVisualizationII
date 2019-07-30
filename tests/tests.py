@@ -1,15 +1,16 @@
 import unittest
 import json
+import os
+import time
+
 # import mock
 
 from server import create_app, db
-# from server.models import Execution
-from server.utils import MessageGenerator
 
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()  # create_app('testing')
+        self.app = create_app()
         self.ctx = self.app.app_context()
         self.ctx.push()
 
@@ -34,8 +35,11 @@ class ServerTests(unittest.TestCase):
         rv = self.client.post(url, data=d, headers=self.get_headers())
 
         body = rv.get_data(as_text=True)
-        # if body is not None and body != '':
-        #     print(body)
+        if body is not None and body != '':
+            try:
+                body = json.loads(body)
+            except:  # noqa: E722
+                pass
         return body, rv.status_code, rv.headers
 
     def get(self, url):
@@ -49,17 +53,54 @@ class ServerTests(unittest.TestCase):
         return body, rv.status_code, rv.headers
 
     def test_anomalystats(self):
+        worker_id = []
+
+        r, s, h = self.post(
+            '/api/anomalystats',
+            {'id': 0, 'step': 0, 'mean': 10.0, 'stddev': 5.0}
+        )
+        self.assertEqual(s, 202)
+        worker_id.append(os.path.basename(h['Location']))
+
+        r, s, h = self.post(
+            '/api/anomalystats',
+            [
+                {'id': 0, 'step': 1, 'mean': 10.3, 'stddev': 4.2},
+                {'id': 1, 'step': 0, 'mean': 1.0, 'stddev': 0.3},
+            ]
+        )
+        self.assertEqual(s, 202)
+        worker_id.append(os.path.basename(h['Location']))
+
+        n_tries = 0
+        while len(worker_id) and n_tries < 100:
+            to_remove = []
+            for wid in worker_id:
+                r, s, h = self.get('/tasks/status/' + worker_id[0])
+                if s == 201:
+                    to_remove.append(wid)
+
+            worker_id = [wid for wid in worker_id if wid not in to_remove]
+            n_tries = n_tries + 1
+            time.sleep(0.1)
+        self.assertEqual(len(worker_id), 0)
+
+        time.sleep(10)
+        print("")
+        r, s, h = self.get('/api/anomalystats')
+        print(r, s, h)
+
         # get anomaly stat
         # r, s, h = self.get('/api/anomalystats/0')
         # self.assertEqual(s, 400)
 
         # post an anomaly stat
-        r, s, h = self.post(
-            '/api/anomalystats',
-            {'id': 0, 'val1': 10, 'val2': 100})
-        print(r)
-        print(s)
-        print(h)
+        # r, s, h = self.post(
+        #     '/api/anomalystats',
+        #     {'id': 0, 'val1': 10, 'val2': 100})
+        # print(r)
+        # print(s)
+        # print(h)
 
         # with mock.patch('server.tasks.run_flask_request.apply_async',
         #                 return_value=mock.MagicMock(state='PENDING')) as m:
@@ -74,8 +115,8 @@ class ServerTests(unittest.TestCase):
 
         # self.assertEqual(s, 200)
 
-        import time
-        time.sleep(60)
+        # import time
+        # time.sleep(60)
 
         # check the first accumulation
         # r, s, h = self.get('/api/anomalystats/0')
@@ -103,37 +144,6 @@ class ServerTests(unittest.TestCase):
         # r, s, h = self.get('/api/anomalystats/0')
         # self.assertEqual(s, 200)
         # self.assertEqual(r['sum'], 660)
-
-    def test_runstats(self):
-        n_messages = 50
-        msz_size = 1024
-        interval = -1
-
-        gen = MessageGenerator(n_messages, msz_size, interval)
-
-        # post message
-        gen.start()
-        for i in range(n_messages):
-            r, s, h = self.post('/api/messages',
-                                data={'rank': 0, 'data': gen.get()})
-            self.assertEqual(s, 200)
-
-        # get request_per_second
-        r, s, h = self.get('/stats')
-        self.assertEqual(s, 200)
-        print("\n\tRequest/sec: {:.3f} ... ".format(
-            r['requests_per_second']), end='')
-
-        # get message (i.e. mean and std. dev.)
-        r, s, h = self.get('/api/stat/0')
-        self.assertEqual(s, 200)
-
-        d_mean = abs(float(r['mean']) - gen.mean)
-        d_stddev = abs(float(r['stddev']) - gen.std_dev)
-
-        self.assertAlmostEqual(d_mean, 0.0, delta=1.0)
-        self.assertAlmostEqual(d_stddev, 0.0, delta=1.0)
-        self.assertEqual(n_messages, r['count'])
 
     def test_executions(self):
         # try to get an execution in the empty database
@@ -214,3 +224,47 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(len(r), 2)
         self.assertEqual(r[0]['id'], 'id_3')
         self.assertEqual(r[1]['id'], 'id_2')
+
+
+
+# class MessageGenerator(object):
+#     def __init__(self, n=100, size=1024 * 1024, interval=1000):
+#         self.n = n                # total number of messages
+#         self.size = size          # message size in bytes
+#         self.interval = interval  # interval between messages in millisecond
+#
+#         self.mean = float(np.random.randint(0, 100))
+#         self.std_dev = float(np.random.randint(10, 50))
+#         self.count = int(self.size / 4)  # number of elements in a message
+#
+#         # thread
+#         self.q = Queue()  # message queue
+#         self.ev = threading.Event()  # terminating event
+#         self.thread = threading.Thread(target=self._run)
+#
+#     def _run(self):
+#         count = 0
+#         while count < self.n:
+#             # generate random data (normal distribution)
+#             t_begin = time.time()
+#             rd = np.random.normal(
+#                 self.mean, self.std_dev, self.count).astype(np.float32)
+#             rd = rd.tolist()
+#             t_end = time.time()
+#
+#             # make interval
+#             t_elapsed = t_end - t_begin
+#             if t_elapsed < self.interval / 1000:
+#                 time.sleep(self.interval / 1000 - t_elapsed)
+#
+#             # add to queue
+#             self.q.put(rd)
+#             count = count + 1
+#
+#     def start(self):
+#         self.thread.start()
+#
+#     def get(self):
+#         rd = self.q.get()
+#         self.q.task_done()
+#         return rd

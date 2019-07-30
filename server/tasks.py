@@ -47,8 +47,11 @@ def run_flask_request(environ):
         # return rv.get_data(), rv.status_code, rv.headers
         # for some reason, couldn't return with get_data()
         # and rv.headers directly.
-        return rv.get_json(), rv.status_code, \
-            {'Location': rv.headers['Location']}
+        try:
+            return rv.get_json(), rv.status_code, \
+                {'Location': rv.headers['Location']}
+        except:
+            return rv.get_json(), rv.status_code
 
 
 def make_async(f):
@@ -94,6 +97,9 @@ def get_status(id):
     task = run_flask_request.AsyncResult(id)
     if task.state == states.PENDING:
         abort(404)
+
     if task.state == states.RECEIVED or task.state == states.STARTED:
         return '', 202, {'Location': url_for('tasks.get_status', id=id)}
-    return task.info
+
+    # data, status_code, header
+    return tuple(task.info)
