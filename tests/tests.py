@@ -1,5 +1,6 @@
 import unittest
 import json
+# import mock
 
 from server import create_app, db
 # from server.models import Execution
@@ -8,7 +9,7 @@ from server.utils import MessageGenerator
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app('testing')
+        self.app = create_app()  # create_app('testing')
         self.ctx = self.app.app_context()
         self.ctx.push()
 
@@ -49,36 +50,59 @@ class ServerTests(unittest.TestCase):
 
     def test_anomalystats(self):
         # get anomaly stat
-        r, s, h = self.get('/api/anomalystats/0')
-        self.assertEqual(s, 400)
+        # r, s, h = self.get('/api/anomalystats/0')
+        # self.assertEqual(s, 400)
 
         # post an anomaly stat
-        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 10, 'val2': 100})
-        self.assertEqual(s, 200)
+        r, s, h = self.post(
+            '/api/anomalystats',
+            {'id': 0, 'val1': 10, 'val2': 100})
+        print(r)
+        print(s)
+        print(h)
+
+        # with mock.patch('server.tasks.run_flask_request.apply_async',
+        #                 return_value=mock.MagicMock(state='PENDING')) as m:
+        #     r, s, h = self.post(
+        #       '/api/anomalystats',
+        #       {'id': 0, 'val1': 10, 'val2': 100})
+        #     print(r)
+        #     print(s)
+        #     print(h)
+        #     print(m.call_count)
+        #     print(m.call_args_list[0][1]['args'][0])
+
+        # self.assertEqual(s, 200)
+
+        import time
+        time.sleep(60)
 
         # check the first accumulation
-        r, s, h = self.get('/api/anomalystats/0')
-        self.assertEqual(s, 200)
-        self.assertEqual(r['sum'], 110)
+        # r, s, h = self.get('/api/anomalystats/0')
+        # self.assertEqual(s, 200)
+        # self.assertEqual(r['sum'], 110)
 
         # post another stat
-        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 20, 'val2': 200})
-        self.assertEqual(s, 200)
+        # r, s, h = self.post(
+        #   '/api/anomalystats',
+        #   {'id': 0, 'val1': 20, 'val2': 200})
+        # self.assertEqual(s, 200)
 
         # check the accumulation
-        r, s, h = self.get('/api/anomalystats/0')
-        self.assertEqual(s, 200)
-        self.assertEqual(r['sum'], 330)
+        # r, s, h = self.get('/api/anomalystats/0')
+        # self.assertEqual(s, 200)
+        # self.assertEqual(r['sum'], 330)
 
         # post another stat
-        r, s, h = self.post('/api/anomalystats', {'id': 0, 'val1': 30, 'val2': 300})
-        self.assertEqual(s, 200)
+        # r, s, h = self.post(
+        #   '/api/anomalystats',
+        #   {'id': 0, 'val1': 30, 'val2': 300})
+        # self.assertEqual(s, 200)
 
         # check the accumulation
-        r, s, h = self.get('/api/anomalystats/0')
-        self.assertEqual(s, 200)
-        self.assertEqual(r['sum'], 660)
-
+        # r, s, h = self.get('/api/anomalystats/0')
+        # self.assertEqual(s, 200)
+        # self.assertEqual(r['sum'], 660)
 
     def test_runstats(self):
         n_messages = 50

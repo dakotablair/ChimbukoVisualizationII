@@ -37,18 +37,24 @@ def run_flask_request(environ):
         # Run the route function and record the response
         try:
             rv = app.full_dispatch_request()
-        except:
+        except:  # noqa E722
             # If we are in debug mode we want to see the exception
             # Else, return a 500 error
             if app.debug:
                 raise
             rv = app.make_response(InternalServerError())
-        return rv.get_data(), rv.status_code, rv.headers
+
+        # return rv.get_data(), rv.status_code, rv.headers
+        # for some reason, couldn't return with get_data()
+        # and rv.headers directly.
+        return rv.get_json(), rv.status_code, \
+            {'Location': rv.headers['Location']}
 
 
 def make_async(f):
     """
-    This decorator transforms a sync route to asynchronous by running it with celery worker
+    This decorator transforms a sync route to asynchronous
+    by running it with celery worker
     """
     @wraps(f)
     def wrapped(*args, **kwargs):
@@ -58,13 +64,19 @@ def make_async(f):
             return f(*args, **kwargs)
 
         # launch the task
-        environ = {k: v for k, v in request.environ.items() if isinstance(v, text_types)}
+        environ = {
+            k: v for k, v in request.environ.items()
+            if isinstance(v, text_types)
+        }
         if 'wsgi.input' in request.environ:
             environ['_wsgi.input'] = request.get_data()
+
         t = run_flask_request.apply_async(args=(environ, ))
 
-        # Return a 202 response, with a link that the client can use to obtain task status
-        if t.state == states.PENDING or t.state == states.RECEIVED or t.state == states.STARTED:
+        # Return a 202 response, with a link that the client can use
+        # to obtain task status
+        if t.state == states.PENDING or t.state == states.RECEIVED or \
+                t.state == states.STARTED:
             return '', 202, {'Location': url_for('tasks.get_status', id=t.id)}
 
         # If the task already finished, return its return value as response

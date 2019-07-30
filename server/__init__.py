@@ -24,8 +24,10 @@ from .tasks import run_flask_request  # noqa
 
 
 def create_app(config_name=None):
+    print('create_app: ', config_name)
     if config_name is None:
         config_name = os.environ.get('SERVER_CONFIG', 'development')
+
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 

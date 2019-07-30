@@ -1,28 +1,29 @@
-from flask import request, abort, jsonify
+from flask import request, jsonify
 
 from .. import db
 from ..models import AnomalyStat
-
 from . import api
+from ..tasks import make_async
+from ..utils import url_for
 
 
 @api.route('/anomalystats', methods=['POST'])
+@make_async
 def new_anomalystats():
     """Register new anaomaly stats"""
-    payload = request.get_json()
-
+    payload = request.get_json() or {}
     stat = AnomalyStat.create(payload)
 
     db.session.merge(stat)
     db.session.commit()
 
-    return "OK"
+    r = jsonify({})
+    r.status_code = 201
+    r.headers['Location'] = url_for('api.get_anomalystats', id=stat.id)
+    return r
 
 
 @api.route('/anomalystats/<int:id>', methods=['GET'])
 def get_anomalystats(id):
     """Return anomaly stat specified by id"""
-    stat = AnomalyStat.query.filter_by(id=id).first()
-    if stat is None:
-        abort(400)
-    return jsonify(stat.to_dict())
+    return jsonify(AnomalyStat.query.get_or_404(id).to_dict())

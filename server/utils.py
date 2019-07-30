@@ -6,7 +6,6 @@ import numpy as np
 from queue import Queue
 
 
-
 def timestamp():
     """Return the current timestamp as an integer"""
     return int(time.time())

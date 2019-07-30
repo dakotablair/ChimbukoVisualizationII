@@ -12,7 +12,7 @@ class AnomalyStat(db.Model):
 
     val1 = db.Column(db.Integer, default=0)
     val2 = db.Column(db.Integer, default=0)
-    sum  = db.Column(db.Float, default=0)
+    sum = db.Column(db.Float, default=0)
 
     @staticmethod
     def create(data):
@@ -46,8 +46,9 @@ class AnomalyStat(db.Model):
         tb = AnomalyStat.__table__
         sum = target.val1 + target.val2 + target.sum
         connection.execute(
-            tb.update().where(tb.c.id==target.id).values(sum=sum)
+            tb.update().where(tb.c.id == target.id).values(sum=sum)
         )
+
 
 db.event.listen(AnomalyStat, 'after_update', AnomalyStat.on_updated)
 db.event.listen(AnomalyStat, 'after_insert', AnomalyStat.on_updated)
