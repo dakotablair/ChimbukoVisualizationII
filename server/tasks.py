@@ -50,7 +50,7 @@ def run_flask_request(environ):
         try:
             return rv.get_json(), rv.status_code, \
                 {'Location': rv.headers['Location']}
-        except:
+        except:  # noqa
             return rv.get_json(), rv.status_code
 
 
