@@ -1,28 +1,70 @@
 from flask import abort
 from . import db
 from .utils import timestamp
-
+from runstats import Statistics
 
 class AnomalyStat(db.Model):
     """
     Anomaly statistics
-    measure of mean and standard deviation
+    - contains internal state of Statistics object
     """
-    __tablename__ = 'anomalystats'
-    id = db.Column(db.Integer, primary_key=True)  # rank id
-    created_at = db.Column(db.Integer, default=timestamp)
-    updated_at = db.Column(db.Integer, default=timestamp, onupdate=timestamp)
+    __tablename__ = 'anomalystat'
+    id = db.Column(db.Integer, primary_key=True)
 
-    step = db.Column(db.Integer, default=0)  # current step
-    mean = db.Column(db.Float, default=0)  # mean
-    stddev = db.Column(db.Float, default=0)  # standard deviation
+    # application & rank id's
+    app = db.Column(db.Integer, index=True, default=0)  # application id
+    rank = db.Column(db.Integer, index=True, default=0)  # rank id
+
+    # (unique) key for race-condition
+    key = db.Column(db.String(), unique=True)
+
+    # internal variables of Statistics object
+    count = db.Column(db.Float, default=0)
+    eta = db.Column(db.Float, default=0)
+    rho = db.Column(db.Float, default=0)
+    tau = db.Column(db.Float, default=0)
+    phi = db.Column(db.Float, default=0)
+    min = db.Column(db.Float, default=0)
+    max = db.Column(db.Float, default=0)
+
+    # reference to associated data
+    data = db.relationship('AnomalyData', lazy='dynamic', backref='owner')
+
+    def __repr__(self):
+        stats = Statistics.fromstate(
+            (self.count, self.eta, self.rho, self.tau, self.phi,
+             self.min, self.max)
+        )
+        return '<AnomalyStat {}:{} count={}, ' \
+               'min={:.3f}, max={:.3f} ' \
+               'mean={:.3f}, stddev={:.3f}, skewness={:.3f}, kurtosis={:.3f}>'.format(
+            self.app, self.rank,
+            len(stats), stats.minimum(), stats.maximum(),
+            stats.mean(), stats.stddev(), stats.skewness(), stats.kurtosis()
+        )
 
     @staticmethod
     def create(data):
         """Create a new anomaly statistics"""
-        st = AnomalyStat()
-        st.from_dict(data, partial_update=False)
-        return st
+        if not all(field in data for field in ('app', 'rank')):
+            abort(400, message="Missing application or rank indices")
+        stat = AnomalyStat(
+            app=0, rank=0, key='0:0:0',
+            count=0, eta=0, rho=0, tau=0, phi=0, min=0, max=0
+        )
+        stat.from_dict(data, partial_update=True)
+        return stat
+
+    @staticmethod
+    def create_from(app, rank, stats:Statistics):
+        """Create a new anomaly statistics"""
+        (_count, _eta, _rho, _tau, _phi, _min, _max) = stats.get_state()
+        stat = AnomalyStat(
+            app=app, rank=rank, key='{}:{}:0'.format(app, rank),
+            count=_count, eta=_eta, rho=_rho, tau=_tau, phi=_phi,
+            min=_min, max=_max
+        )
+        return stat
 
     def from_dict(self, data, partial_update=True):
         """Import anomaly statistics from a dictionary"""
@@ -33,16 +75,162 @@ class AnomalyStat(db.Model):
                 if not partial_update:
                     abort(400)
 
+        if 'key' not in data:
+            setattr(self, 'key', '{}:{}:0'.format(
+                data['app'], data['id']
+            ))
+
     def to_dict(self):
-        """Export an anomaly statistics to a dictionary"""
+        """Export anomaly statistics to a dictionary"""
         return {
             'id': self.id,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
-            'step': self.step,
-            'mean': self.mean,
-            'stddev': self.stddev
+            'app': self.app,
+            'rank': self.rank,
+            'key': self.key,
+            'count': self.count,
+            'eta': self.eta,
+            'rho': self.rho,
+            'tau': self.tau,
+            'phi': self.phi,
+            'min': self.min,
+            'max': self.max
         }
+
+    def to_stats(self):
+        """Export anomaly statistics to Statistics object"""
+        stats = Statistics.fromstate(
+            (self.count, self.eta, self.rho, self.tau, self.phi,
+             self.min, self.max)
+        )
+        return stats
+
+
+class AnomalyData(db.Model):
+    """
+    Anomaly data
+    """
+    __tablename__ = 'anomalydata'
+    id = db.Column(db.Integer, primary_key=True)
+
+    # step & the number of detected anomalies
+    step = db.Column(db.Integer, index=True, default=0)  # step (or frame) number
+    n = db.Column(db.Integer)  # the number of anomalies at 'step'
+
+    # key to statistics
+    stat_id = db.Column(db.Integer, db.ForeignKey('anomalystat.id'))
+
+    def __repr__(self):
+        return '<AnomalyData {} => {}>'.format(self.step, self.n)
+
+    # @staticmethod
+    # def create(data):
+    #     """Create a new anomaly data"""
+    #     d = AnomalyData(step=0, n=0)
+    #     d.from_dict(data, partial_update=True)
+    #     return d
+
+    @staticmethod
+    def create(data, owner):
+        """Create a new anomaly data"""
+        d = AnomalyData(step=0, n=0, owner=owner)
+        d.from_dict(data, partial_update=True)
+        return d
+
+    def from_dict(self, data, partial_update=True):
+        """Import anomaly statistics from a dictionary"""
+        for field in data.keys():
+            try:
+                setattr(self, field, data[field])
+            except KeyError:
+                if not partial_update:
+                    abort(400)
+
+#     @staticmethod
+#     def on_inserted(mapper, connection, target):
+#         stat_table = AnomalyStat.__table__
+#         print('after insert')
+#         print('table: ', stat_table)
+#         print('target: ', target, target.stat_id)
+#         print(
+#             connection.execute(
+#                 stat_table.get(target.stat_id)
+#             )
+#         )
+#
+#
+#
+# db.event.listen(AnomalyData, 'after_insert', AnomalyData.on_inserted)
+
+# class AnomalyStat(db.Model):
+#     """
+#     Anomaly statistics
+#     measure of mean and standard deviation
+#     """
+#     __tablename__ = 'anomalystats'
+#     id = db.Column(db.Integer, primary_key=True)  # rank id
+#     created_at = db.Column(db.Integer, default=timestamp)
+#     updated_at = db.Column(db.Integer, default=timestamp, onupdate=timestamp)
+#
+#     count = db.Column(db.Integer, default=0)
+#     mean = db.Column(db.Float, default=0)
+#     M2 = db.Column(db.Float, default=0)
+#
+#     @staticmethod
+#     def create(data):
+#         """Create a new anomaly statistics"""
+#         st = AnomalyStat()
+#         st.from_dict(data, partial_update=False)
+#         return st
+#
+#     def from_dict(self, data, partial_update=True):
+#         """Import anomaly statistics from a dictionary"""
+#         for field in data.keys():
+#             try:
+#                 setattr(self, field, data[field])
+#             except KeyError:
+#                 if not partial_update:
+#                     abort(400)
+#
+#     def to_dict(self):
+#         """Export an anomaly statistics to a dictionary"""
+#         return {
+#             'id': self.id,
+#             'created_at': self.created_at,
+#             'updated_at': self.updated_at,
+#             'step': self.f_step,
+#             'mean': self.f_mean,
+#             'stddev': self.f_stddev
+#         }
+#
+# #     @staticmethod
+# #     def on_updated(mapper, connection, target):
+# #         tb = AnomalyStat.__table__
+# #         print('on_updated')
+# #
+# #         # connection.execute(
+# #         #     tb.update()
+# #         #         .where(tb.c.id == select([tb.c.id]).where(tb.c.f_step < target.step))
+# #         #         .values(
+# #         #             f_step=target.step,
+# #         #             f_mean=target.mean,
+# #         #             f_stddev=target.stddev)
+# #         # )
+# #
+# #     @staticmethod
+# #     def on_inserted(mapper, connection, target):
+# #         tb = AnomalyStat.__table__
+# #         print('on_inserted')
+# #         connection.execute(
+# #             tb.update()
+# #                 .where(tb.c.id == target.id)
+# #                 .values(
+# #                     f_step=target.step,
+# #                     f_mean=target.mean,
+# #                     f_stddev=target.stddev)
+# #         )
+# #
+# # db.event.listen(AnomalyStat, 'after_update', AnomalyStat.on_updated)
+# # db.event.listen(AnomalyStat, 'after_insert', AnomalyStat.on_inserted)
 
 
 class Execution(db.Model):

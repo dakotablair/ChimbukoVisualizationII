@@ -24,7 +24,7 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    # SQLALCHEMY_DATABASE_URI = 'sqlite://'
     CELERY_CONFIG = {'CELERY_ALWAYS_EAGER': True}
 
 

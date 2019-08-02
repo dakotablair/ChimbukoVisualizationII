@@ -14,13 +14,13 @@ class ServerTests(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
 
-        db.drop_all()  # just in case
-        db.create_all()
+        # db.drop_all()  # just in case
+        # db.create_all()
 
         self.client = self.app.test_client()
 
     def tearDown(self):
-        db.drop_all()
+        # db.drop_all()
         self.ctx.pop()
 
     def get_headers(self):
@@ -53,97 +53,63 @@ class ServerTests(unittest.TestCase):
         return body, rv.status_code, rv.headers
 
     def test_anomalystats(self):
-        worker_id = []
+        import numpy as np
+        # N = 100
+        N = 100000
+        data = [
+            {
+                'app_rank': '{}:{}'.format(np.random.randint(0, 3), np.random.randint(0, 10)),
+                'step': np.random.randint(0, 100),
+                'n': np.random.randint(1, 100)
+            } for _ in range(N)
+        ]
+        # print(data)
 
-        r, s, h = self.post(
-            '/api/anomalystats',
-            {'id': 0, 'step': 0, 'mean': 10.0, 'stddev': 5.0}
-        )
-        self.assertEqual(s, 202)
-        worker_id.append(os.path.basename(h['Location']))
+        # app_rank = set([d['app_rank'] for d in data])
+        # print(list(app_rank))
 
-        r, s, h = self.post(
-            '/api/anomalystats',
-            [
-                {'id': 0, 'step': 1, 'mean': 10.3, 'stddev': 4.2},
-                {'id': 1, 'step': 0, 'mean': 1.0, 'stddev': 0.3},
-            ]
-        )
-        self.assertEqual(s, 202)
-        worker_id.append(os.path.basename(h['Location']))
-
-        n_tries = 0
-        while len(worker_id) and n_tries < 100:
-            to_remove = []
-            for wid in worker_id:
-                r, s, h = self.get('/tasks/status/' + worker_id[0])
-                if s == 201:
-                    to_remove.append(wid)
-
-            worker_id = [wid for wid in worker_id if wid not in to_remove]
-            n_tries = n_tries + 1
-            time.sleep(0.1)
-        self.assertEqual(len(worker_id), 0)
-
-        time.sleep(10)
-        print("")
-        r, s, h = self.get('/api/anomalystats')
+        r, s, h = self.post('/api/anomalydata', data)
         print(r, s, h)
 
-        # get anomaly stat
-        # r, s, h = self.get('/api/anomalystats/0')
-        # self.assertEqual(s, 400)
-
-        # post an anomaly stat
+        # worker_id = []
         # r, s, h = self.post(
         #     '/api/anomalystats',
-        #     {'id': 0, 'val1': 10, 'val2': 100})
-        # print(r)
-        # print(s)
-        # print(h)
+        #     {'app': 0, 'rank': 0, 'step': 0, 'n': 10}
+        # )
+        # print(r, s, h)
 
-        # with mock.patch('server.tasks.run_flask_request.apply_async',
-        #                 return_value=mock.MagicMock(state='PENDING')) as m:
-        #     r, s, h = self.post(
-        #       '/api/anomalystats',
-        #       {'id': 0, 'val1': 10, 'val2': 100})
-        #     print(r)
-        #     print(s)
-        #     print(h)
-        #     print(m.call_count)
-        #     print(m.call_args_list[0][1]['args'][0])
 
-        # self.assertEqual(s, 200)
-
-        # import time
-        # time.sleep(60)
-
-        # check the first accumulation
-        # r, s, h = self.get('/api/anomalystats/0')
-        # self.assertEqual(s, 200)
-        # self.assertEqual(r['sum'], 110)
-
-        # post another stat
+        # self.assertEqual(s, 202)
+        # worker_id.append(os.path.basename(h['Location']))
+        #
         # r, s, h = self.post(
-        #   '/api/anomalystats',
-        #   {'id': 0, 'val1': 20, 'val2': 200})
-        # self.assertEqual(s, 200)
+        #     '/api/anomalystats',
+        #     [
+        #         {'id': 0, 'step': 1, 'mean': 10.3, 'stddev': 4.2},
+        #         {'id': 1, 'step': 0, 'mean': 1.0, 'stddev': 0.3},
+        #     ]
+        # )
+        # self.assertEqual(s, 202)
+        # worker_id.append(os.path.basename(h['Location']))
+        #
+        # n_tries = 0
+        # while len(worker_id) and n_tries < 100:
+        #     to_remove = []
+        #     for wid in worker_id:
+        #         r, s, h = self.get('/tasks/status/' + worker_id[0])
+        #         if s == 201:
+        #             to_remove.append(wid)
+        #
+        #     worker_id = [wid for wid in worker_id if wid not in to_remove]
+        #     n_tries = n_tries + 1
+        #     time.sleep(0.1)
+        # self.assertEqual(len(worker_id), 0)
+        #
+        # time.sleep(1)
+        # print("")
+        # r, s, h = self.get('/api/anomalystats')
+        # print(r, s, h)
 
-        # check the accumulation
-        # r, s, h = self.get('/api/anomalystats/0')
-        # self.assertEqual(s, 200)
-        # self.assertEqual(r['sum'], 330)
-
-        # post another stat
-        # r, s, h = self.post(
-        #   '/api/anomalystats',
-        #   {'id': 0, 'val1': 30, 'val2': 300})
-        # self.assertEqual(s, 200)
-
-        # check the accumulation
-        # r, s, h = self.get('/api/anomalystats/0')
-        # self.assertEqual(s, 200)
-        # self.assertEqual(r['sum'], 660)
 
     def test_executions(self):
         # try to get an execution in the empty database
