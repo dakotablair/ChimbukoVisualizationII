@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# IDE
+.idea
+__pycache__
+
+# redis
+redis-stable
+
+# sqlite
+*.sqlite
