@@ -52,7 +52,8 @@ def create_or_update_stats(app, rank, stats: Statistics):
     """
 
     # looking for an existing AnomalyStat object for given app and rank
-    curr_stats = AnomalyStat.query.filter_by(app=app, rank=rank).first()
+    curr_stats = AnomalyStat.query.filter_by(app=app, rank=rank).\
+        order_by(AnomalyStat.count.desc()).first()
 
     # An AnomalyStat object doesn't exist, then create new one
     if curr_stats is None:
@@ -62,29 +63,25 @@ def create_or_update_stats(app, rank, stats: Statistics):
             db.session.add(curr_stats)
             db.session.commit()
         except IntegrityError:
-            # The insert fail due to a concurrent transaction
             db.session.rollback()
             curr_stats = create_or_update_stats(app, rank, stats)
         return curr_stats
 
-    curr_key = curr_stats.key
+    curr_id = curr_stats.id
     st = curr_stats.to_stats()
     st += stats
 
-    (_count, _eta, _rho, _tau, _phi, _min, _max) = st.get_state()
-    new_key = '{}:{}:{}'.format(app, rank, int(curr_key.split(':')[-1]) + 1)
-
-    curr_stats.key = new_key
-    curr_stats.count = _count
-    curr_stats.eta = _eta
-    curr_stats.rho = _rho
-    curr_stats.tau = _tau
-    curr_stats.phi = _phi
-    curr_stats.min = _min
-    curr_stats.max = _max
+    new_id = '{}:{}:{}'.format(app, rank, int(curr_id.split(':')[-1]) + 1)
+    new_stats = AnomalyStat.create_from(app, rank, st, new_id)
 
     db.session.begin_nested()
     try:
+        # To avoid race-condition, we actually don't update
+        # the existing row but new row is added. Then, 'deleted'
+        # field of the previous row is set to false.
+        # We need to take care on this later.
+        db.session.add(new_stats)
+        curr_stats.deleted = True
         db.session.commit()
     except IntegrityError:
         # The update fails due to a concurrent transaction
@@ -97,7 +94,16 @@ def create_or_update_stats(app, rank, stats: Statistics):
 @api.route('/anomalydata', methods=['POST'])
 @make_async
 def new_anomalydata():
-    """Register list of anomaly data"""
+    """
+    Register anomaly data
+    - anomaly data can be a dictionary or a list of dictionary whose structre
+      is as the followings:
+      {
+        'app_rank': '{}:{}'.format(application index, rank index),
+        'step': step index
+        'n': the number of anomalies
+      }
+    """
     payload = request.get_json() or {}
     if not isinstance(payload, list):
         payload = [payload]
@@ -117,24 +123,45 @@ def new_anomalydata():
 
     # This is about x30 times faster than db.session.add_all method
     for data in payload:
-        data['stat_id'] = g_stats[data['app_rank']].id
+        data['stat_id'] = g_stats[data['app_rank']].key
     db.engine.execute(AnomalyData.__table__.insert(), payload)
 
     return jsonify({}), 201
 
 
-@api.route('/anomalystats/<int:id>', methods=['GET'])
-def get_anomalystat(id):
-    """Return anomaly stat specified by id"""
-    return jsonify(AnomalyStat.query.get_or_404(id).to_dict())
-
-
 @api.route('/anomalystats', methods=['GET'])
 def get_anomalystats():
-    print('get_anomalystats')
-    stats = AnomalyStat.query.order_by(AnomalyStat.id.asc())
-    print([d.to_dict() for d in stats.all()])
-    if stats is None:
+    """
+    Return anomaly stat specified by app and rank index
+    - (e.g.) /api/anomalystats will return all available statistics
+    - (e.g.) /api/anomalystats?app=0&rank=0 will return statistics of
+                 application index is 0 and rank index is 0.
+    - return 400 error if there are no available statistics
+    """
+    app = request.args.get('app', default=None)
+    rank = request.args.get('rank', default=None)
+
+    if app is None or rank is None:
+        stats = AnomalyStat.query.filter_by(deleted=False).all()
+    else:
+        stats = AnomalyStat.query.\
+            filter_by(app=int(app), rank=int(rank), deleted=False).first()
+
+    if stats is None or (isinstance(stats, list) and len(stats) == 0):
         abort(400)
 
-    return jsonify([d.to_dict() for d in stats.all()])
+    if not isinstance(stats, list):
+        stats = [stats]
+
+    return jsonify([st.to_dict_stats() for st in stats])
+
+
+# @api.route('/anomalystats', methods=['GET'])
+# def get_anomalystats():
+#     print('get_anomalystats')
+#     stats = AnomalyStat.query.order_by(AnomalyStat.id.asc())
+#     print([d.to_dict() for d in stats.all()])
+#     if stats is None:
+#         abort(400)
+#
+#     return jsonify([d.to_dict() for d in stats.all()])
