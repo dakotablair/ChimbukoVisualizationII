@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 from flask_script import Manager, Command
 
 from server import create_app, db
@@ -46,4 +47,6 @@ def lint():
 
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'test' or sys.argv[1] == 'lint':
+        os.environ['SERVER_CONFIG'] = 'testing'
     manager.run()

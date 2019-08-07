@@ -10,14 +10,15 @@ class AnomalyStat(db.Model):
     - contains internal state of Statistics object
     """
     __tablename__ = 'anomalystat'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True)
+    deleted = db.Column(db.Boolean(), default=False)
 
     # application & rank id's
     app = db.Column(db.Integer, index=True, default=0)  # application id
     rank = db.Column(db.Integer, index=True, default=0)  # rank id
 
-    # (unique) key for race-condition
-    key = db.Column(db.String(), unique=True)
+    # for references
+    key = db.Column(db.String())
 
     # internal variables of Statistics object
     count = db.Column(db.Float, default=0)
@@ -36,14 +37,18 @@ class AnomalyStat(db.Model):
             (self.count, self.eta, self.rho, self.tau, self.phi,
              self.min, self.max)
         )
-        return '<AnomalyStat {}:{} count={}, ' \
-               'min={:.3f}, max={:.3f} ' \
-               'mean={:.3f}, stddev={:.3f}, ' \
-               'skewness={:.3f}, kurtosis={:.3f}>'.format(
-                   self.app, self.rank,
-                   len(stats), stats.minimum(), stats.maximum(),
-                   stats.mean(), stats.stddev(),
-                   stats.skewness(), stats.kurtosis())
+        if self.count > 1:
+            return '<AnomalyStat {}:{} count={}, ' \
+                   'min={:.3f}, max={:.3f} ' \
+                   'mean={:.3f}, stddev={:.3f}, ' \
+                   'skewness={:.3f}, kurtosis={:.3f}>'.format(
+                       self.app, self.rank,
+                       len(stats), stats.minimum(), stats.maximum(),
+                       stats.mean(), stats.stddev(),
+                       stats.skewness(), stats.kurtosis())
+        else:
+            return '<AnomalyStat {}:{} count={}, mean={:.3f}>'.format(
+                self.app, self.rank, len(stats), stats.mean())
 
     @staticmethod
     def create(data):
@@ -51,18 +56,20 @@ class AnomalyStat(db.Model):
         if not all(field in data for field in ('app', 'rank')):
             abort(400, message="Missing application or rank indices")
         stat = AnomalyStat(
-            app=0, rank=0, key='0:0:0',
+            app=0, rank=0, id='0:0:0', key='0:0',
             count=0, eta=0, rho=0, tau=0, phi=0, min=0, max=0
         )
         stat.from_dict(data, partial_update=True)
         return stat
 
     @staticmethod
-    def create_from(app, rank, stats: Statistics):
+    def create_from(app, rank, stats: Statistics, id=None):
         """Create a new anomaly statistics"""
+        if id is None:
+            id = '{}:{}:0'.format(app, rank)
         (_count, _eta, _rho, _tau, _phi, _min, _max) = stats.get_state()
         stat = AnomalyStat(
-            app=app, rank=rank, key='{}:{}:0'.format(app, rank),
+            app=app, rank=rank, id=id, key='{}:{}'.format(app, rank),
             count=_count, eta=_eta, rho=_rho, tau=_tau, phi=_phi,
             min=_min, max=_max
         )
@@ -77,9 +84,14 @@ class AnomalyStat(db.Model):
                 if not partial_update:
                     abort(400)
 
+        if 'id' not in data:
+            setattr(self, 'id', '{}:{}:0'.format(
+                data['app'], data['rank']
+            ))
+
         if 'key' not in data:
-            setattr(self, 'key', '{}:{}:0'.format(
-                data['app'], data['id']
+            setattr(self, 'key', '{}:{}'.format(
+                data['app'], data['rank']
             ))
 
     def to_dict(self):
@@ -106,6 +118,21 @@ class AnomalyStat(db.Model):
         )
         return stats
 
+    def to_dict_stats(self):
+        stats = self.to_stats()
+        count = len(stats)
+        return {
+            'app': self.app,
+            'rank': self.rank,
+            'count': count,
+            'min': stats.minimum(),
+            'max': stats.maximum(),
+            'mean': stats.mean(),
+            'stddev': stats.stddev() if count > 1 else 0,
+            'skewness': stats.skewness() if count > 1 else 0,
+            'kurtosis': stats.kurtosis() if count > 1 else 0
+        }
+
 
 class AnomalyData(db.Model):
     """
@@ -119,7 +146,7 @@ class AnomalyData(db.Model):
     n = db.Column(db.Integer, default=0)
 
     # key to statistics
-    stat_id = db.Column(db.Integer, db.ForeignKey('anomalystat.id'))
+    stat_id = db.Column(db.Integer, db.ForeignKey('anomalystat.key'))
 
     def __repr__(self):
         return '<AnomalyData {}:{}>'.format(self.step, self.n)

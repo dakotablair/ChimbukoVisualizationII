@@ -23,8 +23,9 @@ class ProductionConfig(Config):
 
 
 class TestingConfig(Config):
+    """For test, I need to first launch redis and celery."""
     TESTING = True
-    # SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
     CELERY_CONFIG = {'CELERY_ALWAYS_EAGER': True}
 
 
