@@ -1,2 +1,2 @@
-# ChimbukoWebServer
-move to https://github.com/bsmind/ChimbukoVisualizationII.git
+# ChimbukoVisualizationII
+Scalable visualization module for Chimbuko
