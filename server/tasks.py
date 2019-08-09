@@ -103,3 +103,19 @@ def get_status(id):
 
     # data, status_code, header
     return tuple(task.info)
+
+
+@tasks_bp.route('/inspect', methods=['GET'])
+def get_info():
+    """
+    Return celery information & statistics
+    """
+    i = celery.control.inspect()
+    stats = i.stats()
+    result = {
+        'stats': stats,
+        'registered': i.registered(),
+        'active': i.active(),
+        'scheduled': i.scheduled()
+    }
+    return result

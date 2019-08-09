@@ -104,27 +104,30 @@ def new_anomalydata():
         'n': the number of anomalies
       }
     """
-    payload = request.get_json() or {}
-    if not isinstance(payload, list):
-        payload = [payload]
+    try:
+        payload = request.get_json() or {}
+        if not isinstance(payload, list):
+            payload = [payload]
 
-    # compute local statistics with given anomaly data list
-    l_stats = defaultdict(lambda: Statistics())
-    for d in payload:
-        l_stats[d['app_rank']].push(d['n'])
+        # compute local statistics with given anomaly data list
+        l_stats = defaultdict(lambda: Statistics())
+        for d in payload:
+            l_stats[d['app_rank']].push(d['n'])
 
-    # create or update AnomalyStat table
-    g_stats = {}
-    for app_rank, stats in l_stats.items():
-        app, rank = app_rank.split(':')
-        g_stats[app_rank] = create_or_update_stats(int(app), int(rank), stats)
-    # For some reason, I need to commit again here... why??
-    db.session.commit()
+        # create or update AnomalyStat table
+        g_stats = {}
+        for app_rank, stats in l_stats.items():
+            app, rank = app_rank.split(':')
+            g_stats[app_rank] = create_or_update_stats(int(app), int(rank), stats)
+        # For some reason, I need to commit again here... why??
+        db.session.commit()
 
-    # This is about x30 times faster than db.session.add_all method
-    for data in payload:
-        data['stat_id'] = g_stats[data['app_rank']].key
-    db.engine.execute(AnomalyData.__table__.insert(), payload)
+        # This is about x30 times faster than db.session.add_all method
+        for data in payload:
+            data['stat_id'] = g_stats[data['app_rank']].key
+        db.engine.execute(AnomalyData.__table__.insert(), payload)
+    except Exception as e:
+        print(e)
 
     return jsonify({}), 201
 
