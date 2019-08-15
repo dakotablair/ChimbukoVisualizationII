@@ -21,7 +21,7 @@ class ServerTests(unittest.TestCase):
         # it will cause error. How to smoothly resolve this problem?
         # currently, I make sure each test containing celery task
         # to be completed before calling tearDown.
-        db.drop_all()
+        # db.drop_all()
         self.ctx.pop()
 
     def get_headers(self):
@@ -60,35 +60,85 @@ class ServerTests(unittest.TestCase):
         from runstats import Statistics
         from collections import defaultdict
 
-        def get_random_data(app, rank, n_steps, offset=0):
-            return [{
-                'app_rank': '{}:{}'.format(app, rank),
-                'step': step + offset,
-                'n': np.random.randint(1, 100)
-            } for step in range(n_steps)]
-
-        my_stats = defaultdict(lambda: Statistics())
+        my_runstats = defaultdict(lambda: Statistics())
+        my_n_anomalies = defaultdict(int)
         worker_id = []
 
-        N_UPDATES = 10
+        MAX_N_UPDATES = 50
+        MIN_N_UPDATES = 20
         N_APPS = 3
         N_RANKS = 10
-        N_STEPS = 100
+        INTERVAL = 1000  # millisecond
 
-        # post asynchrnous tasks
-        for i in range(N_UPDATES):
-            data = []
+        # to make this test is more realistic,
+        # there could be different number of updates per (app and rank)
+        n_updates = {}
+        for app_id in range(N_APPS):
+            for rank_id in range(N_RANKS):
+                n_updates['{}:{}'.format(app_id, rank_id)] = \
+                    np.random.randint(MIN_N_UPDATES, MAX_N_UPDATES+1)
+
+        # post Anomaly stats from parameter server
+        for i in range(MAX_N_UPDATES):
+            payload = []
             for app_id in range(N_APPS):
                 for rank_id in range(N_RANKS):
-                    data = data + get_random_data(
-                        app_id, rank_id, N_STEPS, i * N_STEPS)
+                    key = '{}:{}'.format(app_id, rank_id)
+                    if n_updates[key] <= i:
+                        continue
 
-            for d in data:
-                my_stats[d['app_rank']].push(d['n'])
+                    n_anomaly = np.random.randint(1, 100)
 
-            r, s, h = self.post('/api/anomalydata', data)
+                    _runstat = my_runstats[key]
+                    my_n_anomalies[key] = my_n_anomalies[key] + n_anomaly
+
+                    _runstat.push(n_anomaly)
+
+                    try:
+                        stddev = _runstat.stddev()
+                        skewness = _runstat.skewness()
+                        kurtosis = _runstat.kurtosis()
+                    except ZeroDivisionError:
+                        stddev = 0
+                        skewness = 0
+                        kurtosis = 0
+
+                    _payload = {
+                        'app': int(app_id),
+                        'rank': int(rank_id),
+                        'stats': {
+                            'n_updates': int(len(_runstat)),
+                            'n_anomalies': my_n_anomalies[key],
+                            'n_min_anomalies': _runstat.minimum(),
+                            'n_max_anomalies': _runstat.maximum(),
+                            'mean': _runstat.mean(),
+                            'stddev': stddev,
+                            'skewness': skewness,
+                            'kurtosis': kurtosis
+                        },
+                        'data': [{
+                            'n_anomaly': n_anomaly,
+                            'step': i,
+                            'min_timestamp': float(i * INTERVAL),
+                            'max_timestamp': float((i + 1) * INTERVAL),
+                            'stat_id': key
+                        }]
+                    }
+                    payload.append(_payload)
+
+            # if 'delete_old' calls too frequently, it becomes error-prone! why??
+            r, s, h = self.post('/api/anomalydata',
+                                {
+                                    'payload': payload,
+                                    'delete_old': ((i+1) % 10 == 0) or (i+1 == MAX_N_UPDATES)
+                                })
             self.assertEqual(s, 202)
             worker_id.append(os.path.basename(h['Location']))
+            # Note that it does not gaurantee that post operations are
+            # executed in order because celery workers may not be launched
+            # in the same order. To guarantee the order, uncomment the
+            # below line.
+            time.sleep(0.05)
 
         # wait untill all tasks are completed
         n_tries = 0
@@ -106,25 +156,31 @@ class ServerTests(unittest.TestCase):
 
         # for the test purpose,
         # wait until all data is written into the database
-        time.sleep(1)
+        # time.sleep(1)
+
+        r, s, h = self.get('/api/anomalystats')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), N_APPS * N_RANKS)
 
         # check statistics
-        for app_id in range(N_APPS):
-            for rank_id in range(N_RANKS):
-                r, s, h = self.get(
-                    '/api/anomalystats?app={:d}&rank={:d}'.format(
-                        app_id, rank_id))
-                self.assertEqual(s, 200)
-                self.assertEqual(r[0]['app'], app_id)
-                self.assertEqual(r[0]['rank'], rank_id)
+        for key, _rs in my_runstats.items():
+            app_id, rank_id = key.split(':')
+            r, s, h = self.get('/api/anomalydata?app={:d}&rank={:d}'.format(
+                int(app_id), int(rank_id)
+            ))
 
-                stats = my_stats['{}:{}'.format(app_id, rank_id)]
-                self.assertEqual(r[0]['count'], len(stats))
-                self.assertAlmostEqual(r[0]['mean'], stats.mean(), delta=1.0)
-                self.assertAlmostEqual(
-                    r[0]['stddev'], stats.stddev(), delta=1.0)
-                self.assertEqual(r[0]['min'], stats.minimum())
-                self.assertEqual(r[0]['max'], stats.maximum())
+            _stat = r['stat']
+            _data = r['data']
+
+            self.assertEqual(_stat['n_updates'], n_updates[key])
+            self.assertEqual(_stat['n_anomalies'], my_n_anomalies[key])
+            self.assertEqual(_stat['n_min_anomalies'], _rs.minimum())
+            self.assertEqual(_stat['n_max_anomalies'], _rs.maximum())
+            self.assertAlmostEqual(_stat['mean'], _rs.mean(), delta=0.001)
+            self.assertAlmostEqual(_stat['stddev'], _rs.stddev(), delta=0.001)
+            self.assertAlmostEqual(_stat['skewness'], _rs.skewness(), delta=0.001)
+            self.assertAlmostEqual(_stat['kurtosis'], _rs.kurtosis(), delta=0.001)
+            self.assertEqual(len(_data), n_updates[key])
 
     # def test_executions(self):
     #     # try to get an execution in the empty database

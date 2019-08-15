@@ -26,7 +26,9 @@ def from_parameter_server(url, n_steps, interval, n_ranks, app=0):
     for step in range(n_steps):
         t0 = time.time()
         data = [
-            get_random_data(app, rank, step, np.random.normal(mean, stddev))
+            get_random_data(
+                app, rank, step,
+                int(np.random.normal(mean, stddev)))
             for rank, mean, stddev in zip(range(n_ranks), means, stddevs)
         ]
         t1 = time.time()
@@ -62,7 +64,7 @@ if __name__ == '__main__':
     import sys
 
     # the number of steps
-    n_steps = 100
+    n_steps = 20
     # time interval between post requests (sec)
     interval = 1
     # the number of ranks (only for from_parameter_server)

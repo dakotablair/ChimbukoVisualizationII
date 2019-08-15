@@ -1,8 +1,7 @@
 from flask import abort
 from . import db
 from .utils import timestamp
-from runstats import Statistics
-
+from sqlalchemy.dialects.mysql import INTEGER
 
 class AnomalyStat(db.Model):
     """
@@ -10,45 +9,42 @@ class AnomalyStat(db.Model):
     - contains internal state of Statistics object
     """
     __tablename__ = 'anomalystat'
-    id = db.Column(db.String(), primary_key=True)
-    deleted = db.Column(db.Boolean(), default=False)
+    id = db.Column(INTEGER(unsigned=True), primary_key=True)
 
     # application & rank id's
-    app = db.Column(db.Integer, index=True, default=0)  # application id
-    rank = db.Column(db.Integer, index=True, default=0)  # rank id
+    app = db.Column(db.Integer, default=0)  # application id
+    rank = db.Column(db.Integer, default=0)  # rank id
 
-    # for references
+    # timestamp
+    created_at = db.Column(db.Integer, index=True, default=timestamp)
+
+    # for references between AnomalyStat and AnomalyData
     key = db.Column(db.String())
 
-    # internal variables of Statistics object
-    count = db.Column(db.Float, default=0)
-    eta = db.Column(db.Float, default=0)
-    rho = db.Column(db.Float, default=0)
-    tau = db.Column(db.Float, default=0)
-    phi = db.Column(db.Float, default=0)
-    min = db.Column(db.Float, default=0)
-    max = db.Column(db.Float, default=0)
+    # statistics
+    # - n_updates: the number of updates (equivalent to the number of steps)
+    # - n_anomalies: the number of accumulated anomalies
+    # - n_min_anomalies: the minimum number of anomalies
+    # - n_max_anomalies: the maximum number of anomalies
+    # - mean: mean of number of anomalies over time (or steps)
+    # - stddev: std. dev. of number of anomalies over time (or steps)
+    # - skewness: skewness of number of anomalies over time
+    # - kurtosis: kurtosis of number of anomalies over time
+    n_updates = db.Column(db.Integer, default=0)
+    n_anomalies = db.Column(db.Integer, default=0)
+    n_min_anomalies = db.Column(db.Integer, default=0)
+    n_max_anomalies = db.Column(db.Integer, default=0)
+    mean = db.Column(db.Float, default=0)
+    stddev = db.Column(db.Float, default=0)
+    skewness = db.Column(db.Float, default=0)
+    kurtosis = db.Column(db.Float, default=0)
 
     # reference to associated data
     data = db.relationship('AnomalyData', lazy='dynamic', backref='owner')
 
     def __repr__(self):
-        stats = Statistics.fromstate(
-            (self.count, self.eta, self.rho, self.tau, self.phi,
-             self.min, self.max)
-        )
-        if self.count > 1:
-            return '<AnomalyStat {}:{} count={}, ' \
-                   'min={:.3f}, max={:.3f} ' \
-                   'mean={:.3f}, stddev={:.3f}, ' \
-                   'skewness={:.3f}, kurtosis={:.3f}>'.format(
-                       self.app, self.rank,
-                       len(stats), stats.minimum(), stats.maximum(),
-                       stats.mean(), stats.stddev(),
-                       stats.skewness(), stats.kurtosis())
-        else:
-            return '<AnomalyStat {}:{} count={}, mean={:.3f}>'.format(
-                self.app, self.rank, len(stats), stats.mean())
+        return '<AnomalyStat {}:{}:{}>'.format(
+            self.app, self.rank, self.n_updates)
 
     @staticmethod
     def create(data):
@@ -56,23 +52,10 @@ class AnomalyStat(db.Model):
         if not all(field in data for field in ('app', 'rank')):
             abort(400, message="Missing application or rank indices")
         stat = AnomalyStat(
-            app=0, rank=0, id='0:0:0', key='0:0',
-            count=0, eta=0, rho=0, tau=0, phi=0, min=0, max=0
+            n_updates=0, n_anomalies=0, n_min_anomalies=0, n_max_anomalies=0,
+            mean=0, stddev=0, skewness=0, kurtosis=0
         )
         stat.from_dict(data, partial_update=True)
-        return stat
-
-    @staticmethod
-    def create_from(app, rank, stats: Statistics, id=None):
-        """Create a new anomaly statistics"""
-        if id is None:
-            id = '{}:{}:0'.format(app, rank)
-        (_count, _eta, _rho, _tau, _phi, _min, _max) = stats.get_state()
-        stat = AnomalyStat(
-            app=app, rank=rank, id=id, key='{}:{}'.format(app, rank),
-            count=_count, eta=_eta, rho=_rho, tau=_tau, phi=_phi,
-            min=_min, max=_max
-        )
         return stat
 
     def from_dict(self, data, partial_update=True):
@@ -83,11 +66,6 @@ class AnomalyStat(db.Model):
             except KeyError:
                 if not partial_update:
                     abort(400)
-
-        if 'id' not in data:
-            setattr(self, 'id', '{}:{}:0'.format(
-                data['app'], data['rank']
-            ))
 
         if 'key' not in data:
             setattr(self, 'key', '{}:{}'.format(
@@ -100,37 +78,16 @@ class AnomalyStat(db.Model):
             'id': self.id,
             'app': self.app,
             'rank': self.rank,
+            'created_at': self.created_at,
             'key': self.key,
-            'count': self.count,
-            'eta': self.eta,
-            'rho': self.rho,
-            'tau': self.tau,
-            'phi': self.phi,
-            'min': self.min,
-            'max': self.max
-        }
-
-    def to_stats(self):
-        """Export anomaly statistics to Statistics object"""
-        stats = Statistics.fromstate(
-            (self.count, self.eta, self.rho, self.tau, self.phi,
-             self.min, self.max)
-        )
-        return stats
-
-    def to_dict_stats(self):
-        stats = self.to_stats()
-        count = len(stats)
-        return {
-            'app': self.app,
-            'rank': self.rank,
-            'count': count,
-            'min': stats.minimum(),
-            'max': stats.maximum(),
-            'mean': stats.mean(),
-            'stddev': stats.stddev() if count > 1 else 0,
-            'skewness': stats.skewness() if count > 1 else 0,
-            'kurtosis': stats.kurtosis() if count > 1 else 0
+            'n_updates': self.n_updates,
+            'n_anomalies': self.n_anomalies,
+            'n_min_anomalies': self.n_min_anomalies,
+            'n_max_anomalies': self.n_max_anomalies,
+            'mean': self.mean,
+            'stddev': self.stddev,
+            'skewness': self.skewness,
+            'kurtosis': self.kurtosis
         }
 
 
@@ -139,17 +96,19 @@ class AnomalyData(db.Model):
     Anomaly data
     """
     __tablename__ = 'anomalydata'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(INTEGER(unsigned=True), primary_key=True)
 
     # step & the number of detected anomalies
+    n_anomaly = db.Column(db.Integer, default=0)
     step = db.Column(db.Integer, index=True, default=0)
-    n = db.Column(db.Integer, default=0)
+    min_timestamp = db.Column(db.Float, default=0)  # milli-second
+    max_timestamp = db.Column(db.Float, default=0)  # milli-second
 
     # key to statistics
     stat_id = db.Column(db.Integer, db.ForeignKey('anomalystat.key'))
 
     def __repr__(self):
-        return '<AnomalyData {}:{}>'.format(self.step, self.n)
+        return '<AnomalyData {}:{}>'.format(self.step, self.n_anomaly)
 
     @staticmethod
     def create(data, owner):
@@ -166,6 +125,16 @@ class AnomalyData(db.Model):
             except KeyError:
                 if not partial_update:
                     abort(400)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'n_anomaly': self.n_anomaly,
+            'step': self.step,
+            'min_timestamp': self.min_timestamp,
+            'max_timestamp': self.max_timestamp,
+            'stat_id': self.stat_id
+        }
 
 
 class Execution(db.Model):

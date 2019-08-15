@@ -4,11 +4,12 @@ from .. import db
 from ..models import AnomalyStat, AnomalyData
 from . import api
 from ..tasks import make_async
-# from ..utils import url_for
+from ..utils import timestamp
 
 from sqlalchemy.exc import IntegrityError
 from runstats import Statistics
 from collections import defaultdict
+from sqlalchemy import func, and_
 
 
 def get_or_create_stats(app_rank: str):
@@ -99,36 +100,109 @@ def new_anomalydata():
     - anomaly data can be a dictionary or a list of dictionary whose structre
       is as the followings:
       {
-        'app_rank': '{}:{}'.format(application index, rank index),
-        'step': step index
-        'n': the number of anomalies
+        'app': application index
+        'rank': rank index
+        'created_at': (optional) timestamp in milli-second
+        'key': (optional) key of AnomalyStat object, must unique over app and rank
+        'stats': {
+            'n_updates': the number of updates (equivalent to the number of steps)
+            'n_anomalies': the number of accumulated anomalies
+            'n_min_anomalies': the minimum number of anomalies
+            'n_max_anomalies': the maximum number of anomalies,
+            'mean': mean of number of anomalies over time (or steps)
+            'stddev': skewness of number of anomalies over time (or steps)
+            'skewness': (optional) skewness of number of anomalies over time
+            'kurtosis': (optional) kurtosis of number of anomalies over time
+        }
+        'data': [{
+            'n_anomaly': the number of anomalies within given time range (or step)
+            'step': step index
+            'min_timestamp': the minimum timestamp
+            'max_timestamp': the maximum timestamp
+            'stat_id': (optional) key of the associated AnomalyStat object
+        }]
       }
     """
-    try:
-        payload = request.get_json() or {}
-        if not isinstance(payload, list):
-            payload = [payload]
+    data = request.get_json() or {}
+    payload = data.get('payload', None)
+    delete_old = data.get('delete_old', True)
 
-        # compute local statistics with given anomaly data list
-        l_stats = defaultdict(lambda: Statistics())
-        for d in payload:
-            l_stats[d['app_rank']].push(d['n'])
+    if not isinstance(payload, list):
+        payload = [payload]
 
-        # create or update AnomalyStat table
-        g_stats = {}
-        for app_rank, stats in l_stats.items():
-            app, rank = app_rank.split(':')
-            g_stats[app_rank] = create_or_update_stats(int(app), int(rank), stats)
-        # For some reason, I need to commit again here... why??
-        db.session.commit()
+    _stats = []
+    _data = []
 
-        # This is about x30 times faster than db.session.add_all method
-        for data in payload:
-            data['stat_id'] = g_stats[data['app_rank']].key
-        db.engine.execute(AnomalyData.__table__.insert(), payload)
-    except Exception as e:
-        print(e)
+    ts = timestamp()
+    for anomalydata in payload:
+        if anomalydata is None:
+            continue
 
+        _stat = {}
+        # Basic information
+        _stat['app'] = int(anomalydata['app'])
+        _stat['rank'] = int(anomalydata['rank'])
+        _stat['created_at'] = int(anomalydata['created_at']) \
+            if 'created_at' in anomalydata else ts
+
+        # Statistics
+        _s = anomalydata['stats']
+        _stat['n_updates'] = int(_s['n_updates'])
+        _stat['n_anomalies'] = int(_s['n_anomalies'])
+        _stat['n_min_anomalies'] = int(_s['n_min_anomalies'])
+        _stat['n_max_anomalies'] = int(_s['n_max_anomalies'])
+        _stat['mean'] = float(_s['mean'])
+        _stat['stddev'] = float(_s['stddev'])
+        _stat['skewness'] = float(_s['skewness']
+                                 if 'skewness' in anomalydata['stats'] else 0)
+        _stat['kurtosis'] = float(_s['kurtosis']
+                                 if 'kurtosis' in anomalydata['stats'] else 0)
+
+        # key for reference
+        key = '{}:{}'.format(_stat['app'], _stat['rank'])
+        _stat['key'] = anomalydata['key'] if 'key' in anomalydata else key
+        _stats.append(_stat)
+
+        # data
+        for _d in anomalydata['data']:
+            if 'stat_id' not in _d:
+                _d['stat_id'] = key
+        _data.extend(anomalydata['data'])
+
+    # insert stats to AnomalyStat Table
+    if len(_stats):
+        db.engine.execute(AnomalyStat.__table__.insert(), _stats)
+
+    # insert data to AnomalyData Table
+    if len(_data):
+        db.engine.execute(AnomalyData.__table__.insert(), _data)
+
+    # delete old AnomalyStat rows
+    if delete_old:
+        subq = db.session.query(
+            AnomalyStat.app,
+            AnomalyStat.rank,
+            func.max(AnomalyStat.n_updates).label('max_n_updates')
+        ).group_by(
+            AnomalyStat.app, AnomalyStat.rank
+        ).subquery('t2')
+
+        ids = [d.id for d in db.session.query(AnomalyStat).join(
+            subq,
+            and_(
+                AnomalyStat.app == subq.c.app,
+                AnomalyStat.rank == subq.c.rank,
+                AnomalyStat.n_updates < subq.c.max_n_updates
+            )
+        ).all()]
+
+        db.engine.execute(
+            AnomalyStat.__table__.delete().where(
+                AnomalyStat.id.in_(ids)
+            )
+        )
+
+    # todo: make information output with Location
     return jsonify({}), 201
 
 
@@ -141,22 +215,61 @@ def get_anomalystats():
                  application index is 0 and rank index is 0.
     - return 400 error if there are no available statistics
     """
+    subq = db.session.query(
+        AnomalyStat.app,
+        AnomalyStat.rank,
+        func.max(AnomalyStat.n_updates).label('max_n_updates')
+    ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
+
+    stats = db.session.query(AnomalyStat).join(
+        subq,
+        and_(
+            AnomalyStat.app == subq.c.app,
+            AnomalyStat.rank == subq.c.rank,
+            AnomalyStat.n_updates == subq.c.max_n_updates
+        )
+    ).all()
+
+    return jsonify([st.to_dict() for st in stats])
+    # app = request.args.get('app', default=None)
+    # rank = request.args.get('rank', default=None)
+    # n = max(request.args.get('n', default=1), 1)
+    #
+    # if app is None or rank is None:
+    #     stats = AnomalyStat.query.filter_by(deleted=False).all()
+    # else:
+    #     stats = AnomalyStat.query.\
+    #         filter_by(app=int(app), rank=int(rank), deleted=False).first()
+    #
+    # if stats is None or (isinstance(stats, list) and len(stats) == 0):
+    #     abort(400)
+    #
+    # if not isinstance(stats, list):
+    #     stats = [stats]
+    #
+    # return jsonify([st.to_dict_stats() for st in stats])
+
+@api.route('/anomalydata', methods=['GET'])
+def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
 
-    if app is None or rank is None:
-        stats = AnomalyStat.query.filter_by(deleted=False).all()
-    else:
-        stats = AnomalyStat.query.\
-            filter_by(app=int(app), rank=int(rank), deleted=False).first()
+    stat = AnomalyStat.query.filter(
+        and_(
+            AnomalyStat.app==int(app),
+            AnomalyStat.rank==int(rank)
+        )
+    ).order_by(
+        AnomalyStat.n_updates.desc()
+    ).first()
 
-    if stats is None or (isinstance(stats, list) and len(stats) == 0):
-        abort(400)
+    data = stat.data.all()
 
-    if not isinstance(stats, list):
-        stats = [stats]
+    return jsonify({
+        'stat': stat.to_dict(),
+        'data': [d.to_dict() for d in data]
+    })
 
-    return jsonify([st.to_dict_stats() for st in stats])
 
 
 # @api.route('/anomalystats', methods=['GET'])
