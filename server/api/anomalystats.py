@@ -100,8 +100,8 @@ def new_anomalydata():
     - anomaly data can be a dictionary or a list of dictionary whose structre
       is as the followings:
       {
-        'app': application index
-        'rank': rank index
+        'app': application index, if it is not available parse from key ({app}:{rank})
+        'rank': rank index, if it is not available parse from key ({app}:{rank})
         'created_at': (optional) timestamp in milli-second
         'key': (optional) key of AnomalyStat object, must unique over app and rank
         'stats': {
@@ -124,8 +124,12 @@ def new_anomalydata():
       }
     """
     data = request.get_json() or {}
-    payload = data.get('payload', None)
-    delete_old = data.get('delete_old', True)
+    if isinstance(data, list):
+        payload = data
+        delete_old = True
+    else:
+        payload = data.get('payload', None)
+        delete_old = data.get('delete_old', True)
 
     if not isinstance(payload, list):
         payload = [payload]
@@ -140,6 +144,12 @@ def new_anomalydata():
 
         _stat = {}
         # Basic information
+        if 'key' in anomalydata:
+            key = anomalydata['key']
+            app, rank = key.split(':')
+            anomalydata['app'] = int(app)
+            anomalydata['rank'] = int(rank)
+
         _stat['app'] = int(anomalydata['app'])
         _stat['rank'] = int(anomalydata['rank'])
         _stat['created_at'] = int(anomalydata['created_at']) \

@@ -1,7 +1,12 @@
 """
 Test script for "in-situ" mode
-: send pseudo-anomaly statistics per rank (i.e. per AD module)
-  or from a parameter server (i.e. rank size == 1)
+: send pseudo-anomaly statistics from parameter server
+
+pseudo_ad.py :
+- MPI program, each MPI processor represents (pseudo) AD module.
+- It generates periodically (# anomalies) following
+  given [mean, stdandard deviation] and send to parameter server.
+- And, the (# anomalies)
 
 """
 import requests
