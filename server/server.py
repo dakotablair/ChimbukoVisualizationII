@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template
 # render_template, json, request, current_app
 
 from . import stats as req_stats
@@ -21,8 +21,8 @@ def before_request():
 @main.route('/')
 def index():
     """Serve client-side application"""
-    # return render_template('index.html')
-    return "Hello World"
+    return render_template('index.html')
+    # return "Hello World"
 
 
 @main.route('/stats', methods=['GET'])
