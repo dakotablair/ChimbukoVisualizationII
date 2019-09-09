@@ -112,3 +112,6 @@ redis-stable
 
 # sqlite
 *.sqlite
+
+# node_modules
+node_modules/

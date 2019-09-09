@@ -22,7 +22,7 @@ class Controller {
 
         // Initialize Model components
         this.model = new Model();
-
+        
         this.streaming(); // keep listening data event from backend application
         this.rendering(); // keep drawing if data is available.
     }
@@ -33,9 +33,6 @@ class Controller {
          *  if so, renders view components every 0.5 sec.
          *  else, wait next 2 sec.
          */
-         // this is awkward. rendering should be called right after
-         // stream data arrived. this will make another delay as well as
-         // redundant rendering.
         console.log('['+this.date.toLocaleTimeString()+'] rendering() ');
         if(this.model.hasReceived()){
             this.views.stream_update();
@@ -59,28 +56,12 @@ class Controller {
          *  to reflect the changes at the moment whenever the plot is drawed.
          */
         var me = this;
-        var namespace = '/events';
-        var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
-        socket.on('connect', function(){
-            console.log('socket.on.connect');
-        });
-        socket.on('userid', function(msg){
-            console.log('socket.on.userid');
-        });
-        socket.on('status', function(msg){
-            console.log('socket.on.status: ' + msg.status);
-        });
-        socket.on('updated_data', function(data){
-            console.log('[' + me.date.toLocaleTimeString() + '] received data');
-            console.log('updated_data: ', data);
-            me.model.update(data);
-        });
-        //var sse = new EventSource('/stream');
-        //sse.onmessage = function (message) {
-        //    console.log('['+me.date.toLocaleTimeString()+'] received data');
-        //    var d = jQuery.parseJSON(message.data);
-        //    me.model.update(d['stream']);
-        //};
+        var sse = new EventSource('/stream');
+        sse.onmessage = function (message) {
+            console.log('['+me.date.toLocaleTimeString()+'] received data');
+            var d = jQuery.parseJSON(message.data);  
+            me.model.update(d['stream']);
+        };
     }
 
     fetchWithCallback(data, callback, options) {

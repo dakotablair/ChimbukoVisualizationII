@@ -37,14 +37,12 @@ class Model {
         /**
          * concat new array to the corresponding array based on the rank
          */
-         console.log('stream data: ', stream);
         for(var rank in stream) { 
             if(!this.frames[rank]) {
-                this.frames[rank] = [];
+                this.frames[rank] = []
             }
-            this.frames[rank] = this.frames[rank].concat(stream[rank]);
+            this.frames[rank] = this.frames[rank].concat(stream[rank]) 
         }
-        console.log('Model.update: ', this.frames);
     }
     getSortedRanks(delta) {
         /**

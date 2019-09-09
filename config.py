@@ -12,6 +12,10 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REQUEST_STATS_WINDOW = 15
     CELERY_CONFIG = {}
+    SOCKETIO_MESSAGE_QUEUE = os.environ.get(
+        'SOCKETIO_MESSAGE_QUEUE',
+        os.environ.get('CELERY_BROKER_URL', 'redis://')
+    )
 
 
 class DevelopmentConfig(Config):
@@ -27,6 +31,7 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
     CELERY_CONFIG = {'CELERY_ALWAYS_EAGER': True}
+    SOCKETIO_MESSAGE_QUEUE = None
 
 
 config = {

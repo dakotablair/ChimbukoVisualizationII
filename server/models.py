@@ -3,6 +3,62 @@ from . import db
 from .utils import timestamp
 from sqlalchemy.dialects.mysql import INTEGER
 
+
+
+
+class ApplicationInfo(db.Model):
+    __tablename__ = 'appinfo'
+    id = db.Column(INTEGER(unsigned=True), primary_key=True)
+
+    # application id & name & # MPI ranks
+    # - application id should be matched with anomalystat.app
+    # - todo: foreign key
+    app_id = db.Column(db.Integer, default=0)
+    app_name = db.Column(db.String())
+    app_rank = db.Column(db.Integer, default=0)
+
+    # belows are user dependent
+    # - this is only for now because this is valid only for single user
+    order_by = db.Column(db.String(), default="stddev")
+    n_query = db.Column(db.Integer, default=5)
+
+    # timestamps
+    created_at = db.Column(db.Integer, default=timestamp)
+    updated_at = db.Column(db.Integer, default=timestamp, onupdate=timestamp)
+
+    @staticmethod
+    def create(data):
+        """Create an application information"""
+        info = ApplicationInfo(
+            app_id=0, app_name="unknown", app_rank=0,
+            order_by="stddev", n_query=5
+        )
+        info.from_dict(data)
+        return info
+
+    def from_dict(self, data: dict, partial_update=True):
+        """Import application information from a dictionary"""
+        for field in data.keys():
+            try:
+                setattr(self, field, data[field])
+            except KeyError:
+                if not partial_update:
+                    abort(400)
+
+    def to_dict(self):
+        """Export application information to a dictionary"""
+        return {
+            'id': self.id,
+            'app_id': self.app_id,
+            'app_name': self.app_name,
+            'app_rank': self.app_rank,
+            'order_by': self.order_by,
+            'n_query': self.n_query,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+
+
 class AnomalyStat(db.Model):
     """
     Anomaly statistics

@@ -1,10 +1,11 @@
-from flask import request, jsonify, abort
+from flask import request, jsonify, abort, url_for
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData
 from . import api
 from ..tasks import make_async
 from ..utils import timestamp
+from requests import post
 
 from sqlalchemy.exc import IntegrityError
 from runstats import Statistics
@@ -213,6 +214,21 @@ def new_anomalydata():
         )
 
     # todo: make information output with Location
+    return jsonify({}), 201
+
+@api.route('/longtask', methods=['POST'])
+@make_async
+def longtask():
+    # ts = timestamp()
+    # print('publish: updated: %s' % ts)
+    # red.publish('anomalystat', u'updated: %s' % ts)
+    # print(url_for('event', _external=True))
+    print('longtask')
+    try:
+        post('http://127.0.0.1:5000/events/stream_stats')
+    except Exception as e:
+        print(e)
+
     return jsonify({}), 201
 
 
