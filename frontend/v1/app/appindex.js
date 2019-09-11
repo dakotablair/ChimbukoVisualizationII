@@ -3,10 +3,15 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import {
-    set_value
+    set_value,
+    set_stats,
+    set_watched_rank,
+    unset_watched_rank
 } from './actions/dataActions'
 
-import { withStyles, makeStyles } from '@material-ui/core/styles'
+import io from 'socket.io-client';
+
+import { withStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -16,9 +21,9 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper'
 
-// import Dashboard from './views/Dashboard';
-import BarExample from './views/BarExample';
 import AnomalyStats from './views/AnomalyStats';
+import AnomalyHistory from './views/AnomalyHistory';
+
 
 const styles = theme => ({
     root: {flexGrow: 1},
@@ -37,61 +42,86 @@ class ChimbukoApp extends React.Component {
         this.state = {
 
         };
-        this.eventSource = new EventSource("stream");
+        // this.eventSource = new EventSource("stream");
+        this.socketio = null;
     }
 
     componentDidMount() {
-        // this.eventSource.onmessage = ev => {
-        //     const data = JSON.parse(ev.data);
-        //     console.log(data);
-        // };
-        if (this.eventSource == null)
-            this.eventSource = new EventSource("stream");
+        const namespace = '/events';
+        const uri = 'http://' + document.domain + ':' + location.port + namespace;
 
-        this.eventSource.addEventListener("anomalyStatUpdate", ev => {
-            if (this.props.set_value)
-                this.props.set_value("anomaly_stats", JSON.parse(ev.data));
+        if (this.socketio == null)
+            this.socketio = io(uri);
+
+        this.socketio.on('connect', () => {
+            console.log('socket.on.connect');
         });
-        this.eventSource.onerror = e => {
-            // todo: error handling
-            console.log(e, e.readyState)
-            if (e.readyState == EventSource.CLOSED)
-            {
-                this.eventSource.close();
-                this.eventSource = null;
-                console.log('close eventSource')
-            }
+
+        this.socketio.on('updated_data', data => {
+            if (this.props.set_stats)
+                this.props.set_stats(data);
+        });
+
+        this.socketio.on('connect_error', err => {
+            this.socketio.close();
+            this.socketio = null;
+        });
+    }
+
+    handleStatChange = q => {
+        if (this.socketio) {
+            this.socketio.emit('query_stats', q);
         }
     }
 
-    render() {
-        const { classes, stats } = this.props;
+    handleHistoryRequest = rank => {
+        if (this.props.set_watched_rank)
+            this.props.set_watched_rank(rank);
+    }
 
-        console.log(this.props);
+    handleHistoryRemove = rank => {
+        if (this.props.unset_watched_rank)
+            this.props.unset_watched_rank(rank);
+    }
+
+    render() {
+        const { classes, stats, watched_ranks } = this.props;
 
         return (
             <div className={classes.root}>
                 <AppBar position="static">
                     <Toolbar>
-                        <IconButton className={classes.menuButton}
-                            edge="start" color="inherit" aria-label="menu"
+                        <IconButton 
+                            className={classes.menuButton}
+                            edge="start" 
+                            color="inherit" 
+                            aria-label="menu"
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Typography className={classes.title} variant="h6">
+                        <Typography 
+                            className={classes.title} 
+                            variant="h6"
+                        >
                             Chimbuko Visualization
                         </Typography>
                     </Toolbar>
                 </AppBar>
                 <Grid container spacing={3}>
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                         <AnomalyStats 
-                            height={100}
+                            height={200}
                             stats={stats}
+                            onStatChange={this.handleStatChange}
+                            onBarClick={this.handleHistoryRequest}
                         />
                     </Grid>
-                    <Grid item xs={6}>
-                        {/* <BarExample /> */}
+                    <Grid item xs={8}>
+                        <AnomalyHistory
+                            height={200}
+                            ranks={watched_ranks}
+                            onLegendClick={this.handleHistoryRemove}
+                        />
                     </Grid>
                     <Grid item xs={3}>
                         <Paper className={classes.paper}>xs=3</Paper>
@@ -113,13 +143,17 @@ class ChimbukoApp extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        stats: state.data.anomaly_stats
+        stats: state.data.stats,
+        watched_ranks: state.data.watched_ranks,
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        set_value
+        set_value,
+        set_stats,
+        set_watched_rank,
+        unset_watched_rank
     }, dispatch);
 }
 

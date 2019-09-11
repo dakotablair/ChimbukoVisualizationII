@@ -24,7 +24,7 @@ class Model {
         this.frameID = 0;
         this.frameWindow = 30
         
-        this.frames = {};
+        this.frames = [];
         
         this.setWait = true;
         this.NUM_SELECTION_RANK = 10;
@@ -37,14 +37,7 @@ class Model {
         /**
          * concat new array to the corresponding array based on the rank
          */
-         console.log('stream data: ', stream);
-        for(var rank in stream) { 
-            if(!this.frames[rank]) {
-                this.frames[rank] = [];
-            }
-            this.frames[rank] = this.frames[rank].concat(stream[rank]);
-        }
-        console.log('Model.update: ', this.frames);
+         this.frames.push(stream);
     }
     getSortedRanks(delta) {
         /**
@@ -70,6 +63,11 @@ class Model {
             'top': top,
             'bottom': bottom
         }
+    }
+    isAvailable() {
+        if (this.frames.length>0)
+            return true;
+        return false;
     }
     hasReceived() {
         /**
@@ -144,23 +142,25 @@ class Model {
          *      }
          * }
          */
-        var processed = {
-            'top': {'x':[], 'y':[], 'z':[]}, // x: ranking, y: accum. # delta, z: rank_id
-            'bottom': {'x':[], 'y':[], 'z':[]} // x: ranking, y: accum. # delta, z: rank_id  
-        }
-        var maxLength = Math.max(top.length, bottom.length) 
-        for (var i=0; i<maxLength; i++) {
-            if(top[i] !== undefined) {
-                processed.top.x.push(i)
-                processed.top.y.push(delta[top[i]])
-                processed.top.z.push(top[i])
-            }
-            if(bottom[i] !== undefined) {
-                processed.bottom.x.push(i)
-                processed.bottom.y.push(delta[bottom[i]])
-                processed.bottom.z.push(bottom[i])
-            }
-        }
+        var processed = this.frames.shift();
+
+//        var processed = {
+//            'top': {'x':[], 'y':[], 'z':[]}, // x: ranking, y: accum. # delta, z: rank_id
+//            'bottom': {'x':[], 'y':[], 'z':[]} // x: ranking, y: accum. # delta, z: rank_id
+//        }
+//        var maxLength = Math.max(top.length, bottom.length)
+//        for (var i=0; i<maxLength; i++) {
+//            if(top[i] !== undefined) {
+//                processed.top.x.push(i)
+//                processed.top.y.push(delta[top[i]])
+//                processed.top.z.push(top[i])
+//            }
+//            if(bottom[i] !== undefined) {
+//                processed.bottom.x.push(i)
+//                processed.bottom.y.push(delta[bottom[i]])
+//                processed.bottom.z.push(bottom[i])
+//            }
+//        }
         return processed;
     }
     processHistoryViewData(params) {

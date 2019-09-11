@@ -43,17 +43,18 @@ class StreamView extends BarChartView {
         /**
          * Renders delta plot after data converting and scales adjustment
         **/
-        this.processed = this.controller.model.processStreamViewData(
-                this.controller.model.selectedRanks.top, 
-                this.controller.model.selectedRanks.bottom,
-                this.controller.model.delta
-            );
+//        this.processed = this.controller.model.processStreamViewData(
+//                this.controller.model.selectedRanks.top,
+//                this.controller.model.selectedRanks.bottom,
+//                this.controller.model.delta
+//            );
+        this.processed = this.controller.model.processStreamViewData();
         this.render({
             'data': this.processed,
             'xLabel': streamviewValues.X_LABEL, 
             'yLabel': this.getYLabel(), 
             'color': {
-                'colorScales': [this.controller.model.selectedRanks.top, this.controller.model.selectedRanks.bottom]
+                'colorScales': [this.processed.top.z, this.processed.bottom.z]
             },
             'callback': this.getHistory.bind(this)
         });

@@ -37,7 +37,7 @@ class Controller {
          // stream data arrived. this will make another delay as well as
          // redundant rendering.
         console.log('['+this.date.toLocaleTimeString()+'] rendering() ');
-        if(this.model.hasReceived()){
+        if(this.model.isAvailable()){
             this.views.stream_update();
             this.frameID += 1; // maintains frame id for frontend
             this.frameInterval = this.SECOND * 0.5
