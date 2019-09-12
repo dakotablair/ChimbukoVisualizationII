@@ -120,11 +120,11 @@ var streamviewValues = {
     'min': 'Minimum Execution Time',
     'max': 'Maximum Execution Time',
     'mean': 'Average Execution Time',
-    'std': 'Standard Deviation',
-    'skn': 'Skewness',
-    'kts': 'Kurtosis',
-    'DEFAULT_TYPE': 'dlt',
-    'DEFAULT_SIZE': 10,
+    'stddev': 'Standard Deviation',
+    'skewness': 'Skewness',
+    'kurtosis': 'Kurtosis',
+    'DEFAULT_TYPE': 'stddev',
+    'DEFAULT_SIZE': 5,
     'X_LABEL': 'Ranking'
 }
 
@@ -132,6 +132,6 @@ var historyviewValues = {
     'SELECTED_RANK_PREFIX': 'Selected Rank #: ',
     'X_LABEL': 'Frame',
     'Y_LABEL': '# Anomaly',
-    'WINDOW_SIZE': 100,
+    'WINDOW_SIZE': 50,
     'STEP': 5
 }

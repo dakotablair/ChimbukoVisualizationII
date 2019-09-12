@@ -1,15 +1,14 @@
-from flask import request, jsonify, abort, url_for
+from flask import request, jsonify
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData
 from . import api
 from ..tasks import make_async
-from ..utils import timestamp
+from ..utils import timestamp, url_for
 from requests import post
 
 from sqlalchemy.exc import IntegrityError
 from runstats import Statistics
-from collections import defaultdict
 from sqlalchemy import func, and_
 
 
@@ -213,24 +212,11 @@ def new_anomalydata():
             )
         )
 
+    # notify
+    post(url_for('events.stream', _external=True))
+
     # todo: make information output with Location
     return jsonify({}), 201
-
-@api.route('/longtask', methods=['POST'])
-@make_async
-def longtask():
-    # ts = timestamp()
-    # print('publish: updated: %s' % ts)
-    # red.publish('anomalystat', u'updated: %s' % ts)
-    # print(url_for('event', _external=True))
-    print('longtask')
-    try:
-        post('http://127.0.0.1:5000/events/stream_stats')
-    except Exception as e:
-        print(e)
-
-    return jsonify({}), 201
-
 
 @api.route('/anomalystats', methods=['GET'])
 def get_anomalystats():
@@ -257,23 +243,7 @@ def get_anomalystats():
     ).all()
 
     return jsonify([st.to_dict() for st in stats])
-    # app = request.args.get('app', default=None)
-    # rank = request.args.get('rank', default=None)
-    # n = max(request.args.get('n', default=1), 1)
-    #
-    # if app is None or rank is None:
-    #     stats = AnomalyStat.query.filter_by(deleted=False).all()
-    # else:
-    #     stats = AnomalyStat.query.\
-    #         filter_by(app=int(app), rank=int(rank), deleted=False).first()
-    #
-    # if stats is None or (isinstance(stats, list) and len(stats) == 0):
-    #     abort(400)
-    #
-    # if not isinstance(stats, list):
-    #     stats = [stats]
-    #
-    # return jsonify([st.to_dict_stats() for st in stats])
+
 
 @api.route('/anomalydata', methods=['GET'])
 def get_anomalydata():
@@ -295,15 +265,3 @@ def get_anomalydata():
         'stat': stat.to_dict(),
         'data': [d.to_dict() for d in data]
     })
-
-
-
-# @api.route('/anomalystats', methods=['GET'])
-# def get_anomalystats():
-#     print('get_anomalystats')
-#     stats = AnomalyStat.query.order_by(AnomalyStat.id.asc())
-#     print([d.to_dict() for d in stats.all()])
-#     if stats is None:
-#         abort(400)
-#
-#     return jsonify([d.to_dict() for d in stats.all()])

@@ -4,6 +4,39 @@ from .utils import timestamp
 from sqlalchemy.dialects.mysql import INTEGER
 
 
+class AnomalyStatQuery(db.Model):
+    __tablename__ = 'anomalystatquery'
+    id = db.Column(INTEGER(unsigned=True), primary_key=True)
+
+    nQueries = db.Column(db.Integer, default=0)
+    statKind = db.Column(db.String(), default='stddev')
+
+    created_at = db.Column(db.Integer, index=True, default=timestamp)
+
+    @staticmethod
+    def create(data):
+        """Create a new Query condition"""
+        q = AnomalyStatQuery()
+        q.from_dict(data)
+        return q
+
+    def from_dict(self, data: dict, partial_update=False):
+        """Import from a dictionary"""
+        for field in data.keys():
+            try:
+                setattr(self, field, data[field])
+            except KeyError:
+                if not partial_update:
+                    abort(400)
+
+    def to_dict(self):
+        """Export to a dictionary"""
+        return {
+            'id': self.id,
+            'nQueries': self.nQueries,
+            'statKind': self.statKind,
+            'crreated_at': self.created_at
+        }
 
 
 class ApplicationInfo(db.Model):

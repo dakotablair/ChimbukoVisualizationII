@@ -10,146 +10,91 @@ pseudo_ad.py :
 
 """
 import requests
-import numpy as np
 import time
-from mpi4py import MPI
+import random
+from collections import defaultdict
+from runstats import Statistics
 
-MIN_MEAN_VAL = 0
-MAX_MEAN_VAL = 100
+def timestamp():
+    return int(round(time.time() * 1000))
 
-def get_random_data(app, rank, step, n):
-    return {
-        'app_rank': '{}:{}'.format(app, rank),
-        'step': step,
-        'n': n
-    }
+def generate_random_data(n_ranks, step, dist):
+    dataset = []
+    ts = timestamp()
+    for rank in range(n_ranks):
+        mean, stddev = dist[rank]
+        dataset.append({
+            'n_anomaly': abs(random.normalvariate(mean, stddev)),
+            'step': step,
+            'min_timestamp': ts + random.randint(0, 1000),
+            'max_timestamp': ts + 1000 + random.randint(500, 1000),
+            'stat_id': '0:{:d}'.format(rank)
+        })
+    return dataset
 
-def from_parameter_server(url, n_steps, interval, n_ranks, app=0):
-    means = np.random.randint(MIN_MEAN_VAL, MAX_MEAN_VAL, n_ranks).tolist()
-    stddevs = [np.sqrt(np.random.random() * mean) for mean in means]
-
-    for step in range(n_steps):
-        t0 = time.time()
-        data = [
-            get_random_data(
-                app, rank, step,
-                int(np.random.normal(mean, stddev)))
-            for rank, mean, stddev in zip(range(n_ranks), means, stddevs)
-        ]
-        t1 = time.time()
-        elapsed = t1 - t0
-        if elapsed < interval:
-            time.sleep(interval - elapsed)
-
-        requests.post(url=url, json=data)
-
-    return means, stddevs
-
-
-
-def from_ad_module(url, n_steps, interval, rank, app=0):
-    mean = np.random.randint(MIN_MEAN_VAL, MAX_MEAN_VAL)
-    stddev = np.sqrt(np.random.random() * mean)
-
-    for step in range(n_steps):
-        t0 = time.time()
-        data = get_random_data(
-            app, rank, step, np.random.normal(mean, stddev))
-        t1 = time.time()
-        elapsed = t1 - t0
-        if elapsed < interval:
-            time.sleep(interval - elapsed)
-
-        requests.post(url=url, json=data)
-
-    return mean, stddev
-
+def generate_random_normal(n_ranks):
+    dist = {}
+    for rank in range(n_ranks):
+        mean = float(random.randint(0, 50))
+        stddev = float(random.randint(1, 10))
+        dist[rank] = [mean, stddev]
+    return dist
 
 if __name__ == '__main__':
-    import sys
+    n_ranks = 1000  # total number of MPI processors
+    max_steps = 10000  # large number for long test
+    interval = 1  # sec
+    url = 'http://127.0.0.1:5000/api/anomalydata'  # vis server
 
-    # the number of steps
-    n_steps = 20
-    # time interval between post requests (sec)
-    interval = 1
-    # the number of ranks (only for from_parameter_server)
-    n_ranks = 1000
-    # url
-    url='http://127.0.0.1:5000'
+    stats = defaultdict(lambda: Statistics())
+    acc_n_anomalies = defaultdict(int)
 
-    # todo: parsing input arguments
+    # init. (set random normal distribution for each rank)
+    dist = generate_random_normal(n_ranks)
 
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
+    # start ...
+    for step in range(max_steps):
+        dataset = generate_random_data(n_ranks, step, dist)
 
-    # post requests
-    if size == 1:
-        mean, stddev = from_parameter_server(
-            url + '/api/anomalydata', n_steps, interval, n_ranks)
-    else:
-        mean, stddev = from_ad_module(
-            url + '/api/anomalydata', n_steps, interval, rank)
+        # update runstats & make payload
+        payload = []
+        for rank, data in enumerate(dataset):
+            n_anomaly = data['n_anomaly']
+            stats[rank].push(n_anomaly)
+            acc_n_anomalies[rank] += n_anomaly
 
-    if not isinstance(mean, list):
-        mean = [mean]
+            stddev = 0
+            skewness = 0
+            kurtosis = 0
+            try:
+                stddev = stats[rank].stddev()
+                skewness = stats[rank].skewness()
+                kurtosis = stats[rank].kurtosis()
+            except ZeroDivisionError:
+                pass
 
-    if not isinstance(stddev, list):
-        stddev = [stddev]
+            payload.append({
+                'app': 0,
+                'rank': rank,
+                'stats': {
+                    'n_updates': step + 1,
+                    'n_anomalies': acc_n_anomalies[rank],
+                    'n_min_anomalies': stats[rank].minimum(),
+                    'n_max_anomalies': stats[rank].maximum(),
+                    'mean': stats[rank].mean(),
+                    'stddev': stddev,
+                    'skewness': skewness,
+                    'kurtosis': kurtosis
+                },
+                'data': [data]
+            })
 
-    # check correctness
-    comm.Barrier()
+        # post request
+        requests.post(url=url, json=payload)
 
-    # For the test purpose, I need to make sure that
-    # all celery workers finished jobs.
-    if rank == 0:
-        n_tries = 0
-        active = 0
-        scheduled = 0
-        while n_tries < 100:
-            resp = requests.get(url + '/tasks/inspect')
-            data = resp.json()
-            active = sum([len(v) for _, v in data['active'].items()])
-            scheduled = sum([len(v) for _, v in data['scheduled'].items()])
+        # interval
+        time.sleep(interval)
 
-            if active == 0 and scheduled == 0:
-                break
-
-            n_tries = n_tries + 1
-            print('{}: active({}), scheduled({})'.format(
-                n_tries, active, scheduled
-            ))
-
-    comm.Barrier()
-
-    # just to make sure, all data is written to the database
-    time.sleep(1)
-
-    if size == 1:
-        resp = requests.get(url + '/api/anomalystats')
-    else:
-        resp = requests.get(
-            url + '/api/anomalystats?app=0&rank={}'.format(rank))
-
-    retrived = resp.json()
-    print('# Anomaly statistics: ', len(retrived))
-    for r in retrived:
-        r_rank = int(r['rank'])
-        r_mean = r['mean']
-        r_stddev = r['stddev']
-        r_count = r['count']
-
-        d_mean = abs(r_mean - mean[r_rank])
-        d_stddev = abs(r_stddev - stddev[r_rank])
-        d_count = abs(r_count - n_steps)
-
-        if d_mean >= 1.0 or d_stddev >= 1.0 or d_count >= 1.0:
-            print('')
-            print('Rank: {}'.format(r_rank))
-            print('Count: {:d} vs {:d}'.format(r_count, n_steps))
-            print('Mean: {:.3f} vs {:.3f}'.format(r_mean, mean[r_rank]))
-            print('Std: {:.3f} vs {:.3f}'.format(r_stddev, stddev[r_rank]))
-
-    print('Done!')
-
-
+        if step % 10 == 0:
+            print('Sent {:d}-th step.'.format(step + 1))
+            dist = generate_random_normal(n_ranks)

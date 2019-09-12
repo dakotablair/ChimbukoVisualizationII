@@ -36,7 +36,7 @@ class Controller {
          // this is awkward. rendering should be called right after
          // stream data arrived. this will make another delay as well as
          // redundant rendering.
-        console.log('['+this.date.toLocaleTimeString()+'] rendering() ');
+        //console.log('['+this.date.toLocaleTimeString()+'] rendering() ');
         if(this.model.isAvailable()){
             this.views.stream_update();
             this.frameID += 1; // maintains frame id for frontend
@@ -64,23 +64,10 @@ class Controller {
         socket.on('connect', function(){
             console.log('socket.on.connect');
         });
-        socket.on('userid', function(msg){
-            console.log('socket.on.userid');
-        });
-        socket.on('status', function(msg){
-            console.log('socket.on.status: ' + msg.status);
-        });
         socket.on('updated_data', function(data){
-            console.log('[' + me.date.toLocaleTimeString() + '] received data');
-            console.log('updated_data: ', data);
+            //console.log('[' + me.date.toLocaleTimeString() + '] received data');
             me.model.update(data);
         });
-        //var sse = new EventSource('/stream');
-        //sse.onmessage = function (message) {
-        //    console.log('['+me.date.toLocaleTimeString()+'] received data');
-        //    var d = jQuery.parseJSON(message.data);
-        //    me.model.update(d['stream']);
-        //};
     }
 
     fetchWithCallback(data, callback, options) {

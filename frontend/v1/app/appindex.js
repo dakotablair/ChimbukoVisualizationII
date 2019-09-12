@@ -58,6 +58,11 @@ class ChimbukoApp extends React.Component {
         });
 
         this.socketio.on('updated_data', data => {
+            // Note that potentially 'updated_data' could be not only 
+            // anomaly statistics but also something else. We can check
+            // the contents from 'type' field of the data.
+
+            // type == stats
             if (this.props.set_stats)
                 this.props.set_stats(data);
         });

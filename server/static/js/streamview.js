@@ -18,11 +18,11 @@ class StreamView extends BarChartView {
         me.legendTop = new LegendView(me, d3.select('#'+me.name+'-legend'), me.name+'-legend', 'Rank ');
         me.legendBottom = new LegendView(me, d3.select('#'+me.name+'-legend-2'), me.name+'-legend-2', 'Rank ');
 
-        me.streamSize = streamviewValues.DEFAULT_SIZE; // 10 by default
+        me.streamSize = streamviewValues.DEFAULT_SIZE; // 5 by default
         me.streamSizeDom = d3.select('#streamview-size').on('change', function() {
             me.streamSize = me.streamSizeDom.node().value;
         });
-        me.streamType = streamviewValues.DEFAULT_TYPE; // delta by default
+        me.streamType = streamviewValues.DEFAULT_TYPE; // stddev by default
         me.streamTypeDom = d3.select('#streamview-type').on('change', function() {
             me.streamType = me.streamTypeDom.node().value;
         });
@@ -43,18 +43,15 @@ class StreamView extends BarChartView {
         /**
          * Renders delta plot after data converting and scales adjustment
         **/
-//        this.processed = this.controller.model.processStreamViewData(
-//                this.controller.model.selectedRanks.top,
-//                this.controller.model.selectedRanks.bottom,
-//                this.controller.model.delta
-//            );
         this.processed = this.controller.model.processStreamViewData();
+
+        // WARNING: hard-coded for category name here!!
         this.render({
             'data': this.processed,
             'xLabel': streamviewValues.X_LABEL, 
             'yLabel': this.getYLabel(), 
             'color': {
-                'colorScales': [this.processed.top.z, this.processed.bottom.z]
+                'colorScales': [this.processed.TOP.z, this.processed.BOTTOM.z]
             },
             'callback': this.getHistory.bind(this)
         });
@@ -62,29 +59,31 @@ class StreamView extends BarChartView {
     }
     
     updateLegend() {
-        this.legendTop.update(this.processed.top, this.getHistory.bind(this));
-        this.legendBottom.update(this.processed.bottom, this.getHistory.bind(this));
+        // WARNING: hard-coded for category name!!
+        this.legendTop.update(this.processed.TOP, this.getHistory.bind(this));
+        this.legendBottom.update(this.processed.BOTTOM, this.getHistory.bind(this));
     }
     
     getHistory(params) {
         var _params = {
-            'rank_id': params.z,
+            'qRanks': [params.z],
             'app_id': -1, // placeholder
             'start': -1, // if either start or end is not set, then it is dynamic mode. 
-            'size': historyviewValues.WINDOW_SIZE // if dynamic mode, retrive latest frames.
+            'size': historyviewValues.WINDOW_SIZE, // if dynamic mode, retrive latest frames.
+            'last_step': -1
         };
         this.controller.model.selectedRankInfo = {
             'rank_id': params.z,
             'fill': params.fill
         }
+
         var _callback = this.notify.bind(this)
-        fetch('/history', {
+        fetch('/events/query_history', {
             method: "POST",
             body: JSON.stringify(_params),
             headers: {
                 "Content-Type": "application/json"
-            },
-            credentials: "same-origin"
+            }
         }).then(response => response.json()
             .then(json => {
                 if (response.ok) {
@@ -108,20 +107,20 @@ class StreamView extends BarChartView {
     }
     apply() {
         var me = this;
-        fetch('/streamview_layout', {
+        //console.log(me.streamSize, me.streamType)
+        fetch('/events/query_stats', {
             method: "POST",
             body: JSON.stringify({
-                'size': me.streamSize,
-                'type': me.streamType
+                'nQueries': me.streamSize,
+                'statKind': me.streamType
             }),
             headers: {
                 "Content-Type": "application/json"
-            },
-            credentials: "same-origin"
+            }
         }).then(response => response.json()
             .then(json => {
                 if (response.ok) {
-                    console.log('streamview layout was successfully set.')
+                    //console.log('streamview layout was successfully set.')
                     me.controller.model.setStreamSize(me.streamSize)
                 } else {
                     return Promise.reject(json)

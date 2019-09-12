@@ -142,12 +142,28 @@ class Model {
          *      }
          * }
          */
-        var processed = this.frames.shift();
+        var frame = this.frames.shift();
+        var nQueries = frame.nQueries;
+        var processed = {};
 
+        frame.data.forEach(function(dataset){
+            var name = dataset.name;
+            var value = dataset.value;
+            processed[dataset.name] = {
+                'x': new Array(nQueries).fill(0).map((_,i)=>i),
+                'y': dataset.value,
+                'z': dataset.rank
+            };
+        });
+
+        return processed;
+
+        // hard-coded, must have the following structure
 //        var processed = {
 //            'top': {'x':[], 'y':[], 'z':[]}, // x: ranking, y: accum. # delta, z: rank_id
 //            'bottom': {'x':[], 'y':[], 'z':[]} // x: ranking, y: accum. # delta, z: rank_id
 //        }
+
 //        var maxLength = Math.max(top.length, bottom.length)
 //        for (var i=0; i<maxLength; i++) {
 //            if(top[i] !== undefined) {
@@ -161,7 +177,7 @@ class Model {
 //                processed.bottom.z.push(bottom[i])
 //            }
 //        }
-        return processed;
+//        return processed;
     }
     processHistoryViewData(params) {
         /**
@@ -177,6 +193,7 @@ class Model {
         var processed = {
             selected: {'x':[], 'y':[], 'z':[]} // x: frames, y: # anomalies
         }
+        // console.log('processHistory: ', params)
         params.history.forEach(function(numAnomalies, frameID) {
             if (params.dynamic) {
                 if (params.latest_id>=params.WINDOW_SIZE) {
@@ -187,6 +204,7 @@ class Model {
             } else {
                 processed.selected.x.push(params.startFrameNo+frameID)
             }
+//            processed.selected.x.push(params.latest_id)
             processed.selected.y.push(numAnomalies)
             processed.selected.z.push(params.selectedRankID)
         });
