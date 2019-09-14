@@ -11,7 +11,10 @@ from server import create_app, db, socketio
 
 manager = Manager(create_app)
 
-
+# Note that socketio.run(app) runs a production ready server
+# when eventlet or gevent are installed. If neither of these
+# are installed, then the application runs on Flask's developement
+# web server, which is not appropriate for production use.
 class Server(_Server):
     help = description = 'Runs the Socket.IO web server'
 

@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, render_template, Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
+from . import socketio
 
 main = Blueprint('main', __name__)
 
@@ -17,11 +18,18 @@ def before_request():
     """Update requests per second stats."""
     req_stats.add_request()
 
+
+@main.route('/stop')
+def stop():
+    socketio.stop()
+    "Shutting down SocketIO web server!"
+
+
 @main.route('/')
 def index():
     """Serve client-side application"""
-    return render_template('index_v0.html')
-    # return render_template('index.html')
+    #return render_template('index_v0.html')
+    return render_template('index.html')
 
 
 @main.route('/stats', methods=['GET'])

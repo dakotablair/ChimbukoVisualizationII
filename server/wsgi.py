@@ -7,3 +7,4 @@ from server import create_app
 # "application" (the wsgi default) and also the much shorter and convenient
 # "app".
 application = app = create_app(os.environ.get('SERVER_CONFIG', 'production'))
+

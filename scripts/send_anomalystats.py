@@ -41,10 +41,23 @@ def generate_random_normal(n_ranks):
     return dist
 
 if __name__ == '__main__':
+    import sys
+
     n_ranks = 1000  # total number of MPI processors
     max_steps = 10000  # large number for long test
     interval = 1  # sec
     url = 'http://127.0.0.1:5000/api/anomalydata'  # vis server
+
+    if len(sys.argv) > 1:
+        n_ranks = int(sys.argv[1])
+        max_steps = int(sys.argv[2])
+        interval = int(sys.argv[3])
+        url = sys.argv[4]
+
+    print("# Ranks: ", n_ranks)
+    print("# Steps: ", max_steps)
+    print("Interval: ", interval)
+    print("URL: ", url)
 
     stats = defaultdict(lambda: Statistics())
     acc_n_anomalies = defaultdict(int)
