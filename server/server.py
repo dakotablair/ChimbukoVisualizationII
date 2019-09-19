@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, render_template, Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
-from . import socketio
+from . import socketio, celery
 
 main = Blueprint('main', __name__)
 
@@ -21,6 +21,7 @@ def before_request():
 
 @main.route('/stop')
 def stop():
+    celery.control.broadcast('shutdown')
     socketio.stop()
     "Shutting down SocketIO web server!"
 

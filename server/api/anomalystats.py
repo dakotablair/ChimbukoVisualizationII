@@ -97,31 +97,49 @@ def create_or_update_stats(app, rank, stats: Statistics):
 def new_anomalydata():
     """
     Register anomaly data
-    - anomaly data can be a dictionary or a list of dictionary whose structre
-      is as the followings:
-      {
-        'app': application index, if it is not available parse from key ({app}:{rank})
-        'rank': rank index, if it is not available parse from key ({app}:{rank})
-        'created_at': (optional) timestamp in milli-second
-        'key': (optional) key of AnomalyStat object, must unique over app and rank
-        'stats': {
-            'n_updates': the number of updates (equivalent to the number of steps)
-            'n_anomalies': the number of accumulated anomalies
-            'n_min_anomalies': the minimum number of anomalies
-            'n_max_anomalies': the maximum number of anomalies,
-            'mean': mean of number of anomalies over time (or steps)
-            'stddev': skewness of number of anomalies over time (or steps)
-            'skewness': (optional) skewness of number of anomalies over time
-            'kurtosis': (optional) kurtosis of number of anomalies over time
-        }
-        'data': [{
-            'n_anomaly': the number of anomalies within given time range (or step)
-            'step': step index
-            'min_timestamp': the minimum timestamp
-            'max_timestamp': the maximum timestamp
-            'stat_id': (optional) key of the associated AnomalyStat object
-        }]
-      }
+
+    - structure
+    {
+        "created_at": (integer),
+        "anomaly": [
+            {
+                "key": "{app}:{rank}",   // app == pid, todo: append timestamp?
+                "stats": {               // statistics
+                    // todo: "anomalystat_key": "{app}:{rank}:{ts}"
+                    "count": (integer),
+                    "acc": (float),
+                    "min": (float),
+                    "max": (float),
+                    "mean": (float),
+                    "stddev": (float),
+                    "skewness": (float),
+                    "kurtosis": (float)
+                },
+                "data": [         // AnomalyData
+                    {
+                        "app": (integer),
+                        "rank": (integer),
+                        "step": (integer),
+                        "min_timestamp": (integer),
+                        "max_timestamp": (integer),
+                        "n_anomalies": (integer),
+                        "stat_id": (integer)  // must matched with "key"
+                    }
+                ]
+            }
+        ],
+        "func": [
+            {
+                // todo: "funcstat_key": "{fid}:{ts}"
+                "fid": (integer),
+                "name": (string),
+                "stats": { statistics },
+                "inclusive": { statistics },
+                "exclusive": { statistics }
+            }
+        ]
+    }
+
     """
     data = request.get_json() or {}
     if isinstance(data, list):

@@ -1,17 +1,62 @@
 from flask import request, abort, jsonify
 
 from .. import db
+from ..tasks import make_async
 from ..models import Execution
 
 from . import api
 
 
 @api.route('/executions', methods=['POST'])
+@make_async
 def new_executions():
-    """Register a list of new executions"""
-    all_exec = [Execution.create(d) for d in request.get_json()]
-    db.session.add_all(all_exec)
-    db.session.commit()
+    """
+    Register a list of new executions
+
+    - structure
+    [
+        "exec": [
+            {
+                "id": (integer), ==> key
+                "name": (integer),
+                "pid": (integer),
+                "rid": (integer),
+                "tid": (integer),
+                "fid": (integer),
+                "entry": (integer),
+                "exit": (integer),
+                "runtime": (integer),
+                "exclusive": (integer),
+                "label": (integer), // 1: normal, -1: abnormal
+                "parent": (string),   // "id" of parent
+                "n_children": (integer),
+                "n_messages": (integer)
+            }
+        ],
+        "comm": [
+            {
+                todo: "execdata_key": "id"
+                "type": (string),  // SEND or RECV
+                "pid": (integer),
+                "rid": (integer),
+                "tid": (integer),
+                "src": (integer),
+                "tar": (integer),
+                "bytes": (integer),
+                "tag": (integer),
+                "ts": (integer),
+                "fid": (integer),
+                "name": (string)
+            }
+        ]
+    ]
+    """
+    # import pprint
+    # pp = pprint.PrettyPrinter(indent=2)
+    # pp.pprint(request.get_json())
+    # all_exec = [Execution.create(d) for d in request.get_json()]
+    # db.session.add_all(all_exec)
+    # db.session.commit()
     return "OK"
 
 
