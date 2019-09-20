@@ -53,6 +53,8 @@ class Base(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'key': self.key,
+            'key_ts': self.key_ts,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
@@ -71,12 +73,21 @@ class FuncStat(Base):
         cascade='all,delete-orphan',
         single_parent=True,
         backref=backref('func', cascade="all"))
+    # stats = db.relationship('Stat', lazy='dynamic', backref='func')
 
     def to_dict(self):
-        return super().to_dict().update({
+        d = super().to_dict()
+
+        stats = {}
+        for st in self.stats.all():
+            stats[st.kind] = st.to_dict()
+
+        d.update({
             'fid': self.fid,
-            'name': self.name
+            'name': self.name,
+            **stats
         })
+        return d
 
 
 class AnomalyStat(Base):
@@ -94,7 +105,7 @@ class AnomalyStat(Base):
         cascade='all,delete-orphan',
         single_parent=True,
         uselist=False,
-        backref=backref('anomaly', cascade="all")
+        backref=backref('anomaly', cascade="all,delete")
     )
 
     # anomaly data for history view
@@ -102,13 +113,23 @@ class AnomalyStat(Base):
     # - one-to-many, no cascaded operation
     hist = db.relationship('AnomalyData', lazy='dynamic', backref='owner')
 
+    def to_dict(self):
+        d = super().to_dict()
+
+        d.update({
+            'app': self.app,
+            'rank': self.rank,
+            'stats': self.stat.to_dict()
+        })
+        return d
+
 
 class Stat(Base):
     __tablename__ = 'stat'
-    funcstat_key = db.Column(db.String(), db.ForeignKey('funcstat.key_ts'))
-    anomalystat_key = db.Column(db.String(), db.ForeignKey('anomalystat.key_ts'))
+    funcstat_key = db.Column(db.String(), db.ForeignKey('funcstat.key_ts'), nullable=True)
+    anomalystat_key = db.Column(db.String(), db.ForeignKey('anomalystat.key_ts'), nullable=True)
 
-    # kind = db.Column(db.String(), default='default')
+    kind = db.Column(db.String(), default='anomaly')
 
     count = db.Column(db.Integer, default=0)
     accumulate = db.Column(db.Integer, default=0)
@@ -120,17 +141,19 @@ class Stat(Base):
     kurtosis = db.Column(db.Integer, default=0)
 
     def to_dict(self):
-        return super().to_dict().update({
-            # 'kind': self.kind,
+        d = super().to_dict()
+        d.update({
+            'kind': self.kind,
             'count': self.count,
-            'acc': self.accumulate,
-            'min': self.minimum,
-            'max': self.maximum,
+            'accumulate': self.accumulate,
+            'minimum': self.minimum,
+            'maximum': self.maximum,
             'mean': self.mean,
             'stddev': self.stddev,
             'skewness': self.skewness,
             'kurtosis': self.kurtosis
         })
+        return d
 
 
 class AnomalyData(Base):
@@ -142,6 +165,17 @@ class AnomalyData(Base):
     step = db.Column(db.Integer, index=True, default=0)
     min_timestamp = db.Column(db.Float, default=0)  # usec
     max_timestamp = db.Column(db.Float, default=0)  # usec
+
+    def to_dict(self):
+        d = super().to_dict()
+        d.update({
+            'anomalystat_key': self.anomalystat_key,
+            'n_anomalies': self.n_anomalies,
+            'step': self.step,
+            'min_timestamp': self.min_timestamp,
+            'max_timestamp': self.max_timestamp
+        })
+        return d
 
 
 class ExecData(Base):

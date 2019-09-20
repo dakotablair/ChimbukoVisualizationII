@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
 from .. import db
-from ..models import AnomalyStat, AnomalyData
+from ..models import AnomalyStat, AnomalyData, FuncStat, Stat
 from . import api
 from ..tasks import make_async
 from ..utils import timestamp, url_for
@@ -12,84 +12,129 @@ from runstats import Statistics
 from sqlalchemy import func, and_
 
 
-def get_or_create_stats(app_rank: str):
+def process_on_anomaly(data:list, ts):
     """
-    Get or create AnomalyStat object
-
-    Ref: http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
+    process on anomaly data before adding to database
     """
-    app, rank = app_rank.split(':')
-    app = int(app)
-    rank = int(rank)
+    anomaly_stat = []
+    anomaly_data = []
+    stat = []
 
-    # looking for an existing AnomalyStat object for given app and rank
-    stat = AnomalyStat.query.filter_by(app=app, rank=rank).first()
+    for d in data:
+        if 'key' in d:
+            app, rank = d['key'].split(':')
+            app = int(app)
+            rank = int(rank)
+        else:
+            app = d.get('app')
+            rank = d.get('rank')
+        key = '{}:{}'.format(app, rank)
+        key_ts = '{}:{}'.format(key, ts)
+        anomaly_stat.append({
+            'key': key,
+            'key_ts': key_ts,
+            'app': app,
+            'rank': rank,
+            'created_at': ts
+        })
 
-    # An AnomalyStat object exist, then return it
-    if stat is not None:
-        return stat
+        d['stats'].update({'kind': 'anomaly', 'anomalystat_key': key_ts})
+        stat.append(d['stats'])
 
-    # An AnomalyStat object doesn't exist so we create an instance
-    stat = AnomalyStat.create({'app': app, 'rank': rank})
+        if 'data' in d:
+            [dd.update({
+                'anomalystat_key': key,
+                'funcstat_key': None,
+            }) for dd in d['data']]
+            anomaly_data += d['data']
 
-    # we create a savepoint in case of race condition
-    db.session.begin_nested()
-    try:
-        # we try to insert and release the savepoint
-        db.session.add(stat)
-        db.session.commit()
-    except IntegrityError:
-        # The insert fail due to a concurrent transaction
-        db.session.rollback()
-        # we get the AnomalyStat object which exist now
-        stat = get_or_create_stats(app_rank)
-
-    return stat
+    return anomaly_stat, anomaly_data, stat
 
 
-def create_or_update_stats(app, rank, stats: Statistics):
-    """
-    Create or update AnomalyStat object
-    """
+def process_on_func(data:list, ts):
+    func_stat = []
+    stat = []
 
-    # looking for an existing AnomalyStat object for given app and rank
-    curr_stats = AnomalyStat.query.filter_by(app=app, rank=rank).\
-        order_by(AnomalyStat.count.desc()).first()
+    for d in data:
+        key_ts = '{}:{}'.format(d['fid'], ts)
+        func_stat.append({
+            'created_at': ts,
+            'key_ts': key_ts,
+            'fid': d['fid'],
+            'name': d['name']
+        })
+        d['stats'].update({
+            'kind': 'stats',
+            'funcstat_key': key_ts,
+            'anomalystat_key': None
+        })
+        stat.append(d['stats'])
+        d['inclusive'].update({
+            'kind': 'inclusive',
+            'funcstat_key': key_ts,
+            'anomalystat_key': None
+        })
+        stat.append(d['inclusive'])
+        d['exclusive'].update({
+            'kind': 'exclusive',
+            'funcstat_key': key_ts,
+            'anomalystat_key': None
+        })
+        stat.append(d['exclusive'])
 
-    # An AnomalyStat object doesn't exist, then create new one
-    if curr_stats is None:
-        curr_stats = AnomalyStat.create_from(app, rank, stats)
-        db.session.begin_nested()
-        try:
-            db.session.add(curr_stats)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            curr_stats = create_or_update_stats(app, rank, stats)
-        return curr_stats
+    return func_stat, stat
 
-    curr_id = curr_stats.id
-    st = curr_stats.to_stats()
-    st += stats
 
-    new_id = '{}:{}:{}'.format(app, rank, int(curr_id.split(':')[-1]) + 1)
-    new_stats = AnomalyStat.create_from(app, rank, st, new_id)
+def delete_old_anomaly():
+    subq = db.session.query(
+        AnomalyStat.app,
+        AnomalyStat.rank,
+        func.max(AnomalyStat.created_at).label('max_ts')
+    ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
-    db.session.begin_nested()
-    try:
-        # To avoid race-condition, we actually don't update
-        # the existing row but new row is added. Then, 'deleted'
-        # field of the previous row is set to false.
-        # We need to take care on this later.
-        db.session.add(new_stats)
-        curr_stats.deleted = True
-        db.session.commit()
-    except IntegrityError:
-        # The update fails due to a concurrent transaction
-        db.session.rollback()
-        curr_stats = create_or_update_stats(app, rank, stats)
+    ret = [ [d.id, d.key_ts] for d in db.session.query(AnomalyStat).join(
+        subq,
+        and_(
+            AnomalyStat.app == subq.c.app,
+            AnomalyStat.rank == subq.c.rank,
+            AnomalyStat.created_at < subq.c.max_ts
+        )
+    ).all()]
 
-    return curr_stats
+    ids = [q[0] for q in ret]
+    keys = [q[1] for q in ret]
+
+    db.engine.execute(
+        AnomalyStat.__table__.delete().where(AnomalyStat.id.in_(ids))
+    )
+    db.engine.execute(
+        Stat.__table__.delete().where(Stat.anomalystat_key.in_(keys))
+    )
+
+
+def delete_old_func():
+    subq = db.session.query(
+        FuncStat.fid,
+        func.max(FuncStat.created_at).label('max_ts')
+    ).group_by(FuncStat.fid).subquery('t2')
+
+    ret = [[d.id, d.key_ts] for d in db.session.query(FuncStat).join(
+        subq,
+        and_(
+            FuncStat.fid == subq.c.fid,
+            FuncStat.created_at < subq.c.max_ts
+        )
+    ).all()]
+
+    ids = [q[0] for q in ret]
+    keys = list(set([q[1] for q in ret]))
+
+    db.engine.execute(
+        FuncStat.__table__.delete().where(FuncStat.id.in_(ids))
+    )
+    db.engine.execute(
+        Stat.__table__.delete().where(Stat.funcstat_key.in_(keys))
+    )
 
 
 @api.route('/anomalydata', methods=['POST'])
@@ -107,9 +152,9 @@ def new_anomalydata():
                 "stats": {               // statistics
                     // todo: "anomalystat_key": "{app}:{rank}:{ts}"
                     "count": (integer),
-                    "acc": (float),
-                    "min": (float),
-                    "max": (float),
+                    "accumulate": (float),
+                    "minimum": (float),
+                    "maximum": (float),
                     "mean": (float),
                     "stddev": (float),
                     "skewness": (float),
@@ -142,99 +187,44 @@ def new_anomalydata():
 
     """
     data = request.get_json() or {}
-    if isinstance(data, list):
-        payload = data
-        delete_old = True
-    else:
-        payload = data.get('payload', None)
-        delete_old = data.get('delete_old', True)
 
-    if not isinstance(payload, list):
-        payload = [payload]
+    ts = data.get('created_at', None)
+    if ts is None:
+        return jsonify({}), 201
 
-    _stats = []
-    _data = []
+    anomaly_head, anomaly_data, anomaly_stat = \
+        process_on_anomaly(data.get('anomaly', []), ts)
+    func_head, func_stat = process_on_func(data.get('func', []), ts)
 
-    ts = timestamp()
-    for anomalydata in payload:
-        if anomalydata is None:
-            continue
+    if len(anomaly_head):
+        db.engine.execute(AnomalyStat.__table__.insert(), anomaly_head)
 
-        _stat = {}
-        # Basic information
-        if 'key' in anomalydata:
-            key = anomalydata['key']
-            app, rank = key.split(':')
-            anomalydata['app'] = int(app)
-            anomalydata['rank'] = int(rank)
+    if len(anomaly_data):
+        db.engine.execute(AnomalyData.__table__.insert(), anomaly_data)
 
-        _stat['app'] = int(anomalydata['app'])
-        _stat['rank'] = int(anomalydata['rank'])
-        _stat['created_at'] = int(anomalydata['created_at']) \
-            if 'created_at' in anomalydata else ts
+    if len(anomaly_stat):
+        db.engine.execute(Stat.__table__.insert(), anomaly_stat)
 
-        # Statistics
-        _s = anomalydata['stats']
-        _stat['n_updates'] = int(_s['n_updates'])
-        _stat['n_anomalies'] = int(_s['n_anomalies'])
-        _stat['n_min_anomalies'] = int(_s['n_min_anomalies'])
-        _stat['n_max_anomalies'] = int(_s['n_max_anomalies'])
-        _stat['mean'] = float(_s['mean'])
-        _stat['stddev'] = float(_s['stddev'])
-        _stat['skewness'] = float(_s['skewness']
-                                 if 'skewness' in anomalydata['stats'] else 0)
-        _stat['kurtosis'] = float(_s['kurtosis']
-                                 if 'kurtosis' in anomalydata['stats'] else 0)
+    if len(func_head):
+        db.engine.execute(FuncStat.__table__.insert(), func_head)
 
-        # key for reference
-        key = '{}:{}'.format(_stat['app'], _stat['rank'])
-        _stat['key'] = anomalydata['key'] if 'key' in anomalydata else key
-        _stats.append(_stat)
+    if len(func_stat):
+        db.engine.execute(Stat.__table__.insert(), func_stat)
 
-        # data
-        for _d in anomalydata['data']:
-            if 'stat_id' not in _d:
-                _d['stat_id'] = key
-        _data.extend(anomalydata['data'])
-
-    # insert stats to AnomalyStat Table
-    if len(_stats):
-        db.engine.execute(AnomalyStat.__table__.insert(), _stats)
-
-    # insert data to AnomalyData Table
-    if len(_data):
-        db.engine.execute(AnomalyData.__table__.insert(), _data)
-
-    # delete old AnomalyStat rows
-    if delete_old:
-        subq = db.session.query(
-            AnomalyStat.app,
-            AnomalyStat.rank,
-            func.max(AnomalyStat.n_updates).label('max_n_updates')
-        ).group_by(
-            AnomalyStat.app, AnomalyStat.rank
-        ).subquery('t2')
-
-        ids = [d.id for d in db.session.query(AnomalyStat).join(
-            subq,
-            and_(
-                AnomalyStat.app == subq.c.app,
-                AnomalyStat.rank == subq.c.rank,
-                AnomalyStat.n_updates < subq.c.max_n_updates
-            )
-        ).all()]
-
-        db.engine.execute(
-            AnomalyStat.__table__.delete().where(
-                AnomalyStat.id.in_(ids)
-            )
-        )
+    # although we have defined models to enable cascased delete operation,
+    # it actually didn't work. The reason is that we do the bulk insertion
+    # to get performance and, for now, I couldn't figure out how to define
+    # backreference in the above bulk insertion. So that, we do delete
+    # Stat rows manually (but using bulk deletion)
+    delete_old_anomaly()
+    delete_old_func()
 
     # notify
-    post(url_for('events.stream', _external=True))
+    # post(url_for('events.stream', _external=True))
 
     # todo: make information output with Location
     return jsonify({}), 201
+
 
 @api.route('/anomalystats', methods=['GET'])
 def get_anomalystats():
@@ -245,20 +235,28 @@ def get_anomalystats():
                  application index is 0 and rank index is 0.
     - return 400 error if there are no available statistics
     """
+    app = request.args.get('app', default=None)
+    rank = request.args.get('rank', default=None)
+
     subq = db.session.query(
         AnomalyStat.app,
         AnomalyStat.rank,
-        func.max(AnomalyStat.n_updates).label('max_n_updates')
+        func.max(AnomalyStat.created_at).label('max_ts')
     ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
-    stats = db.session.query(AnomalyStat).join(
+    q = db.session.query(AnomalyStat).join(
         subq,
         and_(
             AnomalyStat.app == subq.c.app,
             AnomalyStat.rank == subq.c.rank,
-            AnomalyStat.n_updates == subq.c.max_n_updates
+            AnomalyStat.created_at == subq.c.max_ts
         )
-    ).all()
+    )
+
+    if app is not None and rank is not None:
+        stats = q.filter(AnomalyStat.app==int(app), AnomalyStat.rank==int(rank)).all()
+    else:
+        stats = q.all()
 
     return jsonify([st.to_dict() for st in stats])
 
@@ -267,6 +265,7 @@ def get_anomalystats():
 def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
+    limit = request.args.get('limit', default=None)
 
     stat = AnomalyStat.query.filter(
         and_(
@@ -274,12 +273,38 @@ def get_anomalydata():
             AnomalyStat.rank==int(rank)
         )
     ).order_by(
-        AnomalyStat.n_updates.desc()
+        AnomalyStat.created_at.desc()
     ).first()
 
-    data = stat.data.all()
+    if limit is None:
+        data = stat.hist.order_by(AnomalyData.step.desc()).all()
+    else:
+        data = stat.hist.order_by(AnomalyData.step.desc()).limit(limit).all()
+    data.reverse()
 
-    return jsonify({
-        'stat': stat.to_dict(),
-        'data': [d.to_dict() for d in data]
-    })
+    return jsonify([dd.to_dict() for dd in data])
+
+
+@api.route('/funcstats', methods=['GET'])
+def get_funcstats():
+    fid = request.args.get('fid', default=None)
+
+    subq = db.session.query(
+        FuncStat.fid,
+        func.max(FuncStat.created_at).label('max_ts')
+    ).group_by(FuncStat.fid).subquery('t2')
+
+    q = db.session.query(FuncStat).join(
+        subq,
+        and_(
+            FuncStat.fid == subq.c.fid,
+            FuncStat.created_at == subq.c.max_ts
+        )
+    )
+
+    if fid is None:
+        stats = q.all()
+    else:
+        stats = q.filter(FuncStat.fid == int(fid)).all()
+
+    return jsonify([st.to_dict() for st in stats])
