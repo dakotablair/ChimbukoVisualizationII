@@ -21,7 +21,7 @@ class ServerTests(unittest.TestCase):
         # it will cause error. How to smoothly resolve this problem?
         # currently, I make sure each test containing celery task
         # to be completed before calling tearDown.
-        # db.drop_all()
+        db.drop_all()
         self.ctx.pop()
 
     def get_headers(self):

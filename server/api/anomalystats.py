@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, abort
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData, FuncStat, Stat
@@ -190,7 +190,7 @@ def new_anomalydata():
 
     ts = data.get('created_at', None)
     if ts is None:
-        return jsonify({}), 201
+        abort(400)
 
     anomaly_head, anomaly_data, anomaly_stat = \
         process_on_anomaly(data.get('anomaly', []), ts)
