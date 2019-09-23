@@ -192,35 +192,38 @@ def new_anomalydata():
     if ts is None:
         abort(400)
 
-    anomaly_head, anomaly_data, anomaly_stat = \
-        process_on_anomaly(data.get('anomaly', []), ts)
-    func_head, func_stat = process_on_func(data.get('func', []), ts)
+    try:
+        anomaly_head, anomaly_data, anomaly_stat = \
+            process_on_anomaly(data.get('anomaly', []), ts)
+        func_head, func_stat = process_on_func(data.get('func', []), ts)
 
-    if len(anomaly_head):
-        db.engine.execute(AnomalyStat.__table__.insert(), anomaly_head)
+        if len(anomaly_head):
+            db.engine.execute(AnomalyStat.__table__.insert(), anomaly_head)
 
-    if len(anomaly_data):
-        db.engine.execute(AnomalyData.__table__.insert(), anomaly_data)
+        if len(anomaly_data):
+            db.engine.execute(AnomalyData.__table__.insert(), anomaly_data)
 
-    if len(anomaly_stat):
-        db.engine.execute(Stat.__table__.insert(), anomaly_stat)
+        if len(anomaly_stat):
+            db.engine.execute(Stat.__table__.insert(), anomaly_stat)
 
-    if len(func_head):
-        db.engine.execute(FuncStat.__table__.insert(), func_head)
+        if len(func_head):
+            db.engine.execute(FuncStat.__table__.insert(), func_head)
 
-    if len(func_stat):
-        db.engine.execute(Stat.__table__.insert(), func_stat)
+        if len(func_stat):
+            db.engine.execute(Stat.__table__.insert(), func_stat)
 
-    # although we have defined models to enable cascased delete operation,
-    # it actually didn't work. The reason is that we do the bulk insertion
-    # to get performance and, for now, I couldn't figure out how to define
-    # backreference in the above bulk insertion. So that, we do delete
-    # Stat rows manually (but using bulk deletion)
-    delete_old_anomaly()
-    delete_old_func()
+        # although we have defined models to enable cascased delete operation,
+        # it actually didn't work. The reason is that we do the bulk insertion
+        # to get performance and, for now, I couldn't figure out how to define
+        # backreference in the above bulk insertion. So that, we do delete
+        # Stat rows manually (but using bulk deletion)
+        delete_old_anomaly()
+        delete_old_func()
+    except Exception as e:
+        print(e)
 
     # notify
-    post(url_for('events.stream', _external=True))
+    # post(url_for('events.stream', _external=True))
 
     # todo: make information output with Location
     return jsonify({}), 201
