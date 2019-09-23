@@ -51,17 +51,17 @@ def new_executions():
         ]
     }
     """
-    data = request.get_json() or {}
-
-    exec = data.get('exec', [])
-    comm = data.get('comm', [])
-
     try:
-        if len(exec):
-            db.engine.execute(ExecData.__table__.insert(), exec)
+        data = request.get_json() or {}
 
-        if len(comm):
-            db.engine.execute(CommData.__table__.insert(), comm)
+        execdata = data.get('exec', [])
+        commdata = data.get('comm', [])
+
+        if len(execdata):
+            db.engine.execute(ExecData.__table__.insert(), execdata)
+
+        if len(commdata):
+            db.engine.execute(CommData.__table__.insert(), commdata)
     except Exception as e:
         print(e)
 
