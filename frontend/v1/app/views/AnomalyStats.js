@@ -63,7 +63,8 @@ class AnomalyStats extends React.Component
         const {height, stats, classes} = this.props;
 
         const statKinds = [
-            "min", "max", "mean", "stddev", "kurtosis", "skewness"
+            "min", "max", "mean", "stddev", "kurtosis", "skewness",
+            "updates", "accumulate"
         ];
 
         const {statKind, nQueries, data} = stats;

@@ -56,11 +56,14 @@ def new_executions():
     exec = data.get('exec', [])
     comm = data.get('comm', [])
 
-    if len(exec):
-        db.engine.execute(ExecData.__table__.insert(), exec)
+    try:
+        if len(exec):
+            db.engine.execute(ExecData.__table__.insert(), exec)
 
-    if len(comm):
-        db.engine.execute(CommData.__table__.insert(), comm)
+        if len(comm):
+            db.engine.execute(CommData.__table__.insert(), comm)
+    except Exception as e:
+        print(e)
 
     return jsonify({}), 201
 

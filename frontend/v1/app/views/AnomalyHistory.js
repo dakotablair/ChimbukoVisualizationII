@@ -96,7 +96,7 @@ class AnomalyHistory extends React.Component
                     if (q[datasetIndex]) {
                         dataset.data.push({
                             x: Date.now(),
-                            y: q[datasetIndex].n_anomaly,
+                            y: q[datasetIndex].n_anomalies,
                             ...q[datasetIndex]
                         });
                     }
