@@ -223,7 +223,7 @@ def new_anomalydata():
         print(e)
 
     # notify
-    # post(url_for('events.stream', _external=True))
+    post(url_for('events.stream', _external=True))
 
     # todo: make information output with Location
     return jsonify({}), 201
