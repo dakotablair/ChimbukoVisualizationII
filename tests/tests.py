@@ -191,3 +191,149 @@ class ServerTests(unittest.TestCase):
                         self.assertEqual(r[k][k1], v1)
                 else:
                     self.assertEqual(r[k], v)
+
+    def test_execdata(self):
+        import time
+        r, s, h = self.get('/api/executions')
+        self.assertEqual(s, 400)
+
+        r, s, h = self.get('/api/executions?min_ts=0')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 0)
+
+        # post execution only
+        exec_payload = {
+            'exec': [
+                {
+                    'key': 'exec 0',
+                    'name': 'func 0',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 0,
+                    'exit': 100,
+                    'runtime': 100,
+                    'exclusive': 30,
+                    'label': 1,
+                    'parent': 'root',
+                    'n_children': 1,
+                    'n_messages': 0
+                },
+                {
+                    'key': 'exec 1',
+                    'name': 'func 1',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 10,
+                    'exit': 80,
+                    'runtime': 70,
+                    'exclusive': 50,
+                    'label': 1,
+                    'parent': 'exec 0',
+                    'n_children': 1,
+                    'n_messages': 2
+                },
+                {
+                    'key': 'exec 2',
+                    'name': 'func 2',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 30,
+                    'exit':  50,
+                    'runtime': 20,
+                    'exclusive': 20,
+                    'label': -1,
+                    'parent': 'exec 1',
+                    'n_children': 0,
+                    'n_messages': 4
+                }
+            ]
+        }
+        r, s, h = self.post('/api/executions', exec_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
+
+        # check
+        r, s, h = self.get('/api/executions?min_ts=10&max_ts=80')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 2)
+        for i, ex in enumerate(exec_payload['exec'][1:]):
+            for k, v in ex.items():
+                self.assertEqual(r[i][k], v)
+
+        # post communication only
+        comm_payload = {
+            'comm': [
+                {
+                    "execdata_key": "exec 1",
+                    "type": "SEND",
+                    "src": 0,
+                    "tar": 1,
+                    "size": 100,
+                    "tag": 20,
+                    "timestamp": 15
+                },
+                {
+                    "execdata_key": "exec 1",
+                    "type": "RECV",
+                    "src": 1,
+                    "tar": 0,
+                    "size": 100,
+                    "tag": 20,
+                    "timestamp": 60
+                },
+                {
+                    "execdata_key": "exec 2",
+                    "type": "SEND",
+                    "src": 2,
+                    "tar": 3,
+                    "size": 200,
+                    "tag": 40,
+                    "timestamp": 35
+                },
+                {
+                    "execdata_key": "exec 2",
+                    "type": "RECV",
+                    "src": 3,
+                    "tar": 2,
+                    "size": 50,
+                    "tag": 40,
+                    "timestamp": 45
+                }
+            ]
+        }
+        r, s, h = self.post('/api/executions', comm_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
+
+        # check
+        r, s, h = self.get('/api/executions?min_ts=10&max_ts=80&with_comm=1')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 2)
+        check_comm = []
+        for ex in r:
+            check_comm += ex['comm']
+        self.assertEqual(len(check_comm), 4)
+        for i, comm in enumerate(comm_payload['comm']):
+            for k, v, in comm.items():
+                self.assertEqual(check_comm[i][k], v)
+
+        # check
+        exec_payload.update(comm_payload)
+        r, s, h = self.get('/api/executions?min_ts=-1&with_comm=1')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 3)
+        for i, ex in enumerate(exec_payload['exec']):
+            for k, v in ex.items():
+                if isinstance(v, dict):
+                    self.assertEqual(k, 'comm')
+                    for k2, v2 in v.items():
+                        self.assertEqual(r[i][k][k2], v)
+                else:
+                    self.assertEqual(r[i][k], v)
+
