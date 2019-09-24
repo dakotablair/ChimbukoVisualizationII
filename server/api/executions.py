@@ -57,18 +57,23 @@ def new_executions():
         execdata = data.get('exec', [])
         commdata = data.get('comm', [])
 
+        # print("New executions: {}, {}".format(
+        #     len(execdata), len(commdata)
+        # ))
+
         if len(execdata):
             db.engine.execute(ExecData.__table__.insert(), execdata)
 
         if len(commdata):
             db.engine.execute(CommData.__table__.insert(), commdata)
     except Exception as e:
-        print(e)
+        print("Exception on /executions POST: ", e)
+        pass
 
     return jsonify({}), 201
 
 
-@api.route('/executions', methods=['GET'])
+@api.route('/get_executions', methods=['GET'])
 def get_executions():
     """
     Return a list of execution data within a given time range

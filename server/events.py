@@ -125,6 +125,8 @@ def push_anomaly_stats():
                 'data': [top_dataset, bottom_dataset]
             })
 
+        # return jsonify({}), 201
+
 
 @events.route('/stream_stats', methods=['POST'])
 def stream():

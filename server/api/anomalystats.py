@@ -229,7 +229,7 @@ def new_anomalydata():
     return jsonify({}), 201
 
 
-@api.route('/anomalystats', methods=['GET'])
+@api.route('/get_anomalystats', methods=['GET'])
 def get_anomalystats():
     """
     Return anomaly stat specified by app and rank index
@@ -264,7 +264,7 @@ def get_anomalystats():
     return jsonify([st.to_dict() for st in stats])
 
 
-@api.route('/anomalydata', methods=['GET'])
+@api.route('/get_anomalydata', methods=['GET'])
 def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
@@ -288,7 +288,7 @@ def get_anomalydata():
     return jsonify([dd.to_dict() for dd in data])
 
 
-@api.route('/funcstats', methods=['GET'])
+@api.route('/get_funcstats', methods=['GET'])
 def get_funcstats():
     fid = request.args.get('fid', default=None)
 
