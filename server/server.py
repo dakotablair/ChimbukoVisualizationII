@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, render_template, Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
-from . import socketio, celery
+from . import socketio, celery as mycelery
+from .utils import url_for
 
 main = Blueprint('main', __name__)
 
@@ -21,7 +22,44 @@ def before_request():
 
 @main.route('/stop')
 def stop():
-    celery.control.broadcast('shutdown')
+    import time
+    def get_inspect():
+        from requests import get
+        resp = get(url_for('tasks.get_info', _external=True))
+        info = resp.json()
+        return info
+
+    max_tries = 1000
+    n_try = 0
+    n_tasks = 0
+    while n_try < max_tries:
+        inspect = get_inspect()
+
+        n_tasks = 0
+
+        # no running celery workers
+        if inspect.get('stats') is None:
+            break
+
+        active = inspect.get('active')
+        if active is not None and isinstance(active, dict):
+            n_tasks += sum([ len(v) for _, v in active.items()])
+
+        scheduled = inspect.get('scheduled')
+        if scheduled is not None and isinstance(scheduled, dict):
+            n_tasks += sum([ len(v) for _, v in scheduled.items()])
+
+        if n_tasks == 0:
+            break
+
+        print('remained celery tasks: ', n_tasks)
+        n_try += 1
+        time.sleep(10)
+
+    print('Before shutdown celery workers...')
+    print('remained celery tasks: ', n_tasks)
+
+    mycelery.control.broadcast('shutdown')
     socketio.stop()
     "Shutting down SocketIO web server!"
 
