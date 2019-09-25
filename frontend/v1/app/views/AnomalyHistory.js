@@ -131,7 +131,7 @@ class AnomalyHistory extends React.Component
                         xAxes: [{
                             type: 'realtime',
                             realtime: {
-                                duration: 20000,
+                                duration: 60000,
                                 refresh: 1000,
                                 delay: 1000,
                                 onRefresh: this.onChartRefresh
@@ -162,6 +162,10 @@ class AnomalyHistory extends React.Component
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return false;
+    }
+
     handleSwitch = name => ev => {
         this.setState({...this.state, [name]: event.target.checked});
     }
@@ -172,15 +176,23 @@ class AnomalyHistory extends React.Component
             if (activePoint.length > 0) {
               const datasetIndex = activePoint[0]._datasetIndex;
               const index = activePoint[0]._index;
-              const label = this.chart.data.datasets[datasetIndex].label;
+              // const label = this.chart.data.datasets[datasetIndex].label;
               const item = this.chart.data.datasets[datasetIndex].data[index];
-              console.log("clicked: ", label, item);
+
+              const pid = item.anomalystat_key.split(":")[0];
+              const rid = item.anomalystat_key.split(":")[1];
+              const min_timestamp = item.min_timestamp;
+              const max_timestamp = item.max_timestamp;
+              console.log("clicked: ", pid, rid, min_timestamp, max_timestamp);
+              if (this.props.onBarClick)
+                this.props.onBarClick(pid, rid, min_timestamp, max_timestamp);
             }            
         }
     }
 
     render() {
         const { classes } = this.props;
+        console.log('render AnomalyHistory view');
 
         return (
             <div className={classes.root}>
@@ -214,14 +226,69 @@ class AnomalyHistory extends React.Component
 AnomalyHistory.defaultProps = {
     height: 100,
     ranks: {},
-    onLegendClick: (_) => {}
+    onLegendClick: (_) => {},
+    onBarClick: (pid, rid, min_ts, max_ts) => {}
 };
 
 AnomalyHistory.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number.isRequired,
     ranks: PropTypes.object,
-    onLegendClick: PropTypes.func
+    onLegendClick: PropTypes.func,
+    onBarClick: PropTypes.func,
 };
 
 export default withStyles(useStyles)(AnomalyHistory);
+
+
+// $('#myChart').click(function (e) {
+//     var helpers = Chart.helpers;
+
+//     var eventPosition = helpers.getRelativePosition(e, myRadarChart.chart);
+//     var mouseX = eventPosition.x;
+//     var mouseY = eventPosition.y;
+
+//     var activePoints = [];
+//     helpers.each(myRadarChart.scale.ticks, function (label, index) {
+//         for (var i = this.getValueCount() - 1; i >= 0; i--) {
+//             var pointLabelPosition = this.getPointPosition(i, this.getDistanceFromCenterForValue(this.options.reverse ? this.min : this.max) + 5);
+
+//             var pointLabelFontSize = helpers.getValueOrDefault(this.options.pointLabels.fontSize, Chart.defaults.global.defaultFontSize);
+//             var pointLabeFontStyle = helpers.getValueOrDefault(this.options.pointLabels.fontStyle, Chart.defaults.global.defaultFontStyle);
+//             var pointLabeFontFamily = helpers.getValueOrDefault(this.options.pointLabels.fontFamily, Chart.defaults.global.defaultFontFamily);
+//             var pointLabeFont = helpers.fontString(pointLabelFontSize, pointLabeFontStyle, pointLabeFontFamily);
+//             ctx.font = pointLabeFont;
+
+//             var labelsCount = this.pointLabels.length,
+//                 halfLabelsCount = this.pointLabels.length / 2,
+//                 quarterLabelsCount = halfLabelsCount / 2,
+//                 upperHalf = (i < quarterLabelsCount || i > labelsCount - quarterLabelsCount),
+//                 exactQuarter = (i === quarterLabelsCount || i === labelsCount - quarterLabelsCount);
+//             var width = ctx.measureText(this.pointLabels[i]).width;
+//             var height = pointLabelFontSize;
+
+//             var x, y;
+
+//             if (i === 0 || i === halfLabelsCount)
+//                 x = pointLabelPosition.x - width / 2;
+//             else if (i < halfLabelsCount)
+//                 x = pointLabelPosition.x;
+//             else
+//                 x = pointLabelPosition.x - width;
+
+//             if (exactQuarter)
+//                 y = pointLabelPosition.y - height / 2;
+//             else if (upperHalf)
+//                 y = pointLabelPosition.y - height;
+//             else
+//                 y = pointLabelPosition.y
+            
+//             if ((mouseY >= y && mouseY <= y + height) && (mouseX >= x && mouseX <= x + width))
+//                 activePoints.push({ index: i, label: this.pointLabels[i] });
+//         }
+//     }, myRadarChart.scale);
+    
+//     var firstPoint = activePoints[0];
+//     if (firstPoint !== undefined) {
+//         alert(firstPoint.index + ': ' + firstPoint.label);
+//     }

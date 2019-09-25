@@ -6,7 +6,18 @@ const INIT_STATE = {
     stats_colors: {},
 
     // anomaly history
-    watched_ranks: {}
+    watched_ranks: {},
+
+    // execution data 
+    // - descending order on entry time
+    func_colors: {},
+    execdata_config: {
+        pid: -1,
+        rid: -1,
+        min_timestamp: -1,
+        max_timestamp: -1
+    },
+    execdata: []
 };
 
 const getRandomColor = () => {
@@ -46,6 +57,16 @@ const set_stats = (state, newStats) => {
     return {...state, stats: newStats, stats_colors: stats_colors};
 };
 
+const set_execdata = (state, newData) => {
+    const { func_colors:colors } = state;
+    newData.forEach(d => {
+        if (!colors.hasOwnProperty(d.fid)) {
+            colors[d.fid] = getRandomColor();
+        }
+    });
+    return {...state, execdata: newData, func_colors: colors};
+}
+
 const set_rank = (state, rank) => {
     const { watched_ranks: ranks } = state;
     if (!ranks.hasOwnProperty(rank))
@@ -82,6 +103,9 @@ function dataReducers(state = INIT_STATE, action)
 
         case "UNSET_WATCHED_RANK":
             return unset_rank(state, payload);
+
+        case "SET_EXECUTION_DATA":
+            return set_execdata(state, payload);
 
         case "REJECTED":
             console.log(payload)

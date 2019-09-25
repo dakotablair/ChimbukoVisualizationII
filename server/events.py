@@ -1,10 +1,9 @@
-from flask import g, session, Blueprint, current_app, request, jsonify
+from flask import g, session, Blueprint, current_app, request, jsonify, abort
 
 from . import db, socketio, celery
-from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, Stat
+from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, Stat, ExecData
 
 from sqlalchemy import func, and_
-import uuid
 
 events = Blueprint('events', __name__)
 
@@ -77,7 +76,7 @@ def push_anomaly_stats():
         ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
         # top 'nQueries' statistics
-        top_stats = db.session.query(AnomalyStat).join(
+        stats = db.session.query(AnomalyStat).join(
             subq,
             and_(
                 AnomalyStat.app == subq.c.app,
@@ -86,21 +85,18 @@ def push_anomaly_stats():
             )
         ).join(
             AnomalyStat.stat, aliased=True
-        ).order_by(col.desc()).limit(nQueries).all()
-        top_stats = [st.to_dict() for st in top_stats]
+        ).order_by(col.desc()).all()
 
-        # bottom 'nQueries' statistics
-        bottom_stats = db.session.query(AnomalyStat).join(
-            subq,
-            and_(
-                AnomalyStat.app == subq.c.app,
-                AnomalyStat.rank == subq.c.rank,
-                AnomalyStat.created_at == subq.c.max_ts
-            )
-        ).join(
-            AnomalyStat.stat, aliased=True
-        ).order_by(col.asc()).limit(nQueries).all()
-        bottom_stats = [st.to_dict() for st in bottom_stats]
+        # WARNING: (race-condition), it is possible that we actually get
+        # not the latest AnomalyStat. In addition, the corresponding
+        # statistics are not available. Need to hadle this situation!
+
+        top_stats = []
+        bottom_stats = []
+        if stats is not None and len(stats):
+            nQueries = min(nQueries, len(stats))
+            top_stats = [st.to_dict() for st in stats[:nQueries]]
+            bottom_stats = [st.to_dict() for st in stats[-nQueries:]]
 
         # ---------------------------------------------------
         # processing data for the front-end
@@ -178,6 +174,65 @@ def get_history():
         payload.append(data.to_dict())
 
     return jsonify(payload)
+
+
+@celery.task
+def push_execution(pid, rid, min_ts, max_ts, order, with_comm):
+    from .wsgi_aux import app
+    with app.app_context():
+        min_ts = int(min_ts)
+        execdata = ExecData.query.filter(ExecData.entry >= min_ts)
+        if max_ts is not None:
+            max_ts = int(max_ts)
+            execdata = execdata.filter(ExecData.exit <= max_ts)
+
+        if pid is not None:
+            pid = int(pid)
+            execdata = execdata.filter(ExecData.pid == pid)
+
+        if rid is not None:
+            rid = int(rid)
+            execdata = execdata.filter(ExecData.rid == rid)
+
+        if order == 'asc':
+            execdata = execdata.order_by(ExecData.entry.asc())
+        else:
+            execdata = execdata.order_by(ExecData.entry.desc())
+
+        execdata = [d.to_dict(int(with_comm)) for d in execdata.all()]
+        if len(execdata):
+            push_data({
+                'type': 'execution',
+                'data': execdata
+            })
+
+
+@events.route('/query_executions', methods=['GET'])
+def get_execution():
+    """
+    Return a list of execution data within a given time range
+    - required:
+        min_ts: minimum timestamp
+    - options
+        max_ts: maximum timestamp
+        order: [(asc) | desc]
+        with_comm: 1 or (0)
+        pid: program index, default None
+        rid: rank index, default None
+    """
+    min_ts = request.args.get('min_ts', None)
+    if min_ts is None:
+        abort(400)
+
+    # parse options
+    max_ts = request.args.get('max_ts', None)
+    order = request.args.get('order', 'asc')
+    with_comm = request.args.get('with_comm', 0)
+    pid = request.args.get('pid', None)
+    rid = request.args.get('rid', None)
+
+    push_execution.delay(pid, rid, min_ts, max_ts, order, with_comm)
+    return jsonify({}), 200
 
 
 @socketio.on('query_stats', namespace='/events')

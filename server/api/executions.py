@@ -83,6 +83,8 @@ def get_executions():
         max_ts: maximum timestamp
         order: [(asc) | desc]
         with_comm: 1 or (0)
+        pid: program index, default None
+        rid: rank index, default None
     """
     min_ts = request.args.get('min_ts', None)
     if min_ts is None:
@@ -92,10 +94,18 @@ def get_executions():
     max_ts = request.args.get('max_ts', None)
     order = request.args.get('order', 'asc')
     with_comm = request.args.get('with_comm', 0)
+    pid = request.args.get('pid', None)
+    rid = request.args.get('rid', None)
 
     execdata = ExecData.query.filter(ExecData.entry >= min_ts)
     if max_ts is not None:
         execdata = execdata.filter(ExecData.exit <= max_ts)
+
+    if pid is not None:
+        execdata = execdata.filter(ExecData.pid == pid)
+
+    if rid is not None:
+        execdata = execdata.filter(ExecData.rid == rid)
 
     if order == 'asc':
         execdata = execdata.order_by(ExecData.entry.asc())

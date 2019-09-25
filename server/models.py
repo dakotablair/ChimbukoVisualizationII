@@ -206,7 +206,7 @@ class ExecData(Base):
         single_parent=True,
         backref=backref('exec', cascade="all"))
 
-    def to_dict(self, with_comm=False):
+    def to_dict(self, with_comm=0):
         d = super().to_dict()
         d.update({
             'pid': self.pid,
@@ -223,7 +223,7 @@ class ExecData(Base):
             'n_children': self.n_children,
             'n_messages': self.n_messages
         })
-        if with_comm:
+        if int(with_comm) > 0:
             d.update({
                 'comm': [c.to_dict() for c in self.comm.all()]
             })
