@@ -92,6 +92,7 @@ def push_anomaly_stats():
         # not the latest AnomalyStat. In addition, the corresponding
         # statistics are not available. Need to hadle this situation!
 
+        # maybe better to query separately in to_dict() function.
         top_stats = []
         bottom_stats = []
         if stats is not None and len(stats):
@@ -126,8 +127,83 @@ def push_anomaly_stats():
 
 
 @events.route('/stream_stats', methods=['POST'])
-def stream():
+def stream_db():
     push_anomaly_stats.apply_async()
+    return jsonify({}), 200
+
+
+@events.route('/stream_stats', methods=['POST'])
+def stream():
+    # need to trim code
+    head = request.args.get('head', [])
+    stat = request.args.get('stat', [])
+
+    for h, s in zip(head, stat):
+        h.update({'stats': s})
+
+    # get query condition from database
+    q = AnomalyStatQuery.query. \
+        order_by(AnomalyStatQuery.created_at.desc()).first()
+    if q is None:
+        q = AnomalyStatQuery.create({'nQueries': 5, 'statKind': 'stddev'})
+        db.session.add(q)
+        db.session.commit()
+
+    # query arguments
+    nQueries = q.nQueries
+    statKind = q.statKind
+
+    # query column
+    key = 'stddev'
+    if statKind == 'updates':
+        key = 'count'
+    elif statKind == 'min':
+        key = 'minimum'
+    elif statKind == 'max':
+        key = 'maximum'
+    elif statKind == 'mean':
+        key = 'mean'
+    elif statKind == 'skewness':
+        key = 'skewness'
+    elif statKind == 'kurtosis':
+        key = 'kurtosis'
+    elif statKind == 'accumulate':
+        key = 'accumulate'
+    else:
+        statKind = 'stddev'
+
+    head.sort(key=lambda d: d[key], reserve=True)
+
+    top_stats = []
+    bottom_stats = []
+    if head is not None and len(head):
+        nQueries = min(nQueries, len(head))
+        top_stats = head[:nQueries]
+        bottom_stats = head[-head:]
+
+    # ---------------------------------------------------
+    # processing data for the front-end
+    # --------------------------------------------------
+    if len(top_stats) and len(bottom_stats):
+        top_dataset = {
+            'name': 'TOP',
+            'value': [st['stats'][key] for st in top_stats],
+            'rank': [st['rank'] for st in top_stats]
+        }
+        bottom_dataset = {
+            'name': 'BOTTOM',
+            'value': [st['stats'][key] for st in bottom_stats],
+            'rank': [st['rank'] for st in bottom_stats]
+        }
+
+        # broadcast the statistics to all clients
+        push_data({
+            'type': 'stats',
+            'nQueries': nQueries,
+            'statKind': statKind,
+            'data': [top_dataset, bottom_dataset]
+        })
+
     return jsonify({}), 200
 
 

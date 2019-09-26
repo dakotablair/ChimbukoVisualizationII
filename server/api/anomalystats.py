@@ -217,13 +217,20 @@ def new_anomalydata():
         # to get performance and, for now, I couldn't figure out how to define
         # backreference in the above bulk insertion. So that, we do delete
         # Stat rows manually (but using bulk deletion)
+
+        # currently this is error prone!!!
+
         #delete_old_anomaly()
         #delete_old_func()
     except Exception as e:
         print(e)
+        anomaly_head = []
+        anomaly_stat = []
 
     # notify
-    post(url_for('events.stream', _external=True))
+    if len(anomaly_head) and len(anomaly_stat):
+        post(url_for('events.stream', _external=True),
+             json={'head': anomaly_head, 'stat': anomaly_stat})
 
     # todo: make information output with Location
     return jsonify({}), 201
