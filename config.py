@@ -16,6 +16,7 @@ class Config(object):
         'SOCKETIO_MESSAGE_QUEUE',
         os.environ.get('CELERY_BROKER_URL', 'redis://')
     )
+    EXECUTION_PATH = os.environ.get('EXECUTION_PATH', None)
 
 
 class DevelopmentConfig(Config):

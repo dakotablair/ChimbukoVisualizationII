@@ -14,6 +14,7 @@ const INIT_STATE = {
     execdata_config: {
         pid: -1,
         rid: -1,
+        step: -1,
         min_timestamp: -1,
         max_timestamp: -1
     },

@@ -95,15 +95,15 @@ class ChimbukoApp extends React.Component {
             this.props.unset_watched_rank(rank);
     }
 
-    handleExecutionRequest = (pid, rid, min_timestamp, max_timestamp) => {
+    handleExecutionRequest = (pid, rid, step, min_timestamp, max_timestamp) => {
         const { execdata_config:config } = this.props;
-        const newConfig = {pid, rid, min_timestamp, max_timestamp};
+        const newConfig = {pid, rid, step, min_timestamp, max_timestamp};
         const is_same = Object.keys(config).map(key => {
             return config[key] === newConfig[key];
         }).every(v => v);
 
         if (!is_same && this.props.get_execution)
-            this.props.get_execution(pid, rid, min_timestamp, max_timestamp);
+            this.props.get_execution(pid, rid, step, min_timestamp, max_timestamp);
     }
 
     render() {

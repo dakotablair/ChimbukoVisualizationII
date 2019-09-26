@@ -217,8 +217,8 @@ def new_anomalydata():
         # to get performance and, for now, I couldn't figure out how to define
         # backreference in the above bulk insertion. So that, we do delete
         # Stat rows manually (but using bulk deletion)
-        delete_old_anomaly()
-        delete_old_func()
+        #delete_old_anomaly()
+        #delete_old_func()
     except Exception as e:
         print(e)
 

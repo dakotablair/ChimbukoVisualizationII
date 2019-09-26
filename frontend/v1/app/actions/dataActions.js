@@ -28,12 +28,12 @@ export function unset_watched_rank(rank) {
     };
 }
 
-export function get_execution(pid, rid, min_timestamp, max_timestamp) {
+export function get_execution(pid, rid, step, min_timestamp, max_timestamp) {
     return dispatch => {
-        const arg1 = `pid=${pid}&rid=${rid}`;
+        const arg1 = `pid=${pid}&rid=${rid}&step=${step}`;
         const arg2 = `min_ts=${min_timestamp}&max_ts=${max_timestamp}`;
         const arg3 = `order=desc&with_comm=0`;
-        const url = `/events/query_executions?${arg1}&${arg2}&${arg3}`;
+        const url = `/events/query_executions_file?${arg1}&${arg2}&${arg3}`;
         axios.get(url)
             .then(resp => {
                 dispatch({
