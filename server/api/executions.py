@@ -1,5 +1,5 @@
-from flask import request, abort, jsonify
-
+from flask import request, abort, jsonify, json, current_app
+import os
 from .. import db
 from ..tasks import make_async
 from ..models import ExecData, CommData
@@ -54,18 +54,35 @@ def new_executions():
     try:
         data = request.get_json() or {}
 
-        execdata = data.get('exec', [])
-        commdata = data.get('comm', [])
+        # execdata = data.get('exec', [])
+        # commdata = data.get('comm', [])
+        app = data.get('app', None)
+        rank = data.get('rank', None)
+        step = data.get('step', None)
+        path = current_app.config.get('EXECUTION_PATH', None)
 
-        # print("New executions: {}, {}".format(
-        #     len(execdata), len(commdata)
-        # ))
+        if all(v is not None for v in [app, rank, step, path]):
+            path = os.path.join(
+                path,
+                '{}'.format(app),
+                '{}'.format(rank)
+            )
+            if not os.path.exists(path):
+                os.makedirs(path)
 
-        if len(execdata):
-            db.engine.execute(ExecData.__table__.insert(), execdata)
+            with open(os.path.join(path, '{}.json'.format(step)), 'w') as f:
+                json.dump(data, f)
 
-        if len(commdata):
-            db.engine.execute(CommData.__table__.insert(), commdata)
+            # with open(os.path.join(path, 'comm-{}.json'.format(step)), 'w') as f:
+            #     json.dump(commdata, f)
+
+
+        # if len(execdata):
+        #     db.engine.execute(ExecData.__table__.insert(), execdata)
+
+        # if len(commdata):
+        #     db.engine.execute(CommData.__table__.insert(), commdata)
+
     except Exception as e:
         print("Exception on /executions POST: ", e)
         pass

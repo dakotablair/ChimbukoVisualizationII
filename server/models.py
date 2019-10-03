@@ -1,9 +1,10 @@
+import os
 from flask import abort
 from . import db
 from .utils import timestamp
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import backref
-
+import pickle
 
 class AnomalyStatQuery(db.Model):
     __tablename__ = 'anomalystatquery'
@@ -11,6 +12,7 @@ class AnomalyStatQuery(db.Model):
 
     nQueries = db.Column(db.Integer, default=0)
     statKind = db.Column(db.String(), default='stddev')
+    ranks = db.Column(db.PickleType, nullable=False)
 
     created_at = db.Column(db.Integer, index=True, default=timestamp)
 
@@ -25,7 +27,10 @@ class AnomalyStatQuery(db.Model):
         """Import from a dictionary"""
         for field in data.keys():
             try:
-                setattr(self, field, data[field])
+                v = data[field]
+                if isinstance(v, list) or isinstance(v, dict):
+                    v = pickle.dumps(v)
+                setattr(self, field, v)
             except KeyError:
                 if not partial_update:
                     abort(400)
@@ -36,7 +41,8 @@ class AnomalyStatQuery(db.Model):
             'id': self.id,
             'nQueries': self.nQueries,
             'statKind': self.statKind,
-            'crreated_at': self.created_at
+            'ranks': pickle.loads(self.ranks),
+            'created_at': self.created_at
         }
 
 
@@ -60,36 +66,8 @@ class Base(db.Model):
         }
 
 
-class FuncStat(Base):
-    __tablename__ = 'funcstat'
-    fid = db.Column(db.Integer)
-    name = db.Column(db.String())
-
-    # statistics
-    # - anomaly, inclusive, exclusive
-    # - one-to-many, cascaded delete, delete-orphan
-    stats = db.relationship(
-        'Stat', lazy='dynamic',
-        cascade='all,delete-orphan',
-        single_parent=True,
-        backref=backref('func', cascade="all"))
-
-    def to_dict(self):
-        d = super().to_dict()
-
-        stats = {}
-        for st in self.stats.all():
-            stats[st.kind] = st.to_dict()
-
-        d.update({
-            'fid': self.fid,
-            'name': self.name,
-            **stats
-        })
-        return d
-
-
 class AnomalyStat(Base):
+    __bind_key__ = 'anomaly_stats'
     __tablename__ = 'anomalystat'
 
     # application & rank id's
@@ -97,52 +75,20 @@ class AnomalyStat(Base):
     rank = db.Column(db.Integer, default=0)  # rank id
 
     # statistics
-    # - anomaly
-    # - one-to-one, cascaded delete, delete-orphan
-    stat = db.relationship(
-        'Stat',
-        cascade='all,delete-orphan',
-        single_parent=True,
-        uselist=False,
-        backref=backref('anomaly', cascade="all,delete")
-    )
-
-    # anomaly data for history view
-    # - anomaly data history
-    # - one-to-many, no cascaded operation
-    hist = db.relationship('AnomalyData', lazy='dynamic', backref='owner')
+    count = db.Column(db.Integer, default=0)
+    accumulate = db.Column(db.Float, default=0)
+    minimum = db.Column(db.Float, default=0)
+    maximum = db.Column(db.Float, default=0)
+    mean = db.Column(db.Float, default=0)
+    stddev = db.Column(db.Float, default=0)
+    skewness = db.Column(db.Float, default=0)
+    kurtosis = db.Column(db.Float, default=0)
 
     def to_dict(self):
         d = super().to_dict()
-
         d.update({
             'app': self.app,
             'rank': self.rank,
-            'stats': self.stat.to_dict()
-        })
-        return d
-
-
-class Stat(Base):
-    __tablename__ = 'stat'
-    funcstat_key = db.Column(db.String(), db.ForeignKey('funcstat.key_ts'), nullable=True)
-    anomalystat_key = db.Column(db.String(), db.ForeignKey('anomalystat.key_ts'), nullable=True)
-
-    kind = db.Column(db.String(), default='anomaly')
-
-    count = db.Column(db.Integer, default=0)
-    accumulate = db.Column(db.Integer, default=0)
-    minimum = db.Column(db.Integer, default=0)
-    maximum = db.Column(db.Integer, default=0)
-    mean = db.Column(db.Integer, default=0)
-    stddev = db.Column(db.Integer, default=0)
-    skewness = db.Column(db.Integer, default=0)
-    kurtosis = db.Column(db.Integer, default=0)
-
-    def to_dict(self):
-        d = super().to_dict()
-        d.update({
-            'kind': self.kind,
             'count': self.count,
             'accumulate': self.accumulate,
             'minimum': self.minimum,
@@ -156,8 +102,12 @@ class Stat(Base):
 
 
 class AnomalyData(Base):
+    __bind_key__ = 'anomaly_data'
     __tablename__ = 'anomalydata'
-    anomalystat_key = db.Column(db.String(), db.ForeignKey('anomalystat.key'))
+
+    # application & rank id's
+    app = db.Column(db.Integer, default=0)  # application id
+    rank = db.Column(db.Integer, default=0)  # rank id
 
     # step & the number of detected anomalies
     n_anomalies = db.Column(db.Integer, default=0)
@@ -168,11 +118,87 @@ class AnomalyData(Base):
     def to_dict(self):
         d = super().to_dict()
         d.update({
-            'anomalystat_key': self.anomalystat_key,
+            'app': self.app,
+            'rank': self.rank,
             'n_anomalies': self.n_anomalies,
             'step': self.step,
             'min_timestamp': self.min_timestamp,
             'max_timestamp': self.max_timestamp
+        })
+        return d
+
+
+class FuncStat(Base):
+    __bind_key__ = 'func_stats'
+    __tablename__ = 'funcstat'
+    fid = db.Column(db.Integer)
+    name = db.Column(db.String())
+
+    # anomaly statistics
+    a_count = db.Column(db.Integer, default=0)
+    a_accumulate = db.Column(db.Float, default=0)
+    a_minimum = db.Column(db.Float, default=0)
+    a_maximum = db.Column(db.Float, default=0)
+    a_mean = db.Column(db.Float, default=0)
+    a_stddev = db.Column(db.Float, default=0)
+    a_skewness = db.Column(db.Float, default=0)
+    a_kurtosis = db.Column(db.Float, default=0)
+
+    # inclusive runtime statistics
+    i_count = db.Column(db.Integer, default=0)
+    i_accumulate = db.Column(db.Float, default=0)
+    i_minimum = db.Column(db.Float, default=0)
+    i_maximum = db.Column(db.Float, default=0)
+    i_mean = db.Column(db.Float, default=0)
+    i_stddev = db.Column(db.Float, default=0)
+    i_skewness = db.Column(db.Float, default=0)
+    i_kurtosis = db.Column(db.Float, default=0)
+
+    # exclusive runtime statistics
+    e_count = db.Column(db.Integer, default=0)
+    e_accumulate = db.Column(db.Float, default=0)
+    e_minimum = db.Column(db.Float, default=0)
+    e_maximum = db.Column(db.Float, default=0)
+    e_mean = db.Column(db.Float, default=0)
+    e_stddev = db.Column(db.Float, default=0)
+    e_skewness = db.Column(db.Float, default=0)
+    e_kurtosis = db.Column(db.Float, default=0)
+
+    def to_dict(self):
+        d = super().to_dict()
+        d.update({
+            'fid': self.fid,
+            'name': self.name,
+            'stats': {
+                'count': self.a_count,
+                'accumulate': self.a_accumulate,
+                'minimum': self.a_minimum,
+                'maximum': self.a_maximum,
+                'mean': self.a_mean,
+                'stddev': self.a_stddev,
+                'skewness': self.a_skewness,
+                'kurtosis': self.a_kurtosis
+            },
+            'inclusive': {
+                'count': self.i_count,
+                'accumulate': self.i_accumulate,
+                'minimum': self.i_minimum,
+                'maximum': self.i_maximum,
+                'mean': self.i_mean,
+                'stddev': self.i_stddev,
+                'skewness': self.i_skewness,
+                'kurtosis': self.i_kurtosis
+            },
+            'exclusive': {
+                'count': self.e_count,
+                'accumulate': self.e_accumulate,
+                'minimum': self.e_minimum,
+                'maximum': self.e_maximum,
+                'mean': self.e_mean,
+                'stddev': self.e_stddev,
+                'skewness': self.e_skewness,
+                'kurtosis': self.e_kurtosis
+            }
         })
         return d
 
@@ -223,10 +249,10 @@ class ExecData(Base):
             'n_children': self.n_children,
             'n_messages': self.n_messages
         })
-        if int(with_comm) > 0:
-            d.update({
-                'comm': [c.to_dict() for c in self.comm.all()]
-            })
+        # if int(with_comm) > 0:
+        #     d.update({
+        #         'comm': [c.to_dict() for c in self.comm.all()]
+        #     })
         return d
 
 
@@ -253,3 +279,5 @@ class CommData(Base):
             'timestamp': self.timestamp
         })
         return d
+
+

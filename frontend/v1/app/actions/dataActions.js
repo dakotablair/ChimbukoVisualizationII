@@ -28,19 +28,20 @@ export function unset_watched_rank(rank) {
     };
 }
 
-export function get_execution(pid, rid, step, min_timestamp, max_timestamp) {
+export function get_execution(item) {
     return dispatch => {
-        const arg1 = `pid=${pid}&rid=${rid}&step=${step}`;
+        const {app, rank, step, min_timestamp, max_timestamp} = item;
+        const arg1 = `pid=${app}&rid=${rank}&step=${step}`;
         const arg2 = `min_ts=${min_timestamp}&max_ts=${max_timestamp}`;
         const arg3 = `order=desc&with_comm=0`;
         const url = `/events/query_executions_file?${arg1}&${arg2}&${arg3}`;
         axios.get(url)
             .then(resp => {
                 dispatch({
-                    type: "SET_VALUE",
+                    type: "SET_EXECUTION_DATA",
                     payload: {
-                        "key": "execdata_config",
-                        "value": {pid, rid, min_timestamp, max_timestamp}
+                        config: item,
+                        data: resp.data
                     }
                 });
             })
@@ -53,9 +54,3 @@ export function get_execution(pid, rid, step, min_timestamp, max_timestamp) {
     };
 }
 
-export function set_execution(data) {
-    return {
-        type: "SET_EXECUTION_DATA",
-        payload: data
-    };
-}

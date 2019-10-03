@@ -2,18 +2,23 @@ import {combineReducers} from 'redux';
 
 const INIT_STATE = {
     // anomaly statistics
-    stats: {},
-    stats_colors: {},
+    stats: {
+        statKind: 'stddev',
+        nQueries: 5
+    },
+    // stats_colors: {},
 
     // anomaly history
-    watched_ranks: {},
+    watched_ranks: [],
+    rank_colors: {},
+    history: {},
 
     // execution data 
     // - descending order on entry time
     func_colors: {},
     execdata_config: {
-        pid: -1,
-        rid: -1,
+        app: -1,
+        rank: -1,
         step: -1,
         min_timestamp: -1,
         max_timestamp: -1
@@ -37,49 +42,35 @@ const set_value = (state, payload) => {
 };
 
 const set_stats = (state, newStats) => {
-    if (!newStats.hasOwnProperty('data'))
-        return state;
-
-    const { stats_colors } = state;
-
-    newStats.data.forEach(dataset => {
-        const name = dataset.name;
-        if (dataset.hasOwnProperty('color'))
-            stats_colors[name] = {...dataset.color};
-        else if (stats_colors.hasOwnProperty(name))
-            dataset['color'] = stats_colors[name];
-        else {
-            const color = getRandomColor();
-            stats_colors[name] = color;
-            dataset['color'] = color;
-        }
-    });
-
-    return {...state, stats: newStats, stats_colors: stats_colors};
+    return {...state, stats: newStats};
 };
 
 const set_execdata = (state, newData) => {
     const { func_colors:colors } = state;
-    newData.forEach(d => {
+    const { config, data } = newData;
+    data.forEach(d => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
         }
     });
-    return {...state, execdata: newData, func_colors: colors};
+    return {...state, execdata: data, execdata_config: config, func_colors: colors};
 }
 
 const set_rank = (state, rank) => {
-    const { watched_ranks: ranks } = state;
-    if (!ranks.hasOwnProperty(rank))
-        ranks[rank] = getRandomColor();
-    return {...state, watched_ranks: {...ranks}};
+    const colors = {...state.rank_colors};
+    const ranks = [...state.watched_ranks];
+    if (!colors.hasOwnProperty(rank))
+        colors[rank] = getRandomColor();
+    ranks.push(rank);
+    return {...state, watched_ranks: ranks, rank_colors: colors};
 }
 
 const unset_rank = (state, rank) => {
-    const { watched_ranks: ranks } = state;
-    if (ranks.hasOwnProperty(rank))
-        delete ranks[rank];
-    return {...state, watched_ranks: {...ranks}};
+    const ranks = [...state.watched_ranks];
+    const idx = ranks.indexOf(rank);
+    if (idx >= 0)
+        ranks.splice(idx, 1);
+    return {...state, watched_ranks: [...ranks]};
 }
 
 

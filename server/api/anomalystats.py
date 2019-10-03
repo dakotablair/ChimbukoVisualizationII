@@ -1,11 +1,12 @@
-from flask import request, jsonify, abort
+from flask import request, jsonify, abort, current_app
 
 from .. import db
-from ..models import AnomalyStat, AnomalyData, FuncStat, Stat
+from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
 from . import api
 from ..tasks import make_async
 from ..utils import timestamp, url_for
 from requests import post
+from ..events import push_data
 
 from sqlalchemy.exc import IntegrityError
 from runstats import Statistics
@@ -18,7 +19,6 @@ def process_on_anomaly(data:list, ts):
     """
     anomaly_stat = []
     anomaly_data = []
-    stat = []
 
     for d in data:
         if 'key' in d:
@@ -30,59 +30,47 @@ def process_on_anomaly(data:list, ts):
             rank = d.get('rank')
         key = '{}:{}'.format(app, rank)
         key_ts = '{}:{}'.format(key, ts)
-        anomaly_stat.append({
+
+        stat = d['stats']
+        stat.update({
             'key': key,
             'key_ts': key_ts,
             'app': app,
             'rank': rank,
             'created_at': ts
         })
-
-        d['stats'].update({'kind': 'anomaly', 'anomalystat_key': key_ts})
-        stat.append(d['stats'])
+        anomaly_stat.append(stat)
 
         if 'data' in d:
-            [dd.update({
-                'anomalystat_key': key,
-                'funcstat_key': None,
-            }) for dd in d['data']]
             anomaly_data += d['data']
 
-    return anomaly_stat, anomaly_data, stat
+    return anomaly_stat, anomaly_data
 
 
 def process_on_func(data:list, ts):
-    func_stat = []
-    stat = []
+    def getStat(stat:dict, prefix):
+        d = {}
+        for k, v in stat.items():
+            d["{}_{}".format(prefix, k)] = v
+        return d
 
+    func_stat = []
     for d in data:
         key_ts = '{}:{}'.format(d['fid'], ts)
-        func_stat.append({
+        base = {
             'created_at': ts,
             'key_ts': key_ts,
             'fid': d['fid'],
             'name': d['name']
-        })
-        d['stats'].update({
-            'kind': 'stats',
-            'funcstat_key': key_ts,
-            'anomalystat_key': None
-        })
-        stat.append(d['stats'])
-        d['inclusive'].update({
-            'kind': 'inclusive',
-            'funcstat_key': key_ts,
-            'anomalystat_key': None
-        })
-        stat.append(d['inclusive'])
-        d['exclusive'].update({
-            'kind': 'exclusive',
-            'funcstat_key': key_ts,
-            'anomalystat_key': None
-        })
-        stat.append(d['exclusive'])
+        }
 
-    return func_stat, stat
+        base.update(getStat(d['stats'], 'a'))
+        base.update(getStat(d['inclusive'], 'i'))
+        base.update(getStat(d['exclusive'], 'e'))
+
+        func_stat.append(base)
+
+    return func_stat
 
 
 def delete_old_anomaly():
@@ -107,9 +95,9 @@ def delete_old_anomaly():
     db.engine.execute(
         AnomalyStat.__table__.delete().where(AnomalyStat.id.in_(ids))
     )
-    db.engine.execute(
-        Stat.__table__.delete().where(Stat.anomalystat_key.in_(keys))
-    )
+    # db.engine.execute(
+    #     Stat.__table__.delete().where(Stat.anomalystat_key.in_(keys))
+    # )
 
 
 def delete_old_func():
@@ -132,9 +120,57 @@ def delete_old_func():
     db.engine.execute(
         FuncStat.__table__.delete().where(FuncStat.id.in_(ids))
     )
-    db.engine.execute(
-        Stat.__table__.delete().where(Stat.funcstat_key.in_(keys))
-    )
+    # db.engine.execute(
+    #     Stat.__table__.delete().where(Stat.funcstat_key.in_(keys))
+    # )
+
+
+def push_anomaly_stat(q, anomaly_stats:list):
+
+    # query arguments
+    nQueries = q.nQueries
+    statKind = q.statKind
+
+    anomaly_stats.sort(key=lambda d: d[statKind], reverse=True)
+
+    top_stats = []
+    bottom_stats = []
+    if anomaly_stats is not None and len(anomaly_stats):
+        nQueries = min(nQueries, len(anomaly_stats))
+        top_stats = anomaly_stats[:nQueries]
+        bottom_stats = anomaly_stats[-nQueries:]
+
+    # ---------------------------------------------------
+    # processing data for the front-end
+    # --------------------------------------------------
+    if len(top_stats) and len(bottom_stats):
+        top_dataset = {
+            'name': 'TOP',
+            'stat': top_stats,
+        }
+        bottom_dataset = {
+            'name': 'BOTTOM',
+            'stat': bottom_stats
+        }
+
+        # broadcast the statistics to all clients
+        push_data({
+            'nQueries': nQueries,
+            'statKind': statKind,
+            'data': [top_dataset, bottom_dataset]
+        }, 'update_stats')
+
+
+def push_anomaly_data(q, anomaly_data:list):
+    q = q.to_dict()
+    ranks = q.get('ranks', [])
+
+    if len(ranks) == 0:
+        return
+
+    selected = list(filter(lambda d: d['rank'] in ranks, anomaly_data))
+    selected.sort(key=lambda d: d['min_timestamp'])
+    push_data(selected, 'update_history')
 
 
 @api.route('/anomalydata', methods=['POST'])
@@ -186,31 +222,31 @@ def new_anomalydata():
     }
 
     """
+    # print('new_anomalydata')
     data = request.get_json() or {}
 
     ts = data.get('created_at', None)
     if ts is None:
         abort(400)
 
+    # print('processing...')
+    anomaly_stat, anomaly_data = \
+        process_on_anomaly(data.get('anomaly', []), ts)
+    func_stat = process_on_func(data.get('func', []), ts)
+
+    # print('update db...')
     try:
-        anomaly_head, anomaly_data, anomaly_stat = \
-            process_on_anomaly(data.get('anomaly', []), ts)
-        func_head, func_stat = process_on_func(data.get('func', []), ts)
-
-        if len(anomaly_head):
-            db.engine.execute(AnomalyStat.__table__.insert(), anomaly_head)
-
-        if len(anomaly_data):
-            db.engine.execute(AnomalyData.__table__.insert(), anomaly_data)
-
         if len(anomaly_stat):
-            db.engine.execute(Stat.__table__.insert(), anomaly_stat)
-
-        if len(func_head):
-            db.engine.execute(FuncStat.__table__.insert(), func_head)
-
+            db.get_engine(app=current_app, bind='anomaly_stats').execute(
+                AnomalyStat.__table__.insert(), anomaly_stat
+            )
+            db.get_engine(app=current_app, bind='anomaly_data').execute(
+                AnomalyData.__table__.insert(), anomaly_data
+            )
         if len(func_stat):
-            db.engine.execute(Stat.__table__.insert(), func_stat)
+            db.get_engine(app=current_app, bind='func_stats').execute(
+                FuncStat.__table__.insert(), func_stat
+            )
 
         # although we have defined models to enable cascased delete operation,
         # it actually didn't work. The reason is that we do the bulk insertion
@@ -224,13 +260,29 @@ def new_anomalydata():
         #delete_old_func()
     except Exception as e:
         print(e)
-        anomaly_head = []
-        anomaly_stat = []
 
-    # notify
-    if len(anomaly_head) and len(anomaly_stat):
-        post(url_for('events.stream', _external=True),
-             json={'head': anomaly_head, 'stat': anomaly_stat})
+    try:
+        # get query condition from database
+        q = AnomalyStatQuery.query. \
+            order_by(AnomalyStatQuery.created_at.desc()).first()
+
+        if q is None:
+            q = AnomalyStatQuery.create({
+                'nQueries': 5,
+                'statKind': 'stddev',
+                'ranks': []
+            })
+            db.session.add(q)
+            db.session.commit()
+
+        if len(anomaly_stat):
+            push_anomaly_stat(q, anomaly_stat)
+
+        if len(anomaly_data):
+            push_anomaly_data(q, anomaly_data)
+
+    except Exception as e:
+        print(e)
 
     # todo: make information output with Location
     return jsonify({}), 201

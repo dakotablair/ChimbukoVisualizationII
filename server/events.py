@@ -2,7 +2,7 @@ import os
 from flask import g, session, Blueprint, current_app, request, jsonify, abort, json
 
 from . import db, socketio, celery
-from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, Stat, ExecData, CommData
+from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, ExecData, CommData
 
 from sqlalchemy import func, and_
 
@@ -17,194 +17,9 @@ def push_model(model, namespace='/events'):
     }, namespace=namespace)
 
 
-def push_data(data, namespace='/events'):
+def push_data(data, event='updated_data',  namespace='/events'):
     """Push the data to all connected Socket.IO clients."""
-    socketio.emit('updated_data', data, namespace=namespace)
-
-
-@celery.task
-def push_anomaly_stats():
-    """Celery task that posts current anomaly statistics"""
-    from .wsgi_aux import app
-    with app.app_context():
-        # get query condition from database
-        q = AnomalyStatQuery.query.\
-            order_by(AnomalyStatQuery.created_at.desc()).first()
-        if q is None:
-            q = AnomalyStatQuery.create({'nQueries': 5, 'statKind': 'stddev'})
-            db.session.add(q)
-            db.session.commit()
-
-        # query arguments
-        nQueries = q.nQueries
-        statKind = q.statKind
-
-        # query column
-        col = Stat.stddev
-        key = 'stddev'
-        if statKind == 'updates':
-            col = Stat.count
-            key = 'count'
-        elif statKind == 'min':
-            col = Stat.minimum
-            key = 'minimum'
-        elif statKind == 'max':
-            col = Stat.maximum
-            key = 'maximum'
-        elif statKind == 'mean':
-            col = Stat.mean
-            key = 'mean'
-        elif statKind == 'skewness':
-            col = Stat.skewness
-            key = 'skewness'
-        elif statKind == 'kurtosis':
-            col = Stat.kurtosis
-            key = 'kurtosis'
-        elif statKind == 'accumulate':
-            col = Stat.accumulate
-            key = 'accumulate'
-        else:
-            statKind = 'stddev'
-
-        # -------------------------------------------
-        # query for the latest anomaly statistics
-        # -------------------------------------------
-        # sub-query to get the latest anomaly statistics
-        subq = db.session.query(
-            AnomalyStat.app,
-            AnomalyStat.rank,
-            func.max(AnomalyStat.created_at).label('max_ts')
-        ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
-
-        # top 'nQueries' statistics
-        stats = db.session.query(AnomalyStat).join(
-            subq,
-            and_(
-                AnomalyStat.app == subq.c.app,
-                AnomalyStat.rank == subq.c.rank,
-                AnomalyStat.created_at == subq.c.max_ts
-            )
-        ).join(
-            AnomalyStat.stat, aliased=True
-        ).order_by(col.desc()).all()
-
-        # WARNING: (race-condition), it is possible that we actually get
-        # not the latest AnomalyStat. In addition, the corresponding
-        # statistics are not available. Need to hadle this situation!
-
-        # maybe better to query separately in to_dict() function.
-        top_stats = []
-        bottom_stats = []
-        if stats is not None and len(stats):
-            nQueries = min(nQueries, len(stats))
-            top_stats = [st.to_dict() for st in stats[:nQueries]]
-            bottom_stats = [st.to_dict() for st in stats[-nQueries:]]
-
-        # ---------------------------------------------------
-        # processing data for the front-end
-        # --------------------------------------------------
-        if len(top_stats) and len(bottom_stats):
-            top_dataset = {
-                'name': 'TOP',
-                'value': [st['stats'][key] for st in top_stats],
-                'rank': [st['rank'] for st in top_stats]
-            }
-            bottom_dataset = {
-                'name': 'BOTTOM',
-                'value': [st['stats'][key] for st in bottom_stats],
-                'rank': [st['rank'] for st in bottom_stats]
-            }
-
-            # broadcast the statistics to all clients
-            push_data({
-                'type': 'stats',
-                'nQueries': nQueries,
-                'statKind': statKind,
-                'data': [top_dataset, bottom_dataset]
-            })
-
-        # return jsonify({}), 201
-
-
-@events.route('/stream_stats', methods=['POST'])
-def stream_db():
-    push_anomaly_stats.apply_async()
-    return jsonify({}), 200
-
-
-@events.route('/stream_stats', methods=['POST'])
-def stream():
-    # need to trim code
-    head = request.args.get('head', [])
-    stat = request.args.get('stat', [])
-
-    for h, s in zip(head, stat):
-        h.update({'stats': s})
-
-    # get query condition from database
-    q = AnomalyStatQuery.query. \
-        order_by(AnomalyStatQuery.created_at.desc()).first()
-    if q is None:
-        q = AnomalyStatQuery.create({'nQueries': 5, 'statKind': 'stddev'})
-        db.session.add(q)
-        db.session.commit()
-
-    # query arguments
-    nQueries = q.nQueries
-    statKind = q.statKind
-
-    # query column
-    key = 'stddev'
-    if statKind == 'updates':
-        key = 'count'
-    elif statKind == 'min':
-        key = 'minimum'
-    elif statKind == 'max':
-        key = 'maximum'
-    elif statKind == 'mean':
-        key = 'mean'
-    elif statKind == 'skewness':
-        key = 'skewness'
-    elif statKind == 'kurtosis':
-        key = 'kurtosis'
-    elif statKind == 'accumulate':
-        key = 'accumulate'
-    else:
-        statKind = 'stddev'
-
-    head.sort(key=lambda d: d[key], reserve=True)
-
-    top_stats = []
-    bottom_stats = []
-    if head is not None and len(head):
-        nQueries = min(nQueries, len(head))
-        top_stats = head[:nQueries]
-        bottom_stats = head[-head:]
-
-    # ---------------------------------------------------
-    # processing data for the front-end
-    # --------------------------------------------------
-    if len(top_stats) and len(bottom_stats):
-        top_dataset = {
-            'name': 'TOP',
-            'value': [st['stats'][key] for st in top_stats],
-            'rank': [st['rank'] for st in top_stats]
-        }
-        bottom_dataset = {
-            'name': 'BOTTOM',
-            'value': [st['stats'][key] for st in bottom_stats],
-            'rank': [st['rank'] for st in bottom_stats]
-        }
-
-        # broadcast the statistics to all clients
-        push_data({
-            'type': 'stats',
-            'nQueries': nQueries,
-            'statKind': statKind,
-            'data': [top_dataset, bottom_dataset]
-        })
-
-    return jsonify({}), 200
+    socketio.emit(event, data, namespace=namespace)
 
 
 @events.route('/query_history', methods=['POST'])
@@ -251,6 +66,7 @@ def get_history():
         payload.append(data.to_dict())
 
     return jsonify(payload)
+
 
 @celery.task
 def push_execution(pid, rid, min_ts, max_ts, order, with_comm):
@@ -388,7 +204,7 @@ def get_execution_file():
     step = request.args.get('step', None)
     min_ts = request.args.get('min_ts', None)
     max_ts = request.args.get('max_ts', None)
-    if pid is None or rid is None or step is None:
+    if all(v is None for v in [pid, rid, step]):
         abort(400)
 
     print(pid, rid, step, min_ts, max_ts)
@@ -414,39 +230,38 @@ def get_execution_file():
         sort_desc = order == 'desc'
         execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
-    if len(execdata):
-        push_data({
-            'type': 'execution',
-            'data': execdata
-        })
-
-    return jsonify({}), 200
+    return jsonify(execdata), 200
 
 
 @socketio.on('query_stats', namespace='/events')
 def query_stats(q):
     nQueries = q.get('nQueries', 5)
     statKind = q.get('statKind', 'stddev')
+    ranks = q.get('ranks', [])
 
-    q = AnomalyStatQuery.create({'nQueries': nQueries, 'statKind': statKind})
+    q = AnomalyStatQuery.create({
+        'nQueries': nQueries,
+        'statKind': statKind,
+        'ranks': ranks
+    })
     db.session.add(q)
     db.session.commit()
 
-    push_anomaly_stats.apply_async()
 
 
-@events.route('/query_stats', methods=['POST'])
-def post_query_stats():
-    q = request.get_json()
-
-    nQueries = q.get('nQueries', 5)
-    statKind = q.get('statKind', 'stddev')
-
-    q = AnomalyStatQuery.create({'nQueries': nQueries, 'statKind': statKind})
-    db.session.add(q)
-    db.session.commit()
-
-    return jsonify({"ok": True})
+# @events.route('/query_stats', methods=['POST'])
+# def post_query_stats():
+#     q = request.get_json()
+#
+#     nQueries = q.get('nQueries', 5)
+#     statKind = q.get('statKind', 'stddev')
+#     ranks = q.get('ranks', [])
+#
+#     q = AnomalyStatQuery.create({'nQueries': nQueries, 'statKind': statKind, 'ranks': ranks})
+#     db.session.add(q)
+#     db.session.commit()
+#
+#     return jsonify({"ok": True})
 
 
 @socketio.on('connect', namespace='/events')

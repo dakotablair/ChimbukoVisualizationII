@@ -7,8 +7,7 @@ import {
     set_stats,
     set_watched_rank,
     unset_watched_rank,
-    get_execution,
-    set_execution
+    get_execution
 } from './actions/dataActions'
 
 import io from 'socket.io-client';
@@ -18,10 +17,18 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
-
+import TextField from '@material-ui/core/TextField';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper'
+import Chip from '@material-ui/core/Chip';
+
+import clsx from 'clsx';
+
+//import Paper from '@material-ui/core/Paper'
 
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
@@ -32,6 +39,27 @@ const styles = theme => ({
     root: {flexGrow: 1},
     menuButton: {marginRight: theme.spacing(2)},
     title: {flexGrow: 1},
+
+    viewroot: {
+        display: 'flex',
+        flexWrap: 'wrap'
+    },
+    row: {
+        display: 'flex',
+        width: '100%'
+    },
+    margin: {
+        margin: theme.spacing(1)
+    },
+    textField: {
+        flexBasis: 200
+    },
+    chip: {
+        padding: theme.spacing(3, 2),
+        flexDirection: "column",
+        justifyContent: "center"
+    },    
+
     paper: {
         padding: theme.spacing(2),
         textAlign: 'center',
@@ -43,13 +71,15 @@ class ChimbukoApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            pause: false,
+            funcX: "runtime",
+            funcY: "fid"
         };
-        // this.eventSource = new EventSource("stream");
         this.socketio = null;
+        this.connectSocket();
     }
 
-    componentDidMount() {
+    connectSocket = () => {
         const namespace = '/events';
         const uri = 'http://' + document.domain + ':' + location.port + namespace;
 
@@ -60,55 +90,110 @@ class ChimbukoApp extends React.Component {
             console.log('socket.on.connect');
         });
 
-        this.socketio.on('updated_data', data => {
-            // Note that potentially 'updated_data' could be not only 
-            // anomaly statistics but also something else. We can check
-            // the contents from 'type' field of the data.
-
-            // type == stats
-            if (this.props.set_stats && data.type === 'stats')
-                this.props.set_stats(data);
-
-            if (this.props.set_value && data.type === 'execution')
-                this.props.set_execution(data.data);
-        });
-
         this.socketio.on('connect_error', err => {
             this.socketio.close();
             this.socketio = null;
         });
     }
 
-    handleStatChange = q => {
-        if (this.socketio) {
-            this.socketio.emit('query_stats', q);
+    componentDidMount() {
+    }
+
+    handleStatChange = key => ev => {
+        const { watched_ranks } = this.props;
+
+        if (this.props.stats[key] !== ev.target.value) {
+            if (this.props.set_stats)
+                this.props.set_stats({
+                    ...this.props.stats, 
+                    [key]: ev.target.value
+                });
+
+            if (this.socketio)
+                this.socketio.emit('query_stats', {
+                    ...this.props.stats, 
+                    [key]: ev.target.value,
+                    ranks: watched_ranks
+                });
         }
     }
 
     handleHistoryRequest = rank => {
-        if (this.props.set_watched_rank)
+        const watched_ranks = [...this.props.watched_ranks];
+
+        if (watched_ranks.indexOf(rank) >= 0)
+            return;
+
+        watched_ranks.push(rank);
+        if (this.socketio && this.props.set_watched_rank) {
+            this.socketio.emit('query_stats', {
+                ranks: watched_ranks,
+                ...this.props.stats
+            });
             this.props.set_watched_rank(rank);
+        }
     }
 
     handleHistoryRemove = rank => {
-        if (this.props.unset_watched_rank)
+        const watched_ranks = [...this.props.watched_ranks];
+        if (watched_ranks.length == 0)
+            return;
+
+        const idx = watched_ranks.indexOf(rank);
+        if (idx == -1)
+            return;
+
+        watched_ranks.splice(idx, 1);
+
+        if (this.socketio && this.props.unset_watched_rank) {
+            this.socketio.emit('query_stats', {
+                ranks: watched_ranks,
+                ...this.props.stats
+            });
             this.props.unset_watched_rank(rank);
+        }
     }
 
-    handleExecutionRequest = (pid, rid, step, min_timestamp, max_timestamp) => {
+    handleExecutionRequest = (item) => {
         const { execdata_config:config } = this.props;
-        const newConfig = {pid, rid, step, min_timestamp, max_timestamp};
+        
         const is_same = Object.keys(config).map(key => {
-            return config[key] === newConfig[key];
+            return config[key] === item[key];
         }).every(v => v);
 
-        if (!is_same && this.props.get_execution)
-            this.props.get_execution(pid, rid, step, min_timestamp, max_timestamp);
+        if (!is_same && this.props.get_execution) {
+            this.props.get_execution(item);
+        }
+    }
+
+    handleSwitch = name => ev => {
+        this.setState({...this.state, [name]: event.target.checked});
+    }    
+
+    handleFuncAxisChange = key => ev => {
+        this.setState({...this.state, [key]: ev.target.value});
     }
 
     render() {
-        const { classes, stats, watched_ranks } = this.props;
+        const { classes, stats, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors } = this.props;
+
+        const statKinds = [
+            "minimum", "maximum", "mean", "stddev", "kurtosis", "skewness",
+            "count", "accumulate"
+        ];
+        const funcFeat = [
+            "pid", "rid", "tid", "fid", 
+            "entry", "exit", "runtime", "exclusive",
+            "label", "n_children", "n_messages"
+        ];
+
+        const { statKind, nQueries } = stats;
+
+        const getSelectedName = () => {
+            const {app, rank, step} = execdata_config;
+            return `${app}:${rank}:${step}`;
+        } 
 
         return (
             <div className={classes.root}>
@@ -132,34 +217,131 @@ class ChimbukoApp extends React.Component {
                 </AppBar>
                 <Grid container spacing={3}>
                     <Grid item xs={4}>
-                        <AnomalyStats 
-                            height={200}
-                            stats={stats}
-                            onStatChange={this.handleStatChange}
-                            onBarClick={this.handleHistoryRequest}
-                        />
+                        <div className={classes.viewroot}>
+                            <div className={classes.row}>
+                                <TextField
+                                    id="stat-kind"
+                                    label="Anomaly statistics"
+                                    value={statKind || "stddev"}
+                                    onChange={this.handleStatChange('statKind')}
+                                    select
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                >
+                                {
+                                    statKinds.map(kind => (
+                                        <MenuItem key={kind} value={kind}>
+                                            {kind}
+                                        </MenuItem>
+                                    ))
+                                }
+                                </TextField>
+                                <TextField
+                                    id="stat-queries"
+                                    label="# Queries"
+                                    value={nQueries || 5}
+                                    onChange={this.handleStatChange('nQueries')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                            </div>
+                            <div className={classes.row}>
+                                <AnomalyStats 
+                                    height={200}
+                                    socketio={this.socketio}
+                                    nQueries={nQueries}
+                                    statKind={statKind}
+                                    onBarClick={this.handleHistoryRequest}
+                                />
+                            </div>
+                        </div>
                     </Grid>
                     <Grid item xs={8}>
-                        <AnomalyHistory
-                            height={200}
-                            ranks={watched_ranks}
-                            onLegendClick={this.handleHistoryRemove}
-                            onBarClick={this.handleExecutionRequest}
-                        />
+                        <div className={classes.viewroot}>
+                            <div className={classes.row} style={{height: 61}}>
+                                <FormGroup row>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={this.state.pause}
+                                                onChange={this.handleSwitch('pause')}
+                                                value="pause"
+                                            />
+                                        }
+                                        label="PAUSE"
+                                    />
+                                </FormGroup>                                
+                            </div>
+                            <div className={classes.row}>
+                                <AnomalyHistory
+                                    height={200}
+                                    ranks={watched_ranks}
+                                    colors={rank_colors}
+                                    socketio={this.socketio}
+                                    onLegendClick={this.handleHistoryRemove}
+                                    onBarClick={this.handleExecutionRequest}
+                                />                            
+                            </div>
+                        </div>
                     </Grid>
+
                     <Grid item xs={6}>
-                        <AnomalyFunc 
-                            height={300}
-                            data={execdata}
-                            config={execdata_config}
-                            colors={func_colors}
-                            x={"entry"}
-                            y={"exit"}
-                        />
+                        <div className={classes.viewroot}>
+                            <div className={classes.row}>
+                                <Chip className={classes.chip} label={getSelectedName()} />
+                                <TextField
+                                    id="func-x"
+                                    label="X-axis"
+                                    value={this.state.funcX}
+                                    onChange={this.handleFuncAxisChange('funcX')}
+                                    select
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                >
+                                {
+                                    funcFeat.map(feat => (
+                                        <MenuItem key={feat} value={feat}>
+                                            {feat}
+                                        </MenuItem>
+                                    ))
+                                }
+                                </TextField>        
+                                <TextField
+                                    id="func-y"
+                                    label="Y-axis"
+                                    value={this.state.funcY}
+                                    onChange={this.handleFuncAxisChange('funcY')}
+                                    select
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                >
+                                {
+                                    funcFeat.map(feat => (
+                                        <MenuItem key={feat} value={feat}>
+                                            {feat}
+                                        </MenuItem>
+                                    ))
+                                }
+                                </TextField>                                                       
+                            </div>
+                            <div className={classes.row}>
+                                <AnomalyFunc 
+                                    height={300}
+                                    data={execdata}
+                                    config={execdata_config}
+                                    colors={func_colors}
+                                    x={this.state.funcX}
+                                    y={this.state.funcY}
+                                />
+                            </div>
+                        </div>
                     </Grid>
-                    <Grid item xs={8}>
+                    {/* <Grid item xs={8}>
                         <Paper className={classes.paper}>xs=8</Paper>
-                    </Grid>
+                    </Grid> */}
                 </Grid>                
             </div>
         );
@@ -170,6 +352,7 @@ function mapStateToProps(state) {
     return {
         stats: state.data.stats,
         watched_ranks: state.data.watched_ranks,
+        rank_colors: state.data.rank_colors,
         execdata: state.data.execdata,
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors
@@ -182,8 +365,7 @@ function mapDispatchToProps(dispatch) {
         set_stats,
         set_watched_rank,
         unset_watched_rank,
-        get_execution,
-        set_execution
+        get_execution
     }, dispatch);
 }
 
