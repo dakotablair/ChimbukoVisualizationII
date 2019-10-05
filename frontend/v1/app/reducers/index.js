@@ -1,4 +1,5 @@
-import {combineReducers} from 'redux';
+import { combineReducers } from 'redux';
+import { getRandomColor } from '../utils';
 
 const INIT_STATE = {
     // anomaly statistics
@@ -23,15 +24,8 @@ const INIT_STATE = {
         min_timestamp: -1,
         max_timestamp: -1
     },
-    execdata: []
-};
-
-const getRandomColor = () => {
-    return {
-        r: Math.floor(Math.random() * 255),
-        g: Math.floor(Math.random() * 255),
-        b: Math.floor(Math.random() * 255)
-    }
+    execdata: [],
+    node_key: null
 };
 
 const set_value = (state, payload) => {

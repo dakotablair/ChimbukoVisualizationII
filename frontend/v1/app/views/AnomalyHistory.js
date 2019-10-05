@@ -39,10 +39,20 @@ class AnomalyHistory extends React.Component
             return;
 
         const { ranks } = this.props;
+        let minTime = Infinity;
 
+        // get min_timestamp in the currently available data
+        Object.keys(this.chartData).forEach(rank => {
+            rank = +rank;
+            if (this.chartData[rank].length > 0 && this.chartData[rank][0].min_timestamp > 0)
+                minTime = Math.min(minTime, this.chartData[rank][0].min_timestamp);
+        });
+
+        //console.log(minTime);
         chartData.forEach(d => {
-            const rank = d.rank;
-            if (ranks.indexOf(rank) >= 0)
+            let {rank, min_timestamp} = d;
+            rank = +rank;
+            if (ranks.indexOf(rank) >= 0 && (minTime === Infinity || min_timestamp >= minTime))
             {
                 if (!this.chartData.hasOwnProperty(rank))
                     this.chartData[rank] = [];
@@ -51,9 +61,11 @@ class AnomalyHistory extends React.Component
         });
 
         // append with empty slot to aling data
-        let minTime = Infinity;
+        minTime = Infinity;
         Object.keys(this.chartData).forEach(rank => {
             rank = +rank;
+            if (ranks.indexOf(rank) >=0 && this.chartData[rank][0] == null)
+                console.log(...this.chartData[rank])
             if (ranks.indexOf(rank) >= 0 && this.chartData[rank][0].min_timestamp > 0) {
                 minTime = Math.min(minTime, this.chartData[rank][0].min_timestamp);
             }

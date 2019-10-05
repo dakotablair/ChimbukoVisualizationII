@@ -10,6 +10,11 @@ import {
     get_execution
 } from './actions/dataActions'
 
+import {
+    executionForest,
+    executionTree
+} from './selectors';
+
 import io from 'socket.io-client';
 
 import { withStyles } from '@material-ui/core/styles'
@@ -33,6 +38,7 @@ import clsx from 'clsx';
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
 import AnomalyFunc from './views/AnomalyFunc';
+import TemporalCallStack from './views/TemporalCallStack';
 
 
 const styles = theme => ({
@@ -174,9 +180,15 @@ class ChimbukoApp extends React.Component {
         this.setState({...this.state, [key]: ev.target.value});
     }
 
+    handleTreeRequest = key => {
+        if (this.props.set_value)
+            this.props.set_value('node_key', key);
+    }
+
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors } = this.props;
+        const { forest, tree } = this.props;
 
         const statKinds = [
             "minimum", "maximum", "mean", "stddev", "kurtosis", "skewness",
@@ -288,7 +300,7 @@ class ChimbukoApp extends React.Component {
                         </div>
                     </Grid>
 
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
                                 <Chip className={classes.chip} label={getSelectedName()} />
@@ -329,19 +341,29 @@ class ChimbukoApp extends React.Component {
                             </div>
                             <div className={classes.row}>
                                 <AnomalyFunc 
-                                    height={300}
+                                    height={400}
                                     data={execdata}
                                     config={execdata_config}
                                     colors={func_colors}
                                     x={this.state.funcX}
                                     y={this.state.funcY}
+                                    onPointClick={this.handleTreeRequest}
                                 />
                             </div>
                         </div>
                     </Grid>
-                    {/* <Grid item xs={8}>
-                        <Paper className={classes.paper}>xs=8</Paper>
-                    </Grid> */}
+                    <Grid item xs={8}>
+                        <TemporalCallStack
+                            id="temporal-callstack"
+                            height={400}
+                            tree={tree}
+                            colors={func_colors}
+                            margin={{
+                                top: 40, bottom: 10, 
+                                left: 50, right: 50
+                            }}
+                        />
+                    </Grid>
                 </Grid>                
             </div>
         );
@@ -355,7 +377,9 @@ function mapStateToProps(state) {
         rank_colors: state.data.rank_colors,
         execdata: state.data.execdata,
         execdata_config: state.data.execdata_config,
-        func_colors: state.data.func_colors
+        func_colors: state.data.func_colors,
+        forest: executionForest(state),
+        tree: executionTree(state)
     };
 }
 

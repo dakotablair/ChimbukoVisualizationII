@@ -34,14 +34,18 @@
     "chartjs-plugin-streaming": "^1.8.0",
     "chartjs-plugin-zoom": "^0.7.4",
     "clsx": "^1.0.4",
+    "d3": "^5.12.0",
     "history": "^4.9.0",
     "moment": "^2.24.0",
     "ncp": "^2.0.0",
     "react-chartjs-2": "^2.7.6",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
+    "react-svg-tooltip": "0.0.11",
+    "react-tooltip": "^3.11.1",
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0"
   }

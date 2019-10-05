@@ -6,6 +6,8 @@ import moment from 'moment';
 import { Scatter } from 'react-chartjs-2';
 // import 'chartjs-plugin-zoom';
 
+import { parseFuncName } from '../utils';
+
 
 class AnomalyFunc extends React.Component
 {
@@ -33,45 +35,49 @@ class AnomalyFunc extends React.Component
         // return true;
     }
 
-    // componentDidMount() {
-    // }
-
-    // componentDidUpdate(prevProps, prevState) {
-    // }
-
-    handleChartClick = ev => {
-        if (this.chart == null) 
+    handleChartClick = elem => {
+        if (elem.length == 0 || this.chart == null)
             return;
 
-        const activePoint = this.chart.getElementAtEvent(ev);
-        if (activePoint && activePoint.length) {
-            // clicked on a point
-            return;
-        }        
+        const datasetIndex = elem[0]._datasetIndex;
+        const index = elem[0]._index;
+       
+        const item = this.chart.props.data.datasets[datasetIndex].data[index];
+        if (this.props.onPointClick)
+            this.props.onPointClick(item.key);
+        // if (this.chart == null) 
+        //     return;
 
-        const mousePoint = Chart.helpers.getRelativePosition(ev, this.chart.chart);
+        // const activePoint = this.chart.getElementAtEvent(ev);
+        // if (activePoint && activePoint.length) {
+        //     // clicked on a point
+        //     console.log(activePoint)
+        //     return;
+        // }        
+
+        // const mousePoint = Chart.helpers.getRelativePosition(ev, this.chart.chart);
 
         /*
          for x-axis (167, 286)
           min_y = bottom (== height) - height + tickheight (12) + fontheight (12)
           max_y = bottom
         */
-        const xaxis = this.chart.chart.scales['x-axis-1'];
-        const max_y = xaxis.bottom - 5;
-        const min_y = max_y - 12;
+        // const xaxis = this.chart.chart.scales['x-axis-1'];
+        // const max_y = xaxis.bottom - 5;
+        // const min_y = max_y - 12;
 
-        let min_x = xaxis.left;
-        let max_x = xaxis.right;
-        const cx = (max_x - min_x) / 2 + min_x;
-        min_x = cx - 20;
-        max_x = cx + 20;
+        // let min_x = xaxis.left;
+        // let max_x = xaxis.right;
+        // const cx = (max_x - min_x) / 2 + min_x;
+        // min_x = cx - 20;
+        // max_x = cx + 20;
 
-        if (mousePoint.x > min_x && mousePoint.x < max_x && 
-            mousePoint.y > min_y && mousePoint.y < max_y)
-        {
-            console.log('hit x-axis label!');
+        // if (mousePoint.x > min_x && mousePoint.x < max_x && 
+        //     mousePoint.y > min_y && mousePoint.y < max_y)
+        // {
+        //     console.log('hit x-axis label!');
 
-        }
+        // }
 
     //    console.log(mousePoint, min_y, max_y, min_x, max_x);
        
@@ -121,8 +127,7 @@ class AnomalyFunc extends React.Component
     }   
 
     getDisplayName = name => {
-        const prefix = (name+"([").match(/.+?(?=[\[\(])/)[0];
-        return prefix.match(/(.*::)*(.*)/)[2];
+        return parseFuncName(name);
     }    
 
     getDataInfo = d => {
@@ -155,6 +160,7 @@ class AnomalyFunc extends React.Component
                 ref={ref => this.chart = ref}
                 data={{"datasets": Object.keys(datasets).map(key => datasets[key])}}
                 height={height}
+                getElementAtEvent={this.handleChartClick}
                 options={{
                     responsive: true,
                     maintainAspectRatio: false,
