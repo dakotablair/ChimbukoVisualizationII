@@ -13,12 +13,13 @@ class AnomalyHistory extends React.Component
     constructor(props) {
         super(props);
         this.state = {
-            pause: false
+            //pause: false
         };
         this.socketio = props.socketio;
         this.chartRef = React.createRef();
         this.chart = null;
         this.chartData = {};
+        this.pause = false;
     }
 
     componentDidMount() {
@@ -64,9 +65,9 @@ class AnomalyHistory extends React.Component
         minTime = Infinity;
         Object.keys(this.chartData).forEach(rank => {
             rank = +rank;
-            if (ranks.indexOf(rank) >=0 && this.chartData[rank][0] == null)
-                console.log(...this.chartData[rank])
-            if (ranks.indexOf(rank) >= 0 && this.chartData[rank][0].min_timestamp > 0) {
+            if (ranks.indexOf(rank) >=0 && this.chartData[rank].length > 0)
+                console.log(...this.chartData[rank][0])
+            if (ranks.indexOf(rank) >= 0 && this.chartData[rank].length > 0 && this.chartData[rank][0].min_timestamp > 0) {
                 minTime = Math.min(minTime, this.chartData[rank][0].min_timestamp);
             }
         });
@@ -84,8 +85,10 @@ class AnomalyHistory extends React.Component
                 if (ranks.indexOf(rank) >= 0 && first > 0) {
                     const n_empty = Math.floor((first - minTime) / 1000000);
                     //console.log('rank: ', rank, ' n_empty: ', n_empty, ' first: ', first)
-                    if (n_empty > 0)
+                    if (n_empty > 0) {
+                        // console.log(n_empty, first, minTime)
                         this.chartData[rank].unshift(...Array(n_empty).fill(0).map(_=>empty));
+                    }
                 }
             });        
         }
@@ -209,6 +212,14 @@ class AnomalyHistory extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        const { pause } = nextProps;
+        if (this.chart) {
+            if (this.pause !== pause) {
+                this.pause = pause;
+                this.chart.options.plugins.streaming.pause = this.pause;
+                this.chart.chart.update({duration: 0});
+            }
+        }
         return false;
     }
 

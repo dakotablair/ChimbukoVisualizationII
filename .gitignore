@@ -115,3 +115,6 @@ redis-stable
 
 # node_modules
 node_modules/
+
+# large files
+*.tar.gz

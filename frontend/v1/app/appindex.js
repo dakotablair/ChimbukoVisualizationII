@@ -1,7 +1,7 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-
+import axis from 'axios';
 import {
     set_value,
     set_stats,
@@ -30,6 +30,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
 
 import clsx from 'clsx';
 
@@ -65,6 +66,9 @@ const styles = theme => ({
         flexDirection: "column",
         justifyContent: "center"
     },    
+    button: {
+        margin: theme.spacing(1)
+    },
 
     paper: {
         padding: theme.spacing(2),
@@ -79,7 +83,8 @@ class ChimbukoApp extends React.Component {
         this.state = {
             pause: false,
             funcX: "runtime",
-            funcY: "fid"
+            funcY: "fid",
+            run_simulate: false
         };
         this.socketio = null;
         this.connectSocket();
@@ -94,6 +99,11 @@ class ChimbukoApp extends React.Component {
 
         this.socketio.on('connect', () => {
             console.log('socket.on.connect');
+        });
+
+        this.socketio.on('run_simulation', err => {
+            console.log(err);
+            this.setState({run_simulate: false});
         });
 
         this.socketio.on('connect_error', err => {
@@ -185,6 +195,33 @@ class ChimbukoApp extends React.Component {
             this.props.set_value('node_key', key);
     }
 
+    handleStatRefresh = ev => {
+        const url = '/api/get_anomalystats';
+        axis.get(url)
+            .then(resp => {
+                console.log('handleStatRefresh: ', resp);
+            })
+            .catch(e => {
+                console.log('handleStatRefresh: ', e);
+            });
+    }
+
+    handleRunSimulation = ev => {
+        if (this.state.run_simulate)
+            return;
+
+        const url = '/api/run_simulation';
+        axis.get(url)
+            .then(resp => {
+                if (resp.status === 202) {
+                    this.setState({run_simulate: true});
+                }
+            })
+            .catch(e => {
+                console.log('handleRunSimulation: ', e);
+            });
+    }
+
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors } = this.props;
@@ -259,6 +296,13 @@ class ChimbukoApp extends React.Component {
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
                                 </TextField>
+                                <Button 
+                                    variant="contained" 
+                                    className={classes.button} 
+                                    onClick={this.handleStatRefresh}
+                                >
+                                    Refresh
+                                </Button>
                             </div>
                             <div className={classes.row}>
                                 <AnomalyStats 
@@ -285,7 +329,19 @@ class ChimbukoApp extends React.Component {
                                         }
                                         label="PAUSE"
                                     />
-                                </FormGroup>                                
+                                </FormGroup>       
+                                <Button
+                                    variant="contained"
+                                    className={classes.button}
+                                    color={this.state.run_simulate?"secondary":"primary"}
+                                    onClick={this.handleRunSimulation}
+                                >
+                                    {
+                                        (this.state.run_simulate) 
+                                            ? "STOP SIMULATION"
+                                            : "RUN SIMULATION"
+                                    }
+                                </Button>                         
                             </div>
                             <div className={classes.row}>
                                 <AnomalyHistory
@@ -295,6 +351,7 @@ class ChimbukoApp extends React.Component {
                                     socketio={this.socketio}
                                     onLegendClick={this.handleHistoryRemove}
                                     onBarClick={this.handleExecutionRequest}
+                                    pause={this.state.pause}
                                 />                            
                             </div>
                         </div>

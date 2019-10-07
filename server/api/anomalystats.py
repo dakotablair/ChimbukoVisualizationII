@@ -297,8 +297,18 @@ def get_anomalystats():
                  application index is 0 and rank index is 0.
     - return 400 error if there are no available statistics
     """
-    app = request.args.get('app', default=None)
-    rank = request.args.get('rank', default=None)
+    # get query condition from database
+    query = AnomalyStatQuery.query. \
+        order_by(AnomalyStatQuery.created_at.desc()).first()
+
+    if query is None:
+        query = AnomalyStatQuery.create({
+            'nQueries': 5,
+            'statKind': 'stddev',
+            'ranks': []
+        })
+        db.session.add(query)
+        db.session.commit()
 
     subq = db.session.query(
         AnomalyStat.app,
@@ -306,22 +316,61 @@ def get_anomalystats():
         func.max(AnomalyStat.created_at).label('max_ts')
     ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
-    q = db.session.query(AnomalyStat).join(
+    stats = db.session.query(AnomalyStat).join(
         subq,
         and_(
             AnomalyStat.app == subq.c.app,
             AnomalyStat.rank == subq.c.rank,
             AnomalyStat.created_at == subq.c.max_ts
         )
-    )
+    ).all()
 
-    if app is not None and rank is not None:
-        stats = q.filter(AnomalyStat.app==int(app), AnomalyStat.rank==int(rank)).all()
-    else:
-        stats = q.all()
+    push_anomaly_stat(query, [st.to_dict() for st in stats])
+    return jsonify({}), 200
+    #return jsonify([st.to_dict() for st in stats])
 
-    return jsonify([st.to_dict() for st in stats])
 
+@api.route('/run_simulation', methods=['GET'])
+@make_async
+def run_simulation():
+    import time
+    error = 'OK'
+    try:
+        step_ts = int(1000000)
+        min_timestamp = int(db.session.query(func.min(AnomalyData.min_timestamp)).scalar())
+        max_timestamp = int(db.session.query(func.max(AnomalyData.min_timestamp)).scalar())
+        for ts in range(min_timestamp, max_timestamp+step_ts, step_ts):
+            data = AnomalyData.query.filter(
+                and_(
+                    AnomalyData.min_timestamp >= ts,
+                    AnomalyData.min_timestamp < ts + step_ts
+                )
+            )
+            data = [d.to_dict() for d in data.all()]
+
+            q = AnomalyStatQuery.query. \
+                order_by(AnomalyStatQuery.created_at.desc()).first()
+
+            if q is None:
+                q = AnomalyStatQuery.create({
+                    'nQueries': 5,
+                    'statKind': 'stddev',
+                    'ranks': []
+                })
+                db.session.add(q)
+                db.session.commit()
+
+            push_anomaly_data(q, data)
+
+            time.sleep(1)
+    except Exception as e:
+        print('Exception on run simulation: ', e)
+        error = 'exception while running simulation'
+        pass
+
+    push_data({'result': error}, 'run_simulation')
+
+    return jsonify({})
 
 @api.route('/get_anomalydata', methods=['GET'])
 def get_anomalydata():
