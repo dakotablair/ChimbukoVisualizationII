@@ -53,14 +53,29 @@ class TreeNode extends React.Component
 
     render() {
         const {x, y, width, height, rgb, opacity, font} = this.props;
-        const { d, showLabel, commScale, xScale } = this.props;
+        const { d, showLabel, commScale, xScale, yScale, highlight } = this.props;
         const {r, g, b} = rgb;
         
+        const rect_stroke = highlight
+            ? {stroke: 'red', strokeWidth: 2, strokeOpacity: 1}
+            : {};
         const bg = (d.label === 1) ? "black": "red";
+        const text_color = bg;
 
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
-        
+        let tooltip_w = 150;
+        let tooltip_h = 150;
+        let tooltip_offset_y = 0;
+        let tooltip_offset_x = 0;
+        if (y + tooltip_h + 10 > yScale.range()[1] - height/2) {
+            tooltip_offset_y =  -(y + tooltip_h + 10 - yScale.range()[1]);
+        }
+        if (x + width + tooltip_w + 10 > xScale.range()[1] - tooltip_w/2) {
+            //tooltip_w = -150;
+            tooltip_offset_x = -tooltip_w;
+        }
+
         const comm = [];
         d.comm.forEach( (_comm, i) => {
             const {rid, src, tar, timestamp} = _comm;
@@ -76,16 +91,6 @@ class TreeNode extends React.Component
                     y2={y2}
                 />
             );
-            // comm.push(<line
-            //     key={`comm-${i}`}
-            //     x1={_x}
-            //     y1={y1}
-            //     x2={_x}
-            //     y2={y2}
-            //     stroke={'black'}
-            //     strokeWidth={1}
-            //     markerEnd="url(#arrow)"
-            // />);
         });
 
         return (
@@ -97,12 +102,14 @@ class TreeNode extends React.Component
                     width={width}
                     height={height}
                     fill={`rgb(${r},${g},${b})`}
-                    opacity={opacity}
+                    fillOpacity={opacity}
+                    {...rect_stroke}
                 />
                 <text
                     x={Math.max(x, 0)}
                     y={y + height/2 + 5}
                     {...font}
+                    fill={text_color}
                 >
                     { (showLabel)
                         ? parseFuncName(d.name)
@@ -110,18 +117,18 @@ class TreeNode extends React.Component
                     }
                 </text>
                 <Tooltip triggerRef={this.rect}>
-                    <rect x={5} y={5} width={150} height={150} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
-                    <text x={10} y={10} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
-                        <tspan x={10} dy=".6em">{parseFuncName(d.name)}</tspan>
-                        <tspan x={10} dy="1.2em">{`Rank: ${d.rid}`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Runtime: ${d.runtime} usec`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>
-                        <tspan x={10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>
-                        <tspan x={10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>
-                        <tspan x={10} dy="1.2em">{`Label: ${d.label}`}</tspan>
+                    <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
+                    <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
+                        <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.name)}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Rank: ${d.rid}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${d.runtime} usec`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.label}`}</tspan>
                     </text>
                 </Tooltip>
                 
@@ -139,7 +146,7 @@ class CallStackTreeNode extends React.Component
     }
 
     render() {
-        const { xScale, yScale, rankScale, colors, font } = this.props;
+        const { xScale, yScale, rankScale, colors, font, selected } = this.props;
 
         const maxLength = xScale.range()[1];
         const nodeHeight = yScale(1) - yScale(0);
@@ -150,7 +157,8 @@ class CallStackTreeNode extends React.Component
                   y = yScale(node.level),
                   w = xScale(node.exit) - x;
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = xScale(node.exit) > 30 && len >= 50;       
+            const showName = xScale(node.exit) > 30 && len >= 50;  
+            const highlight = (selected && selected === node.key) ? true: false;     
             nodes.push(
                 <TreeNode
                     key={`node-${key}`}
@@ -158,12 +166,14 @@ class CallStackTreeNode extends React.Component
                     x={x}
                     y={y}
                     xScale={xScale}
+                    yScale={yScale}
                     commScale={rankScale}
                     width={w}
                     height={nodeHeight}
                     rgb={colors[node.fid]}
                     opacity={0.3}
                     showLabel={showName}
+                    highlight={highlight}
                     font={font}
                 />
             );        

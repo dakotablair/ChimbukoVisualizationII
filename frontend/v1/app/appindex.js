@@ -188,7 +188,7 @@ class ChimbukoApp extends React.Component {
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors } = this.props;
-        const { forest, tree } = this.props;
+        const { forest, tree, selected_node } = this.props;
 
         const statKinds = [
             "minimum", "maximum", "mean", "stddev", "kurtosis", "skewness",
@@ -357,6 +357,7 @@ class ChimbukoApp extends React.Component {
                             id="temporal-callstack"
                             height={400}
                             tree={tree}
+                            selected={selected_node}
                             colors={func_colors}
                             config={execdata_config}
                             margin={{
@@ -380,7 +381,8 @@ function mapStateToProps(state) {
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors,
         forest: executionForest(state),
-        tree: executionTree(state)
+        tree: executionTree(state),
+        selected_node: state.data.node_key
     };
 }
 

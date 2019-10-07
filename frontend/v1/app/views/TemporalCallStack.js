@@ -5,66 +5,9 @@ import moment from 'moment';
 
 import * as d3 from 'd3';
 
-import { fitWidth, getRandomColor } from '../utils';
-import { data } from '../utils/sample'
+import { fitWidth } from '../utils';
 
 import { CallStackTreeNode, Axis, Brush } from './components';
-
-// const process_data = fulldata => {
-//     const execdata = fulldata.exec;
-
-//     // back-end will send data in descending order based on entry time
-//     execdata.sort((a, b) => b.entry - a.entry);
-
-//     // convert to object (hashmap)
-//     const nodes = {};
-//     execdata.forEach(d => nodes[d.key] = d);
-
-//     const forest = {};
-//     const traverse = (d, range) => {
-//         if (d == null) {
-//             return {level: 0, treeid: "root"};
-//         }
-
-//         range[0] = Math.min(range[0], d.entry);
-//         range[1] = Math.max(range[1], d.exit);
-
-//         if (d.level != null) {
-//             return {level: d.level + 1, treeid: d.treeid};
-//         } 
-
-//         let {level, treeid} = traverse(nodes[d.parent], range);
-//         if (treeid === "root")
-//             treeid = d.key;
-//         d.level = level;
-//         d.treeid = treeid;
-//         return {level: d.level + 1, treeid: d.treeid};
-//     };
-
-//     execdata.forEach(d => {
-//         const range = [Infinity, -Infinity];
-//         const {level, treeid} = traverse(d, range);
-//         if (forest[treeid] == null) {
-//             forest[treeid] = {
-//                 id: treeid,
-//                 height: 0,
-//                 count: 0,
-//                 nodes: {},
-//                 min_ts: Infinity,
-//                 max_ts: -Infinity
-//             };
-//         }
-//         const tree = forest[treeid];
-//         tree.height = Math.max(level, tree.height);
-//         tree.count++;
-//         tree.min_ts = Math.min(tree.min_ts, range[0]);
-//         tree.max_ts = Math.max(tree.max_ts, range[1]);
-//         tree.nodes[d.key] = {...d};
-//     });
-
-//     // console.log(forest)
-//     return forest;
-// }
 
 class TemporalCallStack extends React.Component
 {
@@ -74,42 +17,6 @@ class TemporalCallStack extends React.Component
             focused: null
         };
         this.svg = null;
-    }
-
-    setGraph = tree => {
-        /*
-            tree: {id: -1, nodes: [], edges: [], node_index: ?}
-            node: {
-                level: number,
-                messages: [{
-                    'source-node-id': string or unique id,
-                    'destination-node-id': string or unique id
-                }]
-            }
-        */
-        // this.graph = tree;
-        // this.graphId = tree.id;
-   
-        // if (this.graph.nodes.length == 0)
-        //     return;
-
-        // const contextNode = new Set();
-        // this.messages = [];
-
-        // let maxLevel = 0;
-        // this.graph.nodes.forEach(node => {
-        //     maxLevel = Math.max(node.level, maxLevel);
-        //     node.messages.forEach(m => {
-        //         m.level = node.level;
-        //         this.messages.push(m);
-        //         contextNode.add(m['src']);
-        //         contextNode.add(m['dst']);
-        //     });
-        // });
-        // contextNode.delete(this.graph['node_index']);
-        // this.timelines = Array.from(contextNode);
-        // this.resetAxis(maxLevel);
-        // this.resetSVGs(maxLevel);
     }
 
     handleTimeSelection = s => {
@@ -126,17 +33,9 @@ class TemporalCallStack extends React.Component
     }
 
     render() {
-        const { margin, colors } = this.props;
+        const { margin, colors, selected } = this.props;
         const { app: mainApp, rank: mainRank } = this.props.config;
         const { height:treeHeight, min_ts, max_ts, nodes, ranks } = this.props.tree;
-        //console.log(ranks, mainRank);
-
-        
-
-        // ranks.delete(mainRank);
-        // const avail_ranks = new Array.from(ranks);
-        // avail_ranks.unshift(mainRank);
-        // ranks.add(mainRank);
         /*
             layout
 
@@ -145,7 +44,6 @@ class TemporalCallStack extends React.Component
             (call stack tree area) for main rank (what would be good size, i.e. height for this area??)
             rank axis as many as in 'ranks'
         */
-        // -- compute layout
         ranks.delete(mainRank);
         const comm_ranks = Array.from(ranks).sort((a, b) => a - b);
         ranks.add(mainRank);
@@ -182,6 +80,16 @@ class TemporalCallStack extends React.Component
 
         const rankAxis = [];
         const rankLabel = [];
+        rankLabel.push(<text
+            key={`time-axis-label`}
+            x={margin.left}
+            y={0}
+            fontFamily="Verdana"
+            fontSize="12"
+            textAnchor="end"    
+        >
+            {"Time"}
+        </text>)
         comm_ranks.forEach( (_rank, _i) => {
             if (_rank !== mainRank) {
                 const _key = `comm-axis-${_rank}`;
@@ -255,7 +163,7 @@ class TemporalCallStack extends React.Component
                         </marker>
                     </defs>
                     <Axis 
-                        title={"Time"}
+                        title={""}
                         width={cstWidth}
                         domain={[min_ts, max_ts]}
                         style={{dominantBaseline: "central"}}
@@ -293,6 +201,7 @@ class TemporalCallStack extends React.Component
                     </g>
                     <CallStackTreeNode 
                         nodes={nodes}
+                        selected={selected}
                         xScale={xScaleFocused}
                         yScale={yScale}
                         rankScale={rankScale}
