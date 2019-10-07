@@ -216,7 +216,8 @@ def get_execution_file():
     from_file = False
     commdata = None
     # 1. check if DB has?
-    execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
+    execdata = []
+    # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
 
     # 2. look for file?
     if len(execdata) == 0:
@@ -225,12 +226,13 @@ def get_execution_file():
 
     # 3. update & post processing
     if from_file:
-        update_execution_db.delay(execdata, commdata)
+        # update_execution_db.delay(execdata, commdata)
 
         sort_desc = order == 'desc'
         execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
-    return jsonify(execdata), 200
+    return jsonify({"exec": execdata, "comm": commdata})
+    #return jsonify(execdata), 200
 
 
 @socketio.on('query_stats', namespace='/events')

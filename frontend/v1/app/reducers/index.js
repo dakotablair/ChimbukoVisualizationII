@@ -25,6 +25,7 @@ const INIT_STATE = {
         max_timestamp: -1
     },
     execdata: [],
+    commdata: [],
     node_key: null
 };
 
@@ -42,12 +43,16 @@ const set_stats = (state, newStats) => {
 const set_execdata = (state, newData) => {
     const { func_colors:colors } = state;
     const { config, data } = newData;
-    data.forEach(d => {
+    const { exec, comm } = data;
+    exec.forEach(d => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
         }
     });
-    return {...state, execdata: data, execdata_config: config, func_colors: colors};
+    return {...state, 
+        execdata: exec, commdata: comm, 
+        execdata_config: config, 
+        func_colors: colors};
 }
 
 const set_rank = (state, rank) => {

@@ -358,6 +358,7 @@ class ChimbukoApp extends React.Component {
                             height={400}
                             tree={tree}
                             colors={func_colors}
+                            config={execdata_config}
                             margin={{
                                 top: 40, bottom: 10, 
                                 left: 50, right: 50

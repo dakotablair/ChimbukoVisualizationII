@@ -7,15 +7,25 @@ const empty_tree = (treeid="root") => {
         count: 0,
         nodes: {},
         min_ts: Infinity,
-        max_ts: -Infinity
+        max_ts: -Infinity,
+        ranks: new Set()
     };
 }
 
 export const executionForest = createSelector(
-    [state => state.data.execdata],
-    (execdata) => {
-        const nodes = {};
+    [
+        state => state.data.execdata,
+        state => state.data.commdata
+    ],
+    (execdata, commdata) => {
+        const nodes = {}, comm = {};
         execdata.forEach(d => nodes[d.key] = d);
+        commdata.forEach(d => {
+            const key = d.execdata_key;
+            if (comm[key] == null)
+                comm[key] = [];
+            comm[key].push(d);
+        });
 
         const forest = {};
         const traverse = (d, range) => {
@@ -47,7 +57,20 @@ export const executionForest = createSelector(
             tree.count++;
             tree.min_ts = Math.min(tree.min_ts, range[0]);
             tree.max_ts = Math.max(tree.max_ts, range[1]);
-            tree.nodes[d.key] = {...d};
+            
+            let _comm = [];
+            if (comm[d.key] != null)
+                _comm = comm[d.key];
+
+            tree.nodes[d.key] = {
+                ...d, 
+                'comm': [..._comm]
+            };
+            
+            _comm.forEach(c => {
+                tree.ranks.add(c.src);
+                tree.ranks.add(c.tar);
+            });
         });
 
         return forest;

@@ -20,7 +20,7 @@ class Axis extends React.Component
     }
 
     renderAxis = () => {
-        const { width, domain, title } = this.props;
+        const { width, domain, title, direction } = this.props;
         const { tick } = this.props.options
 
         const scale = d3.scaleLinear()
@@ -28,13 +28,26 @@ class Axis extends React.Component
                         .domain(domain);
 
         const xAxis = d3.select(this.g);
+        
+        const createAxis = () => {
+
+        };
+
+        let axis;
+        if (direction === 'top')
+            axis = d3.axisTop;
+        else if (direction === 'bottom')
+            axis = d3.axisBottom;
+        else
+            axis = d3.axisTop;
+    
+
         xAxis.selectAll("text.label").remove();
         xAxis.call(
-            d3.axisTop(scale)
-                .ticks(tick.ticks)
+            axis(scale).ticks(tick.ticks)
                 .tickSizeOuter(tick.tickSizeOuter)
                 .tickPadding(tick.tickPadding)
-                .tickFormat(tick.tickFormat)
+                .tickFormat(tick.tickFormat)            
         ).append("text")
             .attr("class", "label")
             .attr("x", width)
@@ -58,6 +71,7 @@ class Axis extends React.Component
 
 Axis.defaultProps = {
     title: "Axis",
+    direction: "top",
     options: {
         tick: {
             ticks: 10,
@@ -74,6 +88,7 @@ Axis.propTypes = {
     width: PropTypes.number.isRequired,
     domain: PropTypes.arrayOf(PropTypes.number).isRequired,
     title: PropTypes.string,
+    direction: PropTypes.oneOf(["top", "bottom"]),
     options: PropTypes.object,
     tx: PropTypes.number,
     ty: PropTypes.number
