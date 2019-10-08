@@ -1,74 +1,132 @@
-from flask import request, abort, jsonify
-
+from flask import request, abort, jsonify, json, current_app
+import os
 from .. import db
-from ..models import Execution
+from ..tasks import make_async
+from ..models import ExecData, CommData
 
 from . import api
 
 
 @api.route('/executions', methods=['POST'])
+@make_async
 def new_executions():
-    """Register a list of new executions"""
-    all_exec = [Execution.create(d) for d in request.get_json()]
-    db.session.add_all(all_exec)
-    db.session.commit()
-    return "OK"
+    """
+    Register a list of new executions
+
+    - structure
+    {
+        "exec": [
+            {
+                "key": (string),
+                "name": (integer),
+                "pid": (integer),
+                "rid": (integer),
+                "tid": (integer),
+                "fid": (integer),
+                "entry": (integer),
+                "exit": (integer),
+                "runtime": (integer),
+                "exclusive": (integer),
+                "label": (integer), // 1: normal, -1: abnormal
+                "parent": (string),   // "key" of parent
+                "n_children": (integer),
+                "n_messages": (integer)
+            }
+        ],
+        "comm": [
+            {
+                todo: "execdata_key": "id"
+                "type": (string),  // SEND or RECV
+                "pid": (integer),
+                "rid": (integer),
+                "tid": (integer),
+                "src": (integer),
+                "tar": (integer),
+                "bytes": (integer),
+                "tag": (integer),
+                "timestamp": (integer),
+                "fid": (integer),
+                "name": (string)
+            }
+        ]
+    }
+    """
+    try:
+        data = request.get_json() or {}
+
+        # execdata = data.get('exec', [])
+        # commdata = data.get('comm', [])
+        app = data.get('app', None)
+        rank = data.get('rank', None)
+        step = data.get('step', None)
+        path = current_app.config.get('EXECUTION_PATH', None)
+
+        if all(v is not None for v in [app, rank, step, path]):
+            path = os.path.join(
+                path,
+                '{}'.format(app),
+                '{}'.format(rank)
+            )
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+            with open(os.path.join(path, '{}.json'.format(step)), 'w') as f:
+                json.dump(data, f)
+
+            # with open(os.path.join(path, 'comm-{}.json'.format(step)), 'w') as f:
+            #     json.dump(commdata, f)
 
 
-@api.route('/execution', methods=['POST'])
-def new_execution():
-    """Register new executions"""
-    _exec = Execution.create(request.get_json()) or {}
-    if Execution.query.filter_by(id=_exec.id).first() is not None:
-        abort(400)
-    db.session.add(_exec)
-    db.session.commit()
-    return "OK"
+        # if len(execdata):
+        #     db.engine.execute(ExecData.__table__.insert(), execdata)
+
+        # if len(commdata):
+        #     db.engine.execute(CommData.__table__.insert(), commdata)
+
+    except Exception as e:
+        print("Exception on /executions POST: ", e)
+        pass
+
+    return jsonify({}), 201
 
 
-@api.route('/execution/<id>', methods=['GET'])
-def get_execution(id):
-    """Return execution data specified by id"""
-    _exec = Execution.query.filter_by(id=id).first()
-    if _exec is None:
-        abort(400)
-    return jsonify(_exec.to_dict())
-
-
-@api.route('/executions', methods=['GET'])
+@api.route('/get_executions', methods=['GET'])
 def get_executions():
     """
-    Return a list of execution data
+    Return a list of execution data within a given time range
+    - required:
+        min_ts: minimum timestamp
     - options
-        time: [(t_entry) | t_exit | t_runtime]
+        max_ts: maximum timestamp
         order: [(asc) | desc]
-        filter_by: [(label)]
-        since: default 0
-        until
+        with_comm: 1 or (0)
+        pid: program index, default None
+        rid: rank index, default None
     """
-    col = Execution.t_entry
-    if request.args.get('time'):
-        if request.args.get('time') == 't_exit':
-            col = Execution.t_exit
-        elif request.args.get('time') == 't_runtime':
-            col = Execution.t_runtime
-
-    o = request.args.get('order', default='asc')
-    if o == 'asc':
-        all_exec = Execution.query.order_by(col.asc())
-    else:
-        all_exec = Execution.query.order_by(col.desc())
-
-    if all_exec is None:
+    min_ts = request.args.get('min_ts', None)
+    if min_ts is None:
         abort(400)
 
-    if request.args.get('label', default=None) is not None:
-        all_exec = all_exec.filter_by(label=int(request.args.get('label')))
+    # parse options
+    max_ts = request.args.get('max_ts', None)
+    order = request.args.get('order', 'asc')
+    with_comm = request.args.get('with_comm', 0)
+    pid = request.args.get('pid', None)
+    rid = request.args.get('rid', None)
 
-    if request.args.get('since', default=None) is not None:
-        all_exec = all_exec.filter(col >= int(request.args.get('since')))
+    execdata = ExecData.query.filter(ExecData.entry >= min_ts)
+    if max_ts is not None:
+        execdata = execdata.filter(ExecData.exit <= max_ts)
 
-    if request.args.get('until', default=None) is not None:
-        all_exec = all_exec.filter(col <= int(request.args.get('until')))
+    if pid is not None:
+        execdata = execdata.filter(ExecData.pid == pid)
 
-    return jsonify([d.to_dict() for d in all_exec.all()])
+    if rid is not None:
+        execdata = execdata.filter(ExecData.rid == rid)
+
+    if order == 'asc':
+        execdata = execdata.order_by(ExecData.entry.asc())
+    else:
+        execdata = execdata.order_by(ExecData.entry.desc())
+
+    return jsonify([d.to_dict(with_comm) for d in execdata.all()])

@@ -3,8 +3,8 @@ from flask import url_for as _url_for, current_app, _request_ctx_stack
 
 
 def timestamp():
-    """Return the current timestamp as an integer"""
-    return int(time.time())
+    """Return the current timestamp in milli-second as an integer"""
+    return int(round(time.time() * 1000))
 
 
 def url_for(*args, **kwargs):

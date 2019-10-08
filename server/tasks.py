@@ -23,7 +23,7 @@ tasks_bp = Blueprint('tasks', __name__)
 
 @celery.task
 def run_flask_request(environ):
-    from .wsgi import app
+    from .wsgi_aux import app
 
     if '_wsgi.input' in environ:
         environ['wsgi.input'] = BytesIO(environ['_wsgi.input'])
@@ -37,11 +37,12 @@ def run_flask_request(environ):
         # Run the route function and record the response
         try:
             rv = app.full_dispatch_request()
-        except:  # noqa E722
+        except Exception as e:  # noqa E722
             # If we are in debug mode we want to see the exception
             # Else, return a 500 error
-            if app.debug:
-                raise
+            # if app.debug:
+            #     raise
+            print('Exception on run_flask_request: ', e)
             rv = app.make_response(InternalServerError())
 
         # return rv.get_data(), rv.status_code, rv.headers
@@ -83,7 +84,10 @@ def make_async(f):
             return '', 202, {'Location': url_for('tasks.get_status', id=t.id)}
 
         # If the task already finished, return its return value as response
-        return t.info
+        # if isinstance(t.info, list):
+        #     t.info = tuple(t.info)
+        # return t.info
+        return "ok", 201
     return wrapped
 
 
@@ -103,3 +107,19 @@ def get_status(id):
 
     # data, status_code, header
     return tuple(task.info)
+
+
+@tasks_bp.route('/inspect', methods=['GET'])
+def get_info():
+    """
+    Return celery information & statistics
+    """
+    i = celery.control.inspect()
+    stats = i.stats()
+    result = {
+        'stats': stats,
+        'registered': i.registered(),
+        'active': i.active(),
+        'scheduled': i.scheduled()
+    }
+    return result

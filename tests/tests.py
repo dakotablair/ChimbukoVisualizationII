@@ -54,154 +54,286 @@ class ServerTests(unittest.TestCase):
         return body, rv.status_code, rv.headers
 
     def test_anomalystats(self):
-        import os
-        import numpy as np
+        import random
         import time
-        from runstats import Statistics
-        from collections import defaultdict
+        def get_random_stats():
+            return {
+                "count": random.randint(0,100),
+                "accumulate": random.randint(0,100),
+                "minimum": random.randint(0,100),
+                "maximum": random.randint(0,100),
+                "mean": random.randint(0,100),
+                "stddev": random.randint(0,100),
+                "skewness": random.randint(-100,100),
+                "kurtosis": random.randint(-100,100)
+            }
 
-        def get_random_data(app, rank, n_steps, offset=0):
-            return [{
-                'app_rank': '{}:{}'.format(app, rank),
-                'step': step + offset,
-                'n': np.random.randint(1, 100)
-            } for step in range(n_steps)]
+        def get_random_data(app, rank, step):
+            return {
+                "app": app,
+                "rank": rank,
+                "step": step,
+                "min_timestamp": random.randint(0,100),
+                "max_timestamp": random.randint(0, 100),
+                "n_anomalies": random.randint(0, 100),
+                "stat_id": '{}:{}'.format(app, rank)
+            }
 
-        my_stats = defaultdict(lambda: Statistics())
-        worker_id = []
+        def get_random_anomaly(app, rank, start_step, end_step):
+            return {
+                "key": '{}:{}'.format(app, rank),
+                "stats": get_random_stats(),
+                "data": [
+                    get_random_data(app, rank, step)
+                    for step in range(start_step, end_step, 1)
+                ]
+            }
 
-        N_UPDATES = 10
-        N_APPS = 3
-        N_RANKS = 10
-        N_STEPS = 100
+        def get_random_func(n_func):
+            data = [
+                {
+                    "fid": fid,
+                    "name": 'func {}'.format(fid),
+                    "stats": get_random_stats(),
+                    "inclusive": get_random_stats(),
+                    "exclusive": get_random_stats()
+                } for fid in range(n_func)
+            ]
+            return data
 
-        # post asynchrnous tasks
-        for i in range(N_UPDATES):
-            data = []
-            for app_id in range(N_APPS):
-                for rank_id in range(N_RANKS):
-                    data = data + get_random_data(
-                        app_id, rank_id, N_STEPS, i * N_STEPS)
+        # post only anomaly statistics
+        anomaly_payload = {
+            'created_at': 123,
+            'anomaly': [
+                get_random_anomaly(0, 0, 0, 10),
+                get_random_anomaly(0, 1, 0, 5),
+                get_random_anomaly(0, 2, 0, 3)
+            ]
+        }
+        r, s, h = self.post('/api/anomalydata', anomaly_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
 
-            for d in data:
-                my_stats[d['app_rank']].push(d['n'])
+        # check anomaly statistics
+        for d in anomaly_payload['anomaly']:
+            app, rank = d['key'].split(':')
+            r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
+            self.assertEqual(s, 200)
+            r = r[0]
+            self.assertEqual(r['created_at'], 123)
+            for k, v in d['stats'].items():
+                self.assertEqual(v, r['stats'][k])
 
-            r, s, h = self.post('/api/anomalydata', data)
-            self.assertEqual(s, 202)
-            worker_id.append(os.path.basename(h['Location']))
+            r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
+            self.assertEqual(s, 200)
+            for dd in d['data']:
+                step = dd['step']
+                [self.assertEqual(v, r[step][k]) for k, v in dd.items() if k in r[step]]
 
-        # wait untill all tasks are completed
-        n_tries = 0
-        while len(worker_id) and n_tries < 100:
-            to_remove = []
-            for wid in worker_id:
-                r, s, h = self.get('/tasks/status/' + worker_id[0])
-                if s == 201:
-                    to_remove.append(wid)
+        # post only func statistics
+        func_payload = {
+            'created_at': 123,
+            'func': get_random_func(10)
+        }
+        r, s, h = self.post('/api/anomalydata', func_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
 
-            worker_id = [wid for wid in worker_id if wid not in to_remove]
-            n_tries = n_tries + 1
-            time.sleep(0.1)
-        self.assertEqual(len(worker_id), 0)
+        # check func statistics
+        for fid in range(10):
+            r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
+            self.assertEqual(s, 200)
+            r = r[0]
+            for k, v in func_payload['func'][fid].items():
+                if isinstance(v, dict):
+                    for k1, v1 in v.items():
+                        self.assertEqual(r[k][k1], v1)
+                else:
+                    self.assertEqual(r[k], v)
 
-        # for the test purpose,
-        # wait until all data is written into the database
-        time.sleep(1)
+        # post both
+        payload = {
+            'created_at': 124,
+            'anomaly': [
+                get_random_anomaly(0, 0, 10, 15),
+                get_random_anomaly(0, 1, 5, 10),
+                get_random_anomaly(0, 2, 3, 8)
+            ],
+            'func': get_random_func(10)
+        }
+        r, s, h = self.post('/api/anomalydata', payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
 
-        # check statistics
-        for app_id in range(N_APPS):
-            for rank_id in range(N_RANKS):
-                r, s, h = self.get(
-                    '/api/anomalystats?app={:d}&rank={:d}'.format(
-                        app_id, rank_id))
-                self.assertEqual(s, 200)
-                self.assertEqual(r[0]['app'], app_id)
-                self.assertEqual(r[0]['rank'], rank_id)
+        # check anomaly statistics
+        for d in payload['anomaly']:
+            app, rank = d['key'].split(':')
+            r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
+            self.assertEqual(s, 200)
+            r = r[0]
+            self.assertEqual(r['created_at'], 124)
+            for k, v in d['stats'].items():
+                self.assertEqual(v, r['stats'][k])
 
-                stats = my_stats['{}:{}'.format(app_id, rank_id)]
-                self.assertEqual(r[0]['count'], len(stats))
-                self.assertAlmostEqual(r[0]['mean'], stats.mean(), delta=1.0)
-                self.assertAlmostEqual(
-                    r[0]['stddev'], stats.stddev(), delta=1.0)
-                self.assertEqual(r[0]['min'], stats.minimum())
-                self.assertEqual(r[0]['max'], stats.maximum())
+            r, s, h = self.get('/api/anomalydata?app={}&rank={}&limit=5'.format(app, rank))
+            self.assertEqual(s, 200)
+            for i, dd in enumerate(d['data']):
+                [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
 
-    # def test_executions(self):
-    #     # try to get an execution in the empty database
-    #     r, s, h = self.get('/api/execution/id_0')
-    #     self.assertEqual(s, 400)
-    #
-    #     r, s, h = self.get('/api/executions')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 0)
-    #
-    #     # post a single execution
-    #     r, s, h = self.post('/api/execution', data={
-    #         'id': 'id_0', 'pid': 0, 'rid': 0, 'tid': 0, 'fid': 0,
-    #         'fname': 'func_0', 'label': 0, 't_entry': 10, 't_exit': 60,
-    #     })
-    #     self.assertEqual(s, 200)
-    #
-    #     # get the execution
-    #     r, s, h = self.get('/api/execution/id_0')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual('id_0', r['id'])
-    #     self.assertEqual('func_0', r['fname'])
-    #     self.assertEqual(10, r['t_entry'])
-    #     self.assertEqual(60, r['t_exit'])
-    #
-    #     # post a list of executions
-    #     r, s, h = self.post('/api/executions', data=[
-    #         {
-    #             'id': 'id_1', 'pid': 0, 'rid': 0, 'tid': 0, 'fid': 1,
-    #             'fname': 'func_1', 'label': 0, 't_entry': 15, 't_exit': 20,
-    #         },
-    #         {
-    #             'id': 'id_2', 'pid': 0, 'rid': 0, 'tid': 0, 'fid': 2,
-    #             'fname': 'func_2', 'label': 1, 't_entry': 30, 't_exit': 50,
-    #         },
-    #         {
-    #             'id': 'id_3', 'pid': 0, 'rid': 0, 'tid': 0, 'fid': 1,
-    #             'fname': 'func_1', 'label': 0, 't_entry': 35, 't_exit': 40,
-    #         }
-    #     ])
-    #     self.assertEqual(s, 200)
-    #
-    #     # get executions (default)
-    #     r, s, h = self.get('/api/executions')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 4)
-    #     self.assertEqual(r[0]['t_entry'], 10)
-    #     self.assertEqual(r[1]['t_entry'], 15)
-    #     self.assertEqual(r[2]['t_entry'], 30)
-    #     self.assertEqual(r[3]['t_entry'], 35)
-    #
-    #     # get execution (use t_exit and desc order)
-    #     r, s, h = self.get('/api/executions?time=t_exit&order=desc')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 4)
-    #     self.assertEqual(r[0]['t_exit'], 60)
-    #     self.assertEqual(r[1]['t_exit'], 50)
-    #     self.assertEqual(r[2]['t_exit'], 40)
-    #     self.assertEqual(r[3]['t_exit'], 20)
-    #
-    #     # get execution (use t_entry && desc order && label=1)
-    #     r, s, h = self.get('/api/executions?time=t_entry&order=desc&label=1')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 1)
-    #     self.assertEqual(r[0]['fname'], 'func_2')
-    #
-    #     # get execution (use t_entry && desc order && label=0 && since=20)
-    #     r, s, h = self.get(
-    #         '/api/executions?time=t_entry&order=desc&label=0&since=20')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 1)
-    #     self.assertEqual(r[0]['id'], 'id_3')
-    #
-    #     # get execution (use t_entry && desc order && since=20 && until=100)
-    #     r, s, h = self.get(
-    #         '/api/executions?time=t_entry&order=desc&since=20&until=100')
-    #     self.assertEqual(s, 200)
-    #     self.assertEqual(len(r), 2)
-    #     self.assertEqual(r[0]['id'], 'id_3')
-    #     self.assertEqual(r[1]['id'], 'id_2')
+        # check func statistics
+        for fid in range(10):
+            r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
+            self.assertEqual(s, 200)
+            r = r[0]
+            for k, v in payload['func'][fid].items():
+                if isinstance(v, dict):
+                    for k1, v1 in v.items():
+                        self.assertEqual(r[k][k1], v1)
+                else:
+                    self.assertEqual(r[k], v)
+
+    def test_execdata(self):
+        import time
+        r, s, h = self.get('/api/executions')
+        self.assertEqual(s, 400)
+
+        r, s, h = self.get('/api/executions?min_ts=0')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 0)
+
+        # post execution only
+        exec_payload = {
+            'exec': [
+                {
+                    'key': 'exec 0',
+                    'name': 'func 0',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 0,
+                    'exit': 100,
+                    'runtime': 100,
+                    'exclusive': 30,
+                    'label': 1,
+                    'parent': 'root',
+                    'n_children': 1,
+                    'n_messages': 0
+                },
+                {
+                    'key': 'exec 1',
+                    'name': 'func 1',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 10,
+                    'exit': 80,
+                    'runtime': 70,
+                    'exclusive': 50,
+                    'label': 1,
+                    'parent': 'exec 0',
+                    'n_children': 1,
+                    'n_messages': 2
+                },
+                {
+                    'key': 'exec 2',
+                    'name': 'func 2',
+                    'pid': 0,
+                    'rid': 1,
+                    'tid': 2,
+                    'fid': 0,
+                    'entry': 30,
+                    'exit':  50,
+                    'runtime': 20,
+                    'exclusive': 20,
+                    'label': -1,
+                    'parent': 'exec 1',
+                    'n_children': 0,
+                    'n_messages': 4
+                }
+            ]
+        }
+        r, s, h = self.post('/api/executions', exec_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
+
+        # check
+        r, s, h = self.get('/api/executions?min_ts=10&max_ts=80')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 2)
+        for i, ex in enumerate(exec_payload['exec'][1:]):
+            for k, v in ex.items():
+                self.assertEqual(r[i][k], v)
+
+        # post communication only
+        comm_payload = {
+            'comm': [
+                {
+                    "execdata_key": "exec 1",
+                    "type": "SEND",
+                    "src": 0,
+                    "tar": 1,
+                    "size": 100,
+                    "tag": 20,
+                    "timestamp": 15
+                },
+                {
+                    "execdata_key": "exec 1",
+                    "type": "RECV",
+                    "src": 1,
+                    "tar": 0,
+                    "size": 100,
+                    "tag": 20,
+                    "timestamp": 60
+                },
+                {
+                    "execdata_key": "exec 2",
+                    "type": "SEND",
+                    "src": 2,
+                    "tar": 3,
+                    "size": 200,
+                    "tag": 40,
+                    "timestamp": 35
+                },
+                {
+                    "execdata_key": "exec 2",
+                    "type": "RECV",
+                    "src": 3,
+                    "tar": 2,
+                    "size": 50,
+                    "tag": 40,
+                    "timestamp": 45
+                }
+            ]
+        }
+        r, s, h = self.post('/api/executions', comm_payload)
+        self.assertEqual(s, 202)
+        time.sleep(0.1)
+
+        # check
+        r, s, h = self.get('/api/executions?min_ts=10&max_ts=80&with_comm=1')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 2)
+        check_comm = []
+        for ex in r:
+            check_comm += ex['comm']
+        self.assertEqual(len(check_comm), 4)
+        for i, comm in enumerate(comm_payload['comm']):
+            for k, v, in comm.items():
+                self.assertEqual(check_comm[i][k], v)
+
+        # check
+        exec_payload.update(comm_payload)
+        r, s, h = self.get('/api/executions?min_ts=-1&with_comm=1')
+        self.assertEqual(s, 200)
+        self.assertEqual(len(r), 3)
+        for i, ex in enumerate(exec_payload['exec']):
+            for k, v in ex.items():
+                if isinstance(v, dict):
+                    self.assertEqual(k, 'comm')
+                    for k2, v2 in v.items():
+                        self.assertEqual(r[i][k][k2], v)
+                else:
+                    self.assertEqual(r[i][k], v)
+

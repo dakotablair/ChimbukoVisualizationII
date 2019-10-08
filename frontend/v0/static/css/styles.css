@@ -1,0 +1,126 @@
+svg{
+    margin-right: 6px;
+}
+
+.margin{
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.candidateMargin{
+    margin-left: 1px;
+    margin-top: 4px;
+    margin-bottom: 3px;
+}
+svg.selected{
+    border: 1px solid yellow
+}
+
+circle.selected {
+	stroke: #ffff00;
+  stroke-width: 1.5px;
+}
+
+rect.selected {
+  stroke: #ffff00;
+  stroke-width: 1.5px;
+}
+
+text {
+	font-family: sans-serif;
+	font-size: 12px;
+}
+
+.well {
+	border-style: solid;
+  border-width: 0.5px;
+  border-color: #333;
+  line-height: normal;
+}
+.smallfont{
+  font-size: 12px;
+} 
+.btn{
+  font-size: 12px;
+  padding-left:4px;
+  padding-right:4px;
+  padding-top:4px;
+  padding-bottom:4px;
+}
+.nopadding{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.toggle-off {
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+.toggle.off {
+    border-color: rgba(0, 0, 0, .25);
+}
+.toggle-handle {
+    background-color: white;
+    border: thin rgba(0, 0, 0, .25) solid;
+}
+.title {
+    font-size: 20px;
+    display: block;
+}
+.title-inline {
+    font-size: 20px;
+    display: inline-block;
+}
+.label {
+    font-weight: bold;
+}
+.visrow {
+    margin: 2px;
+    display: block;
+    /* border: 1px solid black; */
+}
+.viscol {
+    display: inline-block;
+    border: 1px solid black;
+}
+/* Visualization Components */
+.streamview {
+    display: inline-block;
+}
+.historyview {
+    display: inline-block;
+}
+.scatterview {
+    display: inline-block;  
+}
+.treeview{
+    display: inline-block;
+}
+.temporalview {
+    display: inline-block;
+}
+.legendview {
+    width: 150px;
+    height: 370px;
+    overflow-y:auto;
+    display: inline-block;
+}
+.legendview-item {
+    display: table;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+.legendview-item-circle {
+    border-radius: 50%;
+    behavior: url(PIE.htc);
+    width: 20px;
+    height: 20px !important;
+    display: inline-block;
+    vertical-align: middle;
+}
+.legendview-item-text {
+    height: 20px;
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 5px;
+}
