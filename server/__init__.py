@@ -28,6 +28,8 @@ def create_app(config_name=None, main=True):
     if config_name is None:
         config_name = os.environ.get('SERVER_CONFIG', 'development')
 
+    #print(config_name, config[config_name].SQLALCHEMY_BINDS)
+
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
