@@ -16,7 +16,7 @@ cd $WORK_DIR
 #DATA_NAME="."
 
 # for data from summit
-DATA_NAME="nwchem-104-64-SST"
+DATA_NAME="nwchem-104-8-SST"
 DATA_TAR="${WORK_DIR}/${DATA_NAME}.tar.gz"
 if [ ! -d "${WORK_DIR}/${DATA_NAME}" ]; then
     tar -xzvf $DATA_TAR
