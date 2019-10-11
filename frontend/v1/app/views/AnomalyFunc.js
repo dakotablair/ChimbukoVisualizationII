@@ -114,7 +114,7 @@ class AnomalyFunc extends React.Component
                 display: true,
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
-                        return moment(tick).format('mm:ss');
+                        return moment(tick).format('ss.SSS');
                     return tick;
                     //return moment(tick).format('h:mm:ss.SSS a');
                 },                     

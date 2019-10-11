@@ -44,6 +44,7 @@ class TemporalCallStack extends React.Component
             (call stack tree area) for main rank (what would be good size, i.e. height for this area??)
             rank axis as many as in 'ranks'
         */
+        //console.log(nodes);
         ranks.delete(mainRank);
         const comm_ranks = Array.from(ranks).sort((a, b) => a - b);
         ranks.add(mainRank);
