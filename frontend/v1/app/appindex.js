@@ -38,6 +38,7 @@ import clsx from 'clsx';
 
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
+// import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
 
@@ -356,7 +357,15 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-
+                    {/* <Grid item xs={3}>
+                        <div className={classes.viewroot}>
+                            <div className={classes.row} style={{height: 261}}>
+                                    <SelectedFrame 
+                                        frames={[]}
+                                    />
+                            </div>
+                        </div>
+                    </Grid> */}
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>

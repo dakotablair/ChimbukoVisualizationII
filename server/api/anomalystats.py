@@ -337,10 +337,10 @@ def run_simulation():
     error = 'OK'
     try:
         step_ts = int(1000000)
-        min_timestamp = db.session.query(func.min(AnomalyData.min_timestamp))\
-            .filter(AnomalyData.min_timestamp > 0).scalar()
-        max_timestamp = db.session.query(func.max(AnomalyData.min_timestamp))\
-            .filter(AnomalyData.min_timestamp > 0).scalar()
+        min_timestamp = db.session.query(func.min(AnomalyData.max_timestamp))\
+            .filter(AnomalyData.max_timestamp > 0).scalar()
+        max_timestamp = db.session.query(func.max(AnomalyData.max_timestamp))\
+            .filter(AnomalyData.max_timestamp > 0).scalar()
         min_timestamp = int(min_timestamp)
         max_timestamp = int(max_timestamp)
         # print("min_timestamp: ", min_timestamp)
@@ -348,8 +348,8 @@ def run_simulation():
         for ts in range(min_timestamp, max_timestamp+step_ts, step_ts):
             data = AnomalyData.query.filter(
                 and_(
-                    AnomalyData.min_timestamp >= ts,
-                    AnomalyData.min_timestamp < ts + step_ts
+                    AnomalyData.max_timestamp >= ts,
+                    AnomalyData.max_timestamp < ts + step_ts
                 )
             )
             data = [d.to_dict() for d in data.all()]
