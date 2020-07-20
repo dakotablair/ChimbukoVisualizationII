@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-ROOT_DIR=`pwd`
-
+ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
-cd $WORK_DIR
+cd "${WORK_DIR}" #cd command must use doublequote to take space in filename
 
 # for sample data
 #SAMPLE_TAR="${WORK_DIR}/sample.tar.gz"
@@ -19,7 +18,7 @@ cd $WORK_DIR
 DATA_NAME="nwchem-104-8-SST"
 DATA_TAR="${WORK_DIR}/${DATA_NAME}.tar.gz"
 if [ ! -d "${WORK_DIR}/${DATA_NAME}" ]; then
-    tar -xzvf $DATA_TAR
+    tar -xzvf "$DATA_TAR"
 fi
 DB_DIR="${DATA_NAME}/db"
 
@@ -33,7 +32,7 @@ export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
 export EXECUTION_PATH="${WORK_DIR}/${DATA_NAME}/executions"
 
 echo "run redis ..."
-cd $ROOT_DIR
+cd "$ROOT_DIR"
 webserver/run-redis.sh &
 sleep 10
 

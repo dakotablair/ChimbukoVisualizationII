@@ -118,3 +118,6 @@ node_modules/
 
 # large files
 *.tar.gz
+
+# data
+data/nwchem-*
