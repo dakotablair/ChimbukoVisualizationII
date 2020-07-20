@@ -65,6 +65,7 @@ class Server(_Server):
                 use_debugger = True
         if use_reloader is None:
             use_reloader = app.debug
+        print("host:", host, "port:", port)
         socketio.run(app,
                      host=host,
                      port=port,

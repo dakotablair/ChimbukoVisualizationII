@@ -41,7 +41,7 @@ python manager.py celery --loglevel=info &
 sleep 10
 
 echo "run webserver ..."
-python manager.py runserver --host 0.0.0.0 --port 5001 --debug
+python manager.py runserver --host 0.0.0.0 --port 5002 --debug
 
 
 

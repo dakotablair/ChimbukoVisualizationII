@@ -57,7 +57,7 @@ def process_on_func(data:list, ts):
     func_stat = []
     for d in data:
         key_ts = '{}:{}'.format(d['fid'], ts)
-        base = {
+        base = { 
             'created_at': ts,
             'key_ts': key_ts,
             'fid': d['fid'],
@@ -382,6 +382,7 @@ def run_simulation():
 
 @api.route('/get_anomalydata', methods=['GET'])
 def get_anomalydata():
+    """xw: old pull model, consider to remove"""
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
     limit = request.args.get('limit', default=None)

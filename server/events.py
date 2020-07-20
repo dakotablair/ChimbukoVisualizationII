@@ -24,6 +24,8 @@ def push_data(data, event='updated_data',  namespace='/events'):
 
 @events.route('/query_history', methods=['POST'])
 def get_history():
+    """Return the anomaly history of selected ranks at the step"""
+    """xw: Old routine, consider to remove"""
     q = request.get_json() or {}
 
     app = 0
@@ -70,6 +72,7 @@ def get_history():
 
 @celery.task
 def push_execution(pid, rid, min_ts, max_ts, order, with_comm):
+    """Query execution data and push to socketio clients"""
     from .wsgi_aux import app
     with app.app_context():
         min_ts = int(min_ts)
@@ -128,6 +131,7 @@ def get_execution():
 
 
 def load_execution_db(pid, rid, min_ts, max_ts, order, with_comm):
+    """Query execution data from db"""
     min_ts = int(min_ts)
     execdata = ExecData.query.filter(ExecData.entry >= min_ts)
     if max_ts is not None:
@@ -152,6 +156,7 @@ def load_execution_db(pid, rid, min_ts, max_ts, order, with_comm):
 
 
 def load_execution_file(pid, rid, step, order, with_comm):
+    """Load execution data from json file"""
     path = current_app.config['EXECUTION_PATH']
     if path is None:
         return []
