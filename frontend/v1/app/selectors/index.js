@@ -19,12 +19,12 @@ export const executionForest = createSelector(
     ],
     (execdata, commdata) => {
         const nodes = {}, comm = {};
-        execdata.forEach(d => nodes[d.key] = d);
+        execdata.forEach(d => nodes[d.key] = d); // key and exec is one-to-one
         commdata.forEach(d => {
             const key = d.execdata_key;
             if (comm[key] == null)
                 comm[key] = [];
-            comm[key].push(d);
+            comm[key].push(d); // key and comm is one-to-many
         });
 
         const forest = {};
@@ -38,6 +38,7 @@ export const executionForest = createSelector(
             if (d.level != null)
                 return {level: d.level + 1, treeid: d.treeid};
 
+            // d.parent must exist in execdata
             let {level, treeid} = traverse(nodes[d.parent], range);
             if (treeid === "root")
                 treeid = d.key;

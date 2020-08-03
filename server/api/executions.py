@@ -17,7 +17,7 @@ def new_executions():
     {
         "exec": [
             {
-                "key": (string),
+                "key": (string), // "key" as pid:rid:index is unique
                 "name": (integer),
                 "pid": (integer),
                 "rid": (integer),
@@ -32,10 +32,10 @@ def new_executions():
                 "n_children": (integer),
                 "n_messages": (integer)
             }
-        ],
+        ], // "exec" entry is unique for each "key"
         "comm": [
             {
-                todo: "execdata_key": "id"
+                "execdata_key": "id"
                 "type": (string),  // SEND or RECV
                 "pid": (integer),
                 "rid": (integer),
@@ -48,7 +48,7 @@ def new_executions():
                 "fid": (integer),
                 "name": (string)
             }
-        ]
+        ] // "comm" can have multi-entries for same "execdata_key"
     }
     """
     try:
