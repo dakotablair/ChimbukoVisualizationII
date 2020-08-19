@@ -43,6 +43,8 @@ class Config(object):
     )
     EXECUTION_PATH = os.environ.get('EXECUTION_PATH', None)
 
+    PROVENANCE_DB = os.path.join(basedir, 'data/provdb_2ranks_example.unqlite')
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

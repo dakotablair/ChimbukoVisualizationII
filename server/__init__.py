@@ -6,6 +6,12 @@ from celery import Celery
 
 from config import config
 
+import pymargo
+from pymargo.core import Engine
+from pysonata.provider import SonataProvider
+from pysonata.client import SonataClient
+from pysonata.admin import SonataAdmin
+
 # Flask extensions
 db = SQLAlchemy()
 socketio = SocketIO()
@@ -23,6 +29,8 @@ from .tasks import run_flask_request  # noqa
 # Import Socket.IO events so that they are registered with Flask-SocketIO
 from . import events  # noqa
 
+# Create ProvDB object
+print("ProvDB location: ", config['PROVENANCE_DB'])
 
 def create_app(config_name=None, main=True):
     if config_name is None:
