@@ -37,11 +37,11 @@ webserver/run-redis.sh &
 sleep 10
 
 echo "run celery ..."
-python manager.py celery --loglevel=info &
+python3 manager.py celery --loglevel=info &
 sleep 10
 
 echo "run webserver ..."
-python manager.py runserver --host 0.0.0.0 --port 5002 --debug
+python3 manager.py runserver --host 0.0.0.0 --port 5002 --debug
 
 
 

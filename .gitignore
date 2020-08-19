@@ -121,3 +121,4 @@ node_modules/
 
 # data
 data/nwchem-*
+data/*.unqlite
