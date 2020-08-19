@@ -31,6 +31,7 @@ from . import events  # noqa
 
 # Create ProvDB object
 print("ProvDB location: ", os.environ.get('PROVENANCE_DB', 'no found'))
+engine = Engine('na+sm', pymargo.server)
 
 def create_app(config_name=None, main=True):
     if config_name is None:
