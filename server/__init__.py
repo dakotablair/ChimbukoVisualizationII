@@ -30,7 +30,7 @@ from .tasks import run_flask_request  # noqa
 from . import events  # noqa
 
 # Create ProvDB object
-print("ProvDB location: ", config['PROVENANCE_DB'])
+print("ProvDB location: ", os.environ.get('PROVENANCE_DB', 'no found'))
 
 def create_app(config_name=None, main=True):
     if config_name is None:
