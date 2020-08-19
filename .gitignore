@@ -118,7 +118,8 @@ node_modules/
 
 # large files
 *.tar.gz
+*.unqlite
 
 # data
-data/nwchem-*
-data/*.unqlite
+data/*
+
