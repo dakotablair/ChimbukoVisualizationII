@@ -12,6 +12,8 @@ from pysonata.provider import SonataProvider
 from pysonata.client import SonataClient
 from pysonata.admin import SonataAdmin
 
+import random
+
 events = Blueprint('events', __name__)
 
 
@@ -203,11 +205,13 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         jx9_filter = "function($record) { return " \
                     "$record.pid == %d && " \
                     "$record.rid == %d && " \
-                    "$record.io_step == %d; } " % (int(pid), int(rid), 1)  # int(step))
+                    "$record.io_step == %d; } " % (int(pid),
+                                        random.randint(0, 1),
+                                        random.randint(0, 8))
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
 
         # For the data format compatiblity
-        for record in filtered_records:
+        for record in filtered_records[:min(len(filtered_records), 10)]:
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
