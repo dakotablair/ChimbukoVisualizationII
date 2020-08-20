@@ -1,7 +1,7 @@
 import os
 from flask import g, session, Blueprint, current_app, request, jsonify, abort, json
 
-from . import db, socketio, celery, database
+from . import db, socketio, celery
 from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, ExecData, CommData
 
 from sqlalchemy import func, and_
