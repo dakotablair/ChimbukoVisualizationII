@@ -206,7 +206,17 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
                     "$record.io_step == %d; } " % (int(pid), int(rid), 1)  # int(step))
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
 
-        admin.detach_database(address, 0, 'provdb')
+        # For the data format compatiblity
+        for record in filtered_records:
+            record.key = record.event_id
+            record.name = record.func
+            record.runtime = record.runtime_total
+            record.executive = record.runtime_executive
+            record.label = -1
+            record.n_children = 5
+            record.n_messages = 5
+
+        #admin.detach_database(address, 0, 'provdb')
         #del provider
         #engine.finalize()
 

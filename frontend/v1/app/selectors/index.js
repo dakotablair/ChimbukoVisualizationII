@@ -19,7 +19,8 @@ export const executionForest = createSelector(
     ],
     (execdata, commdata) => {
         const nodes = {}, comm = {};
-        execdata.forEach(d => nodes[d.key] = d); // key and exec is one-to-one
+        execdata.forEach(d.key}); // key and exec is one-to-one
+        //---commdata untouched yet
         commdata.forEach(d => {
             const key = d.execdata_key;
             if (comm[key] == null)

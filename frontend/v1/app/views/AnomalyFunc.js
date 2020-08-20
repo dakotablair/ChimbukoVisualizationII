@@ -130,6 +130,7 @@ class AnomalyFunc extends React.Component
         return parseFuncName(name);
     }    
 
+    //------need to update--------
     getDataInfo = d => {
         const info = `pid: ${d.pid}\nrid: ${d.rid}\ntid: ${d.tid}\nfid: ${d.fid}`;
         const time = `inclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
