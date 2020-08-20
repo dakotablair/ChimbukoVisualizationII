@@ -30,8 +30,15 @@ from .tasks import run_flask_request  # noqa
 from . import events  # noqa
 
 # Create ProvDB object
-print("ProvDB location: ", os.environ.get('PROVENANCE_DB', 'no found'))
+filename = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
 engine = Engine('na+sm', pymargo.server)
+provider = SonataProvider(engine, 0)
+address = str(engine.addr())
+admin = SonataAdmin(engine)
+client = SonataClient(engine)
+
+admin.attach_database(address, 0, 'provdb', 'unqlite', "{ \"path\" : \"%s\" }" % filename)
+database = client.open(address, 0, 'provdb')
 
 def create_app(config_name=None, main=True):
     if config_name is None:

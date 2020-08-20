@@ -1,7 +1,7 @@
 import os
 from flask import g, session, Blueprint, current_app, request, jsonify, abort, json
 
-from . import db, socketio, celery
+from . import db, socketio, celery, database
 from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, ExecData, CommData
 
 from sqlalchemy import func, and_
@@ -179,6 +179,17 @@ def load_execution_file(pid, rid, step, order, with_comm):
     return data.get('exec', []), data.get('comm', [])
 
 
+def load_execution_provdb(pid, rid, step, order, with_comm):
+    """Load execution data from provdb as unqlite file"""
+    collection = database.open('anomalies')
+    jx9_filter = "function($record) { return " +
+                "$record.pid == %d && " +
+                "$record.rid == %d && " +
+                "$record.io_step == %d } " % (pid, rid, step)
+    filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
+
+    return filtered_records, []  # deal with exec first
+
 
 @celery.task
 def update_execution_db(execdata, commdata):
@@ -223,6 +234,10 @@ def get_execution_file():
     # 1. check if DB has?
     execdata = []
     # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
+    execdata, commdata = load_execution_provdb(pid, rid, order, with_comm)
+    sort_desc = order == 'desc'
+    execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
+    print("===found {} executions from provdb".format(len(execdata)))
 
     # 2. look for file?
     if len(execdata) == 0:
