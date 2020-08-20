@@ -211,7 +211,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
-            record['executive'] = record.['runtime_executive']
+            record['executive'] = record['runtime_executive']
             record['label'] = -1
             record['n_children'] = 5
             record['n_messages'] = 5
