@@ -203,7 +203,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         jx9_filter = "function($record) { return " \
                     "$record.pid == %d && " \
                     "$record.rid == %d && " \
-                    "$record.io_step == %d } " % (pid, rid, step)
+                    "$record.io_step == %d } " % (int(pid), int(rid), int(step))
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
 
         admin.detach_database(address, 0, 'provdb')
