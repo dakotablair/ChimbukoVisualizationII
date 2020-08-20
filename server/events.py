@@ -182,9 +182,9 @@ def load_execution_file(pid, rid, step, order, with_comm):
 def load_execution_provdb(pid, rid, step, order, with_comm):
     """Load execution data from provdb as unqlite file"""
     collection = database.open('anomalies')
-    jx9_filter = "function($record) { return " +
-                "$record.pid == %d && " +
-                "$record.rid == %d && " +
+    jx9_filter = "function($record) { return " \
+                "$record.pid == %d && " \
+                "$record.rid == %d && " \
                 "$record.io_step == %d } " % (pid, rid, step)
     filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
 
