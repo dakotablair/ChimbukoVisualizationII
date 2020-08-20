@@ -6,6 +6,12 @@ from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, ExecData, CommDa
 
 from sqlalchemy import func, and_
 
+import pymargo
+from pymargo.core import Engine
+from pysonata.provider import SonataProvider
+from pysonata.client import SonataClient
+from pysonata.admin import SonataAdmin
+
 events = Blueprint('events', __name__)
 
 
@@ -181,12 +187,28 @@ def load_execution_file(pid, rid, step, order, with_comm):
 
 def load_execution_provdb(pid, rid, step, order, with_comm):
     """Load execution data from provdb as unqlite file"""
-    collection = database.open('anomalies')
-    jx9_filter = "function($record) { return " \
-                "$record.pid == %d && " \
-                "$record.rid == %d && " \
-                "$record.io_step == %d } " % (pid, rid, step)
-    filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
+
+    filtered_records = []
+    # Create ProvDB object
+    filename = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
+    with Engine('na+sm', pymargo.server) as engine:
+        provider = SonataProvider(engine, 0)
+        address = str(engine.addr())
+        admin = SonataAdmin(engine)
+        client = SonataClient(engine)
+        admin.attach_database(address, 0, 'provdb', 'unqlite', "{ \"path\" : \"%s\" }" % filename)
+        database = client.open(address, 0, 'provdb')
+
+        collection = database.open('anomalies')
+        jx9_filter = "function($record) { return " \
+                    "$record.pid == %d && " \
+                    "$record.rid == %d && " \
+                    "$record.io_step == %d } " % (pid, rid, step)
+        filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
+
+        admin.detach_database(address, 0, 'provdb')
+        del provider
+        engine.finalize()
 
     return filtered_records, []  # deal with exec first
 
