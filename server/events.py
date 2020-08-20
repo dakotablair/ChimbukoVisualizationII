@@ -234,7 +234,7 @@ def get_execution_file():
     # 1. check if DB has?
     execdata = []
     # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
-    execdata, commdata = load_execution_provdb(pid, rid, order, with_comm)
+    execdata, commdata = load_execution_provdb(pid, rid, step, order, with_comm)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
     print("===found {} executions from provdb".format(len(execdata)))
