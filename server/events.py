@@ -207,8 +207,8 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
 
         admin.detach_database(address, 0, 'provdb')
-        del provider
-        engine.finalize()
+        #del provider
+        #engine.finalize()
 
     return filtered_records, []  # deal with exec first
 
@@ -273,7 +273,7 @@ def get_execution_file():
         sort_desc = order == 'desc'
         execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
-    return jsonify({"exec": execdata, "comm": commdata})
+    return jsonify({"exec": execdata[:10], "comm": commdata})
     #return jsonify(execdata), 200
 
 
