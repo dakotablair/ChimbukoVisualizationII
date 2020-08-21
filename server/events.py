@@ -209,10 +209,11 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
                                         random.randint(0, 1),
                                         random.randint(0, 8))
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
-        filtered_records_reduced = filtered_records[:min(len(filtered_records), 10)]
+        print("...sending {} records to front end...".format(len(filtered_records)))
+        #filtered_records_reduced = filtered_records[:min(len(filtered_records), 10)]
 
         # For the data format compatiblity
-        for record in filtered_records_reduced:
+        for record in filtered_records:
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
@@ -225,7 +226,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         #del provider
         #engine.finalize()
 
-    return filtered_records_reduced, []  # deal with exec first
+    return filtered_records, []  # deal with exec first
 
 
 @celery.task
