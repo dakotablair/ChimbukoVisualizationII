@@ -221,6 +221,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
             record['label'] = -1
             record['n_children'] = 5
             record['n_messages'] = 5
+            record['parent'] = None
 
         #admin.detach_database(address, 0, 'provdb')
         #del provider
@@ -289,7 +290,7 @@ def get_execution_file():
         sort_desc = order == 'desc'
         execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
-    return jsonify({"exec": execdata[:10], "comm": commdata})
+    return jsonify({"exec": execdata, "comm": commdata})
     #return jsonify(execdata), 200
 
 
