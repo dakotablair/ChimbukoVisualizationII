@@ -209,9 +209,10 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
                                         random.randint(0, 1),
                                         random.randint(0, 8))
         filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
+        filtered_records_reduced = filtered_records[:min(len(filtered_records), 10)]
 
         # For the data format compatiblity
-        for record in filtered_records[:min(len(filtered_records), 10)]:
+        for record in filtered_records_reduced:
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
@@ -224,7 +225,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         #del provider
         #engine.finalize()
 
-    return filtered_records, []  # deal with exec first
+    return filtered_records_reduced, []  # deal with exec first
 
 
 @celery.task
@@ -273,7 +274,7 @@ def get_execution_file():
     execdata, commdata = load_execution_provdb(pid, rid, step, order, with_comm)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
-    print("===found {} executions from provdb".format(len(execdata)))
+    print("===found {} executions in provdb".format(len(execdata)))
 
     # 2. look for file?
     if len(execdata) == 0:
