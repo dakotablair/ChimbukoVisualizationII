@@ -18,6 +18,7 @@ export const executionForest = createSelector(
         state => state.data.commdata
     ],
     (execdata, commdata) => {
+        console.log("Inside executionForest")
         const nodes = {}, comm = {};
         execdata.forEach(d.key); // key and exec is one-to-one
         //---commdata untouched yet
@@ -33,7 +34,6 @@ export const executionForest = createSelector(
             if (d == null)
                 return {level: 0, treeid: "root"};
             
-            console.log("inside traverse of " + d.key);
             range[0] = Math.min(range[0], d.entry);
             range[1] = Math.max(range[1], d.exit);
 
