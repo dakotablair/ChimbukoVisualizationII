@@ -221,7 +221,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
             record['label'] = -1
             record['n_children'] = 5
             record['n_messages'] = 5
-            record['parent'] = None
+            record['parent'] = 'root'
 
         #admin.detach_database(address, 0, 'provdb')
         #del provider
