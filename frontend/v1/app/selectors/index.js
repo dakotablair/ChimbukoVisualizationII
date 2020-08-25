@@ -33,6 +33,7 @@ export const executionForest = createSelector(
             if (d == null)
                 return {level: 0, treeid: "root"};
             
+            console.log("inside traverse of " + d.key);
             range[0] = Math.min(range[0], d.entry);
             range[1] = Math.max(range[1], d.exit);
 
