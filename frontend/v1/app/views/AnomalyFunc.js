@@ -135,7 +135,7 @@ class AnomalyFunc extends React.Component
     getDataInfo = d => {
         const info = `pid: ${d.pid}\nrid: ${d.rid}\ntid: ${d.tid}\nfid: ${d.fid}`;
         const time = `inclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
-        const other = `# children: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
+        const other = `# childrenwei: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
         return `${info}\n${time}\n${other}`;
     }    
 

@@ -260,7 +260,7 @@ class ChimbukoApp extends React.Component {
                             className={classes.title} 
                             variant="h6"
                         >
-                            Chimbuko Visualization
+                            Chimbuko Visualization II
                         </Typography>
                     </Toolbar>
                 </AppBar>
