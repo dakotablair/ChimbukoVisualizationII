@@ -45,6 +45,7 @@ class AnomalyFunc extends React.Component
         const item = this.chart.props.data.datasets[datasetIndex].data[index];
         if (this.props.onPointClick)
             this.props.onPointClick(item.key);
+            console.log(item.key);
         // if (this.chart == null) 
         //     return;
 

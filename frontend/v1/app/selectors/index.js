@@ -18,7 +18,7 @@ export const executionForest = createSelector(
         state => state.data.commdata
     ],
     (execdata, commdata) => {
-        console.log("Inside executionForest")
+        console.log('Inside executionForest');
         const nodes = {}, comm = {};
         execdata.forEach(d.key); // key and exec is one-to-one
         //---commdata untouched yet
@@ -41,7 +41,7 @@ export const executionForest = createSelector(
                 return {level: d.level + 1, treeid: d.treeid};
 
             // d.parent must exist in execdata
-            console.log("check parent node: " + d.parent);
+            console.log('check parent node: ' + d.parent);
             let {level, treeid} = traverse(nodes[d.parent], range);
             if (treeid === "root")
                 treeid = d.key;
