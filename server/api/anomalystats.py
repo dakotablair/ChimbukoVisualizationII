@@ -13,7 +13,7 @@ from runstats import Statistics
 from sqlalchemy import func, and_
 
 
-def process_on_anomaly(data:list, ts):
+def process_on_anomaly(data: list, ts):
     """
     process on anomaly data before adding to database
     """
@@ -47,8 +47,8 @@ def process_on_anomaly(data:list, ts):
     return anomaly_stat, anomaly_data
 
 
-def process_on_func(data:list, ts):
-    def getStat(stat:dict, prefix):
+def process_on_func(data: list, ts):
+    def getStat(stat: dict, prefix):
         d = {}
         for k, v in stat.items():
             d["{}_{}".format(prefix, k)] = v
@@ -80,7 +80,7 @@ def delete_old_anomaly():
         func.max(AnomalyStat.created_at).label('max_ts')
     ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
-    ret = [ [d.id, d.key_ts] for d in db.session.query(AnomalyStat).join(
+    ret = [[d.id, d.key_ts] for d in db.session.query(AnomalyStat).join(
         subq,
         and_(
             AnomalyStat.app == subq.c.app,
@@ -125,7 +125,7 @@ def delete_old_func():
     # )
 
 
-def push_anomaly_stat(q, anomaly_stats:list):
+def push_anomaly_stat(q, anomaly_stats: list):
 
     # query arguments
     nQueries = q.nQueries
@@ -161,7 +161,7 @@ def push_anomaly_stat(q, anomaly_stats:list):
         }, 'update_stats')
 
 
-def push_anomaly_data(q, anomaly_data:list):
+def push_anomaly_data(q, anomaly_data: list):
     q = q.to_dict()
     ranks = q.get('ranks', [])
 
@@ -256,8 +256,8 @@ def new_anomalydata():
 
         # currently this is error prone!!!
 
-        #delete_old_anomaly()
-        #delete_old_func()
+        # delete_old_anomaly()
+        # delete_old_func()
     except Exception as e:
         print(e)
 
@@ -327,7 +327,7 @@ def get_anomalystats():
 
     push_anomaly_stat(query, [st.to_dict() for st in stats])
     return jsonify({}), 200
-    #return jsonify([st.to_dict() for st in stats])
+    # return jsonify([st.to_dict() for st in stats])
 
 
 @api.route('/run_simulation', methods=['GET'])
@@ -380,6 +380,7 @@ def run_simulation():
 
     return jsonify({})
 
+
 @api.route('/get_anomalydata', methods=['GET'])
 def get_anomalydata():
     """xw: old pull model, consider to remove"""
@@ -389,8 +390,8 @@ def get_anomalydata():
 
     stat = AnomalyStat.query.filter(
         and_(
-            AnomalyStat.app==int(app),
-            AnomalyStat.rank==int(rank)
+            AnomalyStat.app == int(app),
+            AnomalyStat.rank == int(rank)
         )
     ).order_by(
         AnomalyStat.created_at.desc()

@@ -43,9 +43,10 @@ class AnomalyFunc extends React.Component
         const index = elem[0]._index;
        
         const item = this.chart.props.data.datasets[datasetIndex].data[index];
-        if (this.props.onPointClick)
+        if (this.props.onPointClick) {
             this.props.onPointClick(item.key);
             console.log(item.key);
+        }
         // if (this.chart == null) 
         //     return;
 
@@ -135,7 +136,7 @@ class AnomalyFunc extends React.Component
     getDataInfo = d => {
         const info = `pid: ${d.pid}\nrid: ${d.rid}\ntid: ${d.tid}\nfid: ${d.fid}`;
         const time = `inclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
-        const other = `# childrenwei: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
+        const other = `# children: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
         return `${info}\n${time}\n${other}`;
     }    
 

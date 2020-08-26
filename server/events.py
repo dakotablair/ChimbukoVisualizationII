@@ -1,8 +1,10 @@
 import os
-from flask import g, session, Blueprint, current_app, request, jsonify, abort, json
+from flask import g, session, Blueprint, current_app, request
+from flask import jsonify, abort, json
 
 from . import db, socketio, celery
-from .models import AnomalyStat, AnomalyData, AnomalyStatQuery, ExecData, CommData
+from .models import AnomalyStat, AnomalyData, AnomalyStatQuery
+from .models import ExecData, CommData
 
 from sqlalchemy import func, and_
 
@@ -68,7 +70,7 @@ def get_history():
             payload.append(empty_data)
             continue
 
-        data = stat.hist.filter(AnomalyData.step==step).first()
+        data = stat.hist.filter(AnomalyData.step == step).first()
         if data is None:
             payload.append(empty_data)
             continue
@@ -198,19 +200,23 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         address = str(engine.addr())
         admin = SonataAdmin(engine)
         client = SonataClient(engine)
-        admin.attach_database(address, 0, 'provdb', 'unqlite', "{ \"path\" : \"%s\" }" % filename)
+        admin.attach_database(address, 0, 'provdb', 'unqlite',
+                              "{ \"path\" : \"%s\" }" % filename)
         database = client.open(address, 0, 'provdb')
 
         collection = database.open('anomalies')
         jx9_filter = "function($record) { return " \
-                    "$record.pid == %d && " \
-                    "$record.rid == %d && " \
-                    "$record.io_step == %d; } " % (int(pid),
-                                        random.randint(0, 1),
-                                        random.randint(0, 8))
-        filtered_records = [json.loads(x) for x in collection.filter(jx9_filter)]
-        print("...sending {} records to front end...".format(len(filtered_records)))
-        #filtered_records_reduced = filtered_records[:min(len(filtered_records), 10)]
+            "$record.pid == %d && " \
+            "$record.rid == %d && " \
+            "$record.io_step == %d; } " % (int(pid),
+                                           random.randint(0, 1),
+                                           random.randint(0, 8))
+        filtered_records = [json.loads(x) for x in
+                            collection.filter(jx9_filter)]
+        print("...sending {} records to front end...".format(
+            len(filtered_records)))
+        # filtered_records_reduced = \
+        #   filtered_records[:min(len(filtered_records), 10)]
 
         # For the data format compatiblity
         for record in filtered_records:
@@ -223,9 +229,9 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
             record['n_messages'] = 5
             record['parent'] = 'root'
 
-        #admin.detach_database(address, 0, 'provdb')
-        #del provider
-        #engine.finalize()
+        admin.detach_database(address, 0, 'provdb')
+        del provider
+        engine.finalize()
 
     return filtered_records, []  # deal with exec first
 
@@ -273,14 +279,16 @@ def get_execution_file():
     # 1. check if DB has?
     execdata = []
     # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
-    execdata, commdata = load_execution_provdb(pid, rid, step, order, with_comm)
+    execdata, commdata = load_execution_provdb(pid, rid, step,
+                                               order, with_comm)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
     print("===found {} executions in provdb".format(len(execdata)))
 
     # 2. look for file?
     if len(execdata) == 0:
-        execdata, commdata = load_execution_file(pid, rid, step, order, with_comm)
+        execdata, commdata = load_execution_file(pid, rid, step,
+                                                 order, with_comm)
         from_file = True
 
     # 3. update & post processing
@@ -309,7 +317,6 @@ def query_stats(q):
     db.session.commit()
 
 
-
 # @events.route('/query_stats', methods=['POST'])
 # def post_query_stats():
 #     q = request.get_json()
@@ -318,7 +325,9 @@ def query_stats(q):
 #     statKind = q.get('statKind', 'stddev')
 #     ranks = q.get('ranks', [])
 #
-#     q = AnomalyStatQuery.create({'nQueries': nQueries, 'statKind': statKind, 'ranks': ranks})
+#     q = AnomalyStatQuery.create({'nQueries': nQueries,
+#                                  'statKind': statKind,
+#                                  'ranks': ranks})
 #     db.session.add(q)
 #     db.session.commit()
 #
@@ -333,5 +342,3 @@ def events_connect():
 @socketio.on('disconnect', namespace='/events')
 def events_disconnect():
     print('socketio.on.disconnect')
-
-
