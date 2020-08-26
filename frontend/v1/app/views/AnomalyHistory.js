@@ -101,8 +101,8 @@ class AnomalyHistory extends React.Component
         const item = data.datasets[datasetIndex].data[index];
         let {step, min_timestamp, max_timestamp, n_anomalies} = item;
         const duration = Number.parseFloat((max_timestamp - min_timestamp) / 1000).toFixed(3);
-        min_timestamp = moment(min_timestamp/1000).format('h:mm:ss.SSS a');
-        max_timestamp = moment(max_timestamp/1000).format('h:mm:ss.SSS a');
+        min_timestamp = moment(min_timestamp/1000).parser('h:mm:ss.SSS a');
+        max_timestamp = moment(max_timestamp/1000).parser('h:mm:ss.SSS a');
         
         return `# anomalies: ${n_anomalies}\nstep: ${step}\nmin_ts: ${min_timestamp}\nmax_ts: ${max_timestamp}\nduration: ${duration} msec`;
     }
