@@ -241,8 +241,6 @@ class ChimbukoApp extends React.Component {
 
         const getSelectedName = () => {
             const {app, rank, step} = execdata_config;
-            console.log("getSelectedName");
-            console.log(app, rank, step);
             return `${app}:${rank}:${step}`;
         } 
 
@@ -362,7 +360,7 @@ class ChimbukoApp extends React.Component {
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
-                                <Chip className={classes.chip} label={getSelectedName()} />
+                                {/*<Chip className={classes.chip} label={getSelectedName()} />*/}
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
