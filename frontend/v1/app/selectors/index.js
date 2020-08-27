@@ -130,7 +130,7 @@ export const executionTree = createSelector(
             d.name = d.func; // for compatibility
             d.level = i;
             if (d.exit == 0) // for the parent event that is not ended
-                d.exit = d.io_step_tend;
+                d.exit = exec.io_step_tend;
             let _comm = [];
             if (comm[d.event_id] != null)
                 _comm = comm[d.event_id];
