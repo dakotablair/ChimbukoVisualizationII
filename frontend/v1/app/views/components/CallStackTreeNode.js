@@ -65,7 +65,7 @@ class TreeNode extends React.Component
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
         let tooltip_w = 150;
-        let tooltip_h = 150;
+        let tooltip_h = 80;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
         if (y + tooltip_h + 10 > yScale.range()[1] - height/2) {
@@ -120,7 +120,7 @@ class TreeNode extends React.Component
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
                         <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.name)}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Rank: ${d.event_id.split()[0]}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`EVENT_ID: ${d.event_id}`}</tspan>
                         {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>*/}
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
@@ -155,7 +155,7 @@ class CallStackTreeNode extends React.Component
             const node = this.props.nodes[key];
             const x = xScale(node.entry),
                   y = yScale(node.level),
-                  w = xScale(node.exit) - x;
+                  w = Math.max(xScale(node.exit) - x, 1); // at least with width 1
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
             const showName = true; //xScale(node.exit) > 30 && len >= 50;  

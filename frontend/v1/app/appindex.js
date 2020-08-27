@@ -234,13 +234,15 @@ class ChimbukoApp extends React.Component {
         const funcFeat = [
             "pid", "rid", "tid", "fid", 
             "entry", "exit", "runtime", "exclusive",
-            "label", "n_children", "n_messages"
+            "label" //, "n_children", "n_messages"
         ];
 
         const { statKind, nQueries } = stats;
 
         const getSelectedName = () => {
             const {app, rank, step} = execdata_config;
+            console.log("getSelectedName");
+            console.log(execdata_config);
             return `${app}:${rank}:${step}`;
         } 
 
