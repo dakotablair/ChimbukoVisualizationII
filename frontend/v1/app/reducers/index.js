@@ -48,6 +48,16 @@ const set_execdata = (state, newData) => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
         }
+        exec.call_stack.forEach(p => {
+            if (!colors.hasOwnProperty(p.fid)) {
+                colors[p.fid] = getRandomColor();
+            }
+        });
+        exec.event_window.exec_window.forEach(p => {
+            if (!colors.hasOwnProperty(p.fid)) {
+                colors[p.fid] = getRandomColor();
+            }
+        });
     });
     return {...state, 
         execdata: exec, commdata: comm, 
