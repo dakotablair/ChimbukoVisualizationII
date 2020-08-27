@@ -363,6 +363,13 @@ class ChimbukoApp extends React.Component {
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
                                 <Chip className={classes.chip} label={getSelectedName()} />
+                                <Button 
+                                    variant="contained" 
+                                    className={classes.button} 
+                                    /*onClick={this.handleStatRefresh}*/
+                                >
+                                    {getSelectedName()}
+                                </Button>
                                 <TextField
                                     id="func-x"
                                     label="X-axis"
