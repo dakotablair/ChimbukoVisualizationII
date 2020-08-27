@@ -122,8 +122,8 @@ export const executionTree = createSelector(
         const tree = empty_tree(nodes[0].event_id);
         tree.height = nodes.length;
         tree.count = nodes.length;
-        tree.min_ts = exec.iostep_tstart;
-        tree.max_ts = exec.iostep_tend;
+        tree.min_ts = exec.io_step_tstart;
+        tree.max_ts = exec.io_step_tend;
 
         nodes.forEach((d, i) => {
             d.key = d.event_id; // for compatibility
