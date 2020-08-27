@@ -90,7 +90,6 @@ export const executionTree = createSelector(
     ],
     (node_key, execdata) => {
         console.log("...run executionTree...");
-        console.log(node_key, execdata);
 
         let exec = null; 
         execdata.forEach(d => {
@@ -100,6 +99,9 @@ export const executionTree = createSelector(
 
         if (exec == null)
             return empty_tree();
+
+        console.log("...continued...");
+        console.log(exec);
 
         const nodes = exec.event_window['exec_window'];
         nodes.concat(exec.call_stack); // Todo: may have duplicates
