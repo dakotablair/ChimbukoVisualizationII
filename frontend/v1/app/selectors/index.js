@@ -103,8 +103,8 @@ export const executionTree = createSelector(
         console.log("...continued...");
         console.log(exec);
 
-        const nodes = exec.event_window['exec_window'];
-        nodes.concat(exec.call_stack); // Todo: may have duplicates
+        const nodes = exec.call_stack;
+        //nodes.concat(exec.event_window['exec_window']); // Todo: may have duplicates
         nodes.sort((a, b) => a.entry - b.entry); // ASC order
         const comm = {};
         exec.event_window['comm_window'].forEach(d => {
@@ -114,11 +114,16 @@ export const executionTree = createSelector(
             comm[key].push(d); // key and comm is one-to-many
         });
         
+        console.log("nodes:");
+        console.log(nodes);
+        console.log("comm");
+        console.log(comm);
+
         const tree = empty_tree(nodes[0].event_id);
         tree.height = nodes.length;
         tree.count = nodes.length;
-        tree.min_ts = nodes[0].entry;
-        tree.max_ts = nodes[nodes.length-1].exit;
+        tree.min_ts = exec.iostep_tstart;
+        tree.max_ts = exec.iostep_tend;
 
         nodes.forEach((d, i) => {
             d.key = d.event_id; // for compatibility
