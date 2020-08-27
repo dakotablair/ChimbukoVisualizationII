@@ -84,8 +84,51 @@ export const executionForest = createSelector(
 export const executionTree = createSelector(
     [
         state => state.data.node_key,
-        state => executionForest(state)
+        state => state.data.execdata,
+        /*state => executionForest(state)*/
     ],
+    (node_key, execdata) => {
+        const exec = null; 
+        execdata.forEach(d => {
+            if (d.key == node_key)
+                exec = d;
+        });
+        let nodes = [];
+        nodes = exec.event_window['exec_window'];
+        nodes.concat(exec.call_stack); // Todo: may have duplicates
+        nodes.sort((a, b) => a.entry - b.entry); // ASC order
+        const comm = {};
+        exec.event_window['comm_window'].forEach(d => {
+            const key = d.execdata_key;
+            if (comm[key] == null)
+                comm[key] = [];
+            comm[key].push(d); // key and comm is one-to-many
+        });
+        
+        const tree = empty_tree(nodes[0].event_id);
+        tree.height = nodes.length;
+        tree.count = nodes.length;
+        tree.min_ts = nodes[0].entry;
+        tree.max_ts = nodes[nodes.length-1].exit;
+
+        nodes.forEach((d, i) => {
+            d.key = d.event_id; // for compatibility
+            d.name = d.func; // for compatibility
+            d.level = i;
+            let _comm = [];
+            if (comm[d.event_id] != null)
+                _comm = comm[d.event_id];
+            tree.nodes[d.event_id] = {
+                ...d,
+                'comm': [..._comm]
+            };
+            _comm.forEach(c => {
+                tree.ranks.add(c.src);
+                tree.ranks.add(c.tar);
+            });
+        });
+    }
+    /*
     (node_key, forest) => {
         let treeid = null;
         Object.keys(forest).forEach(_treeid => {
@@ -95,5 +138,5 @@ export const executionTree = createSelector(
         });
 
         return treeid != null ? forest[treeid]: empty_tree();
-    }
+    }*/
 );

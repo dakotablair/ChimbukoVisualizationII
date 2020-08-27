@@ -11,7 +11,7 @@ import {
 } from './actions/dataActions'
 
 import {
-    executionForest,
+    /*executionForest,*/
     executionTree
 } from './selectors';
 
@@ -225,7 +225,7 @@ class ChimbukoApp extends React.Component {
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors } = this.props;
-        const { forest, tree, selected_node } = this.props;
+        const { /*forest, */tree, selected_node } = this.props;
 
         const statKinds = [
             "minimum", "maximum", "mean", "stddev", "kurtosis", "skewness",
@@ -437,7 +437,7 @@ function mapStateToProps(state) {
         execdata: state.data.execdata,
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors,
-        forest: executionForest(state),
+        /*forest: executionForest(state),*/
         tree: executionTree(state),
         selected_node: state.data.node_key
     };

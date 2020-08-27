@@ -189,7 +189,7 @@ def load_execution_file(pid, rid, step, order, with_comm):
     return data.get('exec', []), data.get('comm', [])
 
 
-def load_execution_provdb(pid, rid, step, order, with_comm):
+def load_execution_provdb(pid, rid, step, order):
     """Load execution data from provdb as unqlite file"""
 
     filtered_records = []
@@ -215,8 +215,6 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
                             collection.filter(jx9_filter)]
         print("...sending {} records to front end...".format(
             len(filtered_records)))
-        # filtered_records_reduced = \
-        #   filtered_records[:min(len(filtered_records), 10)]
 
         # For the data format compatiblity
         for record in filtered_records:
@@ -233,7 +231,7 @@ def load_execution_provdb(pid, rid, step, order, with_comm):
         del provider
         engine.finalize()
 
-    return filtered_records, []  # deal with exec first
+    return filtered_records
 
 
 @celery.task
@@ -279,8 +277,7 @@ def get_execution_file():
     # 1. check if DB has?
     execdata = []
     # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
-    execdata, commdata = load_execution_provdb(pid, rid, step,
-                                               order, with_comm)
+    execdata = load_execution_provdb(pid, rid, step, order)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
     print("===found {} executions in provdb".format(len(execdata)))
@@ -299,7 +296,7 @@ def get_execution_file():
         execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
     return jsonify({"exec": execdata, "comm": commdata})
-    #return jsonify(execdata), 200
+    # return jsonify(execdata), 200
 
 
 @socketio.on('query_stats', namespace='/events')
