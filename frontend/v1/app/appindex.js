@@ -242,7 +242,7 @@ class ChimbukoApp extends React.Component {
         const getSelectedName = () => {
             const {app, rank, step} = execdata_config;
             console.log("getSelectedName");
-            console.log(execdata_config);
+            console.log(app, rank, step);
             return `${app}:${rank}:${step}`;
         } 
 
