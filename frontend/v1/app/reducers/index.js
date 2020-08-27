@@ -48,14 +48,12 @@ const set_execdata = (state, newData) => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
         }
-        console.log("set_execdata");
-        console.log(d);
-        exec.call_stack.forEach(p => {
+        d.call_stack.forEach(p => {
             if (!colors.hasOwnProperty(p.fid)) {
                 colors[p.fid] = getRandomColor();
             }
         });
-        exec.event_window.exec_window.forEach(p => {
+        d.event_window.exec_window.forEach(p => {
             if (!colors.hasOwnProperty(p.fid)) {
                 colors[p.fid] = getRandomColor();
             }
