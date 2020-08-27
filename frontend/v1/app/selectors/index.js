@@ -88,13 +88,12 @@ export const executionTree = createSelector(
         /*state => executionForest(state)*/
     ],
     (node_key, execdata) => {
-        const exec = null; 
+        let exec = null; 
         execdata.forEach(d => {
             if (d.key == node_key)
                 exec = d;
         });
-        let nodes = [];
-        nodes = exec.event_window['exec_window'];
+        const nodes = exec.event_window['exec_window'];
         nodes.concat(exec.call_stack); // Todo: may have duplicates
         nodes.sort((a, b) => a.entry - b.entry); // ASC order
         const comm = {};
