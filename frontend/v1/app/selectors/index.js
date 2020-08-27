@@ -137,6 +137,7 @@ export const executionTree = createSelector(
             });
         });
 
+        console.log("tree: " + tree);
         return tree;
     }
     /*
