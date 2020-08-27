@@ -362,7 +362,7 @@ class ChimbukoApp extends React.Component {
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
-                                <Chip className={classes.chip} label={getSelectedName()} />
+                                <Chip className={classes.chip} label="Hello" /*{getSelectedName()}*/ />
                                 <TextField
                                     id="func-x"
                                     label="X-axis"
