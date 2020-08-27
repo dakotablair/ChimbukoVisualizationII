@@ -88,6 +88,7 @@ export const executionTree = createSelector(
         /*state => executionForest(state)*/
     ],
     (node_key, execdata) => {
+        console.log("...run executionTree...")
         let exec = null; 
         execdata.forEach(d => {
             if (d.key == node_key)
