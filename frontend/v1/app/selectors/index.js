@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import { tree } from 'd3';
 
 const empty_tree = (treeid="root") => {
     return {
@@ -89,11 +90,17 @@ export const executionTree = createSelector(
     ],
     (node_key, execdata) => {
         console.log("...run executionTree...");
+        console.log(node_key, execdata);
+
         let exec = null; 
         execdata.forEach(d => {
             if (d.key == node_key)
                 exec = d;
         });
+
+        if (exec == null)
+            return empty_tree();
+
         const nodes = exec.event_window['exec_window'];
         nodes.concat(exec.call_stack); // Todo: may have duplicates
         nodes.sort((a, b) => a.entry - b.entry); // ASC order
@@ -127,6 +134,8 @@ export const executionTree = createSelector(
                 tree.ranks.add(c.tar);
             });
         });
+
+        return tree;
     }
     /*
     (node_key, forest) => {
