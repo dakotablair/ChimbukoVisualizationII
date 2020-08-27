@@ -57,9 +57,9 @@ class TreeNode extends React.Component
         const {r, g, b} = rgb;
         
         const rect_stroke = highlight
-            ? {stroke: 'red', strokeWidth: 2, strokeOpacity: 1}
+            ? {stroke: 'red', strokeWidth: 1, strokeOpacity: 1}
             : {};
-        const bg = (d.label === 1) ? "black": "red";
+        const bg = (d.hasOwnProperty('label') ? ((d.label === 1) ? "black": "red"): "black");
         const text_color = bg;
 
         // todo: smartly determine tooltip position... how??
@@ -120,15 +120,15 @@ class TreeNode extends React.Component
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
                         <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.name)}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Rank: ${d.rid}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Rank: ${d.event_id.split()[0]}`}</tspan>
+                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>*/}
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${d.runtime} usec`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.label}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${(d.exit-d.entry)/1000} ms`}</tspan>
+                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>*/}
+                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>*/}
+                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>*/}
+                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.label}`}</tspan>*/}
                     </text>
                 </Tooltip>
                 
@@ -158,7 +158,7 @@ class CallStackTreeNode extends React.Component
                   w = xScale(node.exit) - x;
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = xScale(node.exit) > 30 && len >= 50;  
+            const showName = true; //xScale(node.exit) > 30 && len >= 50;  
             const highlight = (selected && selected === node.key) ? true: false;     
             nodes.push(
                 <TreeNode
