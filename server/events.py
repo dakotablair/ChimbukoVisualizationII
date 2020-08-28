@@ -213,11 +213,19 @@ def load_execution_provdb(pid, rid, step, order):
                                            random.randint(0, 8))
         filtered_records = [json.loads(x) for x in
                             collection.filter(jx9_filter)]
-        print("...sending {} records to front end...".format(
+        print("...loaded {} records from provdb...".format(
             len(filtered_records)))
 
-        # For the data format compatiblity
+        # Temporarily remove small runtime events
+        reduced_records = []
         for record in filtered_records:
+            if record['runtime_total'] > 1000000:
+                reduced_records.push(record)
+        print("...sending {} records to front end...".format(
+            len(reduced_records)))
+
+        # For the data format compatiblity
+        for record in reduced_records:
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
@@ -231,7 +239,7 @@ def load_execution_provdb(pid, rid, step, order):
         del provider
         engine.finalize()
 
-    return filtered_records
+    return reduced_records
 
 
 @celery.task
