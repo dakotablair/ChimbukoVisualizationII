@@ -219,7 +219,7 @@ def load_execution_provdb(pid, rid, step, order):
         # Temporarily remove small runtime events
         reduced_records = []
         for record in filtered_records:
-            if record['runtime_total'] > 1000000:
+            if record['runtime_total'] > 1000:
                 reduced_records.push(record)
         print("...sending {} records to front end...".format(
             len(reduced_records)))
