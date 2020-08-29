@@ -230,11 +230,11 @@ def load_execution_provdb(pid, rid, step, order):
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
             record['exclusive'] = record['runtime_exclusive']
-            if not record.has_key('label'):
+            if 'label' not in record:
                 record['label'] = -1
             record['n_children'] = 5
             record['n_messages'] = 5
-            if not record.has_key('parent'):
+            if 'parent' not in record:
                 record['parent'] = 'root'
 
         admin.detach_database(address, 0, 'provdb')
