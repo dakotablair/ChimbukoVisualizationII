@@ -230,10 +230,12 @@ def load_execution_provdb(pid, rid, step, order):
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
             record['exclusive'] = record['runtime_exclusive']
-            record['label'] = -1
+            if not record.has_key('label'):
+                record['label'] = -1
             record['n_children'] = 5
             record['n_messages'] = 5
-            record['parent'] = 'root'
+            if not record.has_key('parent'):
+                record['parent'] = 'root'
 
         admin.detach_database(address, 0, 'provdb')
         del provider
