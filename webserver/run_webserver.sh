@@ -30,7 +30,7 @@ export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_stats.sqlite"
 export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_data.sqlite"
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
 export EXECUTION_PATH="${WORK_DIR}/${DATA_NAME}/executions"
-export PROVENANCE_DB="${WORK_DIR}/provdb/provdb_2ranks_example.unqlite"
+export PROVENANCE_DB="${WORK_DIR}/provdb/provdb.unqlite"
 
 echo "run redis ..."
 cd "$ROOT_DIR"
