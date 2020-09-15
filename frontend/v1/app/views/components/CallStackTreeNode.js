@@ -59,7 +59,7 @@ class TreeNode extends React.Component
         const rect_stroke = highlight
             ? {stroke: 'red', strokeWidth: 1, strokeOpacity: 1}
             : {};
-        const bg = (d.hasOwnProperty('label') ? ((d.label === 1) ? "black": "red"): "black");
+        const bg = (d.hasOwnProperty('is_anomaly') ? ((d.is_anomaly === true) ? "red": "black"): "black");
         const text_color = bg;
 
         // todo: smartly determine tooltip position... how??
@@ -128,7 +128,7 @@ class TreeNode extends React.Component
                         {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>*/}
                         {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>*/}
                         {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>*/}
-                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.label}`}</tspan>*/}
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.is_anomaly}`}</tspan>
                     </text>
                 </Tooltip>
                 
