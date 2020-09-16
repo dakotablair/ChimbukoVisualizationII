@@ -144,7 +144,8 @@ export const executionTree = createSelector(
         tree.min_ts = exec.io_step_tstart;
         tree.max_ts = exec.io_step_tend;
 
-        let level, max_level = 0;
+        let level = 0;
+        let max_level = 0;
         for (let i = 0; i < times.length; i++) {
             const t = times[i];
             if (t[1] == 'entry') {
