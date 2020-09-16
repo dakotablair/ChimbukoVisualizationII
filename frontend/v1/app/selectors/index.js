@@ -103,7 +103,7 @@ export const executionTree = createSelector(
         console.log(exec);
 
         // merge call_stack and exec_window
-        let nodes = exec.call_stack;
+        let nodes = []; //exec.call_stack;
         let seen = {}; // hash table for duplicity check
         nodes.forEach(d => {
             if (d.exit == 0)
