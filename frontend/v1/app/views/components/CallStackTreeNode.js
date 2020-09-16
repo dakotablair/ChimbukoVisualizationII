@@ -65,7 +65,7 @@ class TreeNode extends React.Component
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
         let tooltip_w = 150;
-        let tooltip_h = 80;
+        let tooltip_h = 90;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
         if (y + tooltip_h + 10 > yScale.range()[1] - height/2) {

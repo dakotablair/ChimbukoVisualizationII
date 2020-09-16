@@ -103,6 +103,71 @@ export const executionTree = createSelector(
         console.log("...continued...");
         console.log(exec);
 
+        // merge call_stack and exec_window
+        let nodes = exec.call_stack;
+        nodes.forEach(d => {
+            if (d.exit == 0)
+                d.exit = exec.io_step_tend;
+        });
+        nodes.concat(exec.event_window['exec_window']); // assume all has exit time
+        // remove duplicate
+        nodes = [...Set(nodes)];
+        // prepare time list
+        let times = [];
+        nodes.forEach((d, i) => {
+            times.push([d.entry, 'entry', i]);
+            times.push([d.exit, 'exit', i]);
+        });
+        // sort the time list
+        times.sort((a, b) => a[0] - b[0]); // ASC order
+
+        // prepare comm by key
+        const comm = {};
+        exec.event_window['comm_window'].forEach(d => {
+            const key = d.execdata_key;
+            if (comm[key] == null)
+                comm[key] = [];
+            comm[key].push(d); // key and comm is one-to-many
+        });
+        
+        console.log("nodes:");
+        console.log(nodes);
+        console.log("comm");
+        console.log(comm);
+
+        const tree = empty_tree(nodes[times[0][2]].event_id);
+        //tree.height = nodes.length;
+        tree.count = nodes.length;
+        tree.min_ts = exec.io_step_tstart;
+        tree.max_ts = exec.io_step_tend;
+
+        let level, max_level = 0;
+        for (let i = 0; i < times.length; i++) {
+            const t = times[i];
+            if (t[1] == 'entry') {
+                const _node = nodes[t[2]];
+                _node.key = _node.event_id;
+                _node.name = _node.func;
+                _node.level = level++;
+                if (max_level < level)
+                    max_level = level; 
+                let _comm = [];
+                if (comm[_node.event_id] != null)
+                    _comm = comm[_node.event_id];
+                tree.nodes[_node.event_id] = {
+                    ..._node,
+                    'comm': [..._comm]
+                };
+                _comm.forEach(c => {
+                    tree.ranks.add(c.src);
+                    tree.ranks.add(c.tar);
+                });
+            }
+            else // 'exit'
+                level--;       
+        }
+
+        /*-----call stack only -----
         const nodes = exec.call_stack;
         //nodes.concat(exec.event_window['exec_window']); // Todo: may have duplicates
         nodes.sort((a, b) => a.entry - b.entry); // ASC order
@@ -143,6 +208,7 @@ export const executionTree = createSelector(
                 tree.ranks.add(c.tar);
             });
         });
+        */
 
         console.log("tree: ");
         console.log(tree);
