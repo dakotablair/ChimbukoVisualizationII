@@ -108,14 +108,14 @@ export const executionTree = createSelector(
         const seen = {}; // hash table for duplicity check
         exec.call_stack.forEach(d => {
             if (d.exit == 0)
-                d.exit = exec.io_step_tend;
+                d.exit = exec.io_step_tend-1;
             seen[d.event_id] = true;
             nodes.push(d);
         });
         const range = [exec.entry, exec.exit]; // range of the local window
         exec.event_window['exec_window'].forEach(d => {
             if (d.exit == 0)
-                d.exit = exec.io_step_tend;
+                d.exit = exec.io_step_tend-1;
             if (!seen.hasOwnProperty(d.event_id)) {
                 nodes.push(d);
                 seen[d.event_id] = true;
