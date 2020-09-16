@@ -103,18 +103,23 @@ export const executionTree = createSelector(
         console.log(exec);
 
         // merge call_stack and exec_window
-        let nodes = []; //exec.call_stack;
-        let seen = {}; // hash table for duplicity check
+        const nodes = exec.call_stack;
+        const seen = {}; // hash table for duplicity check
         nodes.forEach(d => {
             if (d.exit == 0)
                 d.exit = exec.io_step_tend;
             seen[d.event_id] = true;
         });
+        const range = [exec.entry, exec.exit]; // range of the local window
         exec.event_window['exec_window'].forEach(d => {
             if (!seen.hasOwnProperty(d.event_id)) {
                 nodes.push(d);
                 seen[d.event_id] = true;
             }
+            if (d.entry < range[0])
+                range[0] = d.entry;
+            if (d.exit > range[1])
+                range[1] = d.exit;
         });
         // prepare time list
         let times = [];
@@ -134,17 +139,17 @@ export const executionTree = createSelector(
             comm[key].push(d); // key and comm is one-to-many
         });
         
-        console.log("nodes:");
-        console.log(nodes);
-        console.log("comm");
-        console.log(comm);
+        //console.log("nodes:");
+        //console.log(nodes);
+        //console.log("comm");
+        //console.log(comm);
 
         const tree = empty_tree(nodes[times[0][2]].event_id);
         tree.count = nodes.length;
 
         let level = 0;
         let max_level = 0;
-        let range = [Infinity, -Infinity];
+        
         for (let i = 0; i < times.length; i++) {
             const t = times[i];
             if (t[1] == 'entry') {
@@ -154,10 +159,6 @@ export const executionTree = createSelector(
                 _node.level = level++;
                 if (max_level < level)
                     max_level = level; 
-                if (_node.entry < range[0])
-                    range[0] = _node.entry;
-                if (_node.exit > range[1])
-                    range[1] = _node.exit;
                 let _comm = [];
                 if (comm[_node.event_id] != null)
                     _comm = comm[_node.event_id];
