@@ -141,11 +141,10 @@ export const executionTree = createSelector(
 
         const tree = empty_tree(nodes[times[0][2]].event_id);
         tree.count = nodes.length;
-        tree.min_ts = exec.io_step_tstart;
-        tree.max_ts = exec.io_step_tend;
 
         let level = 0;
         let max_level = 0;
+        let range = [Infinity, -Infinity];
         for (let i = 0; i < times.length; i++) {
             const t = times[i];
             if (t[1] == 'entry') {
@@ -155,6 +154,10 @@ export const executionTree = createSelector(
                 _node.level = level++;
                 if (max_level < level)
                     max_level = level; 
+                if (_node.entry < range[0])
+                    range[0] = _node.entry;
+                if (_node.exit > range[1])
+                    range[1] = _node.exit;
                 let _comm = [];
                 if (comm[_node.event_id] != null)
                     _comm = comm[_node.event_id];
@@ -173,6 +176,8 @@ export const executionTree = createSelector(
         }
 
         tree.height = max_level;
+        tree.min_ts = range[0];
+        tree.max_ts = range[1];
 
         console.log("tree: ");
         console.log(tree);
