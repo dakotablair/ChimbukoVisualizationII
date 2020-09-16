@@ -110,7 +110,7 @@ export const executionTree = createSelector(
         });
         nodes = nodes.concat(exec.event_window['exec_window']); // assume all has exit time
         // remove duplicate
-        uniq = [...new Set(nodes)];
+        let uniq = [...new Set(nodes)];
         console.log("before:", nodes.length, "after: ", uniq.length);
         // prepare time list
         let times = [];
