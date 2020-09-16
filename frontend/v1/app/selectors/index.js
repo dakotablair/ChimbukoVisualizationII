@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { tree } from 'd3';
+import { stratify, tree } from 'd3';
 
 const empty_tree = (treeid="root") => {
     return {
@@ -133,6 +133,8 @@ export const executionTree = createSelector(
         console.log(nodes);
         console.log("comm");
         console.log(comm);
+        console.log("trees:");
+        console.log(times);
 
         const tree = empty_tree(nodes[times[0][2]].event_id);
         tree.count = nodes.length;
@@ -157,6 +159,7 @@ export const executionTree = createSelector(
                     ..._node,
                     'comm': [..._comm]
                 };
+                console.log("added " + str(_node.key));
                 _comm.forEach(c => {
                     tree.ranks.add(c.src);
                     tree.ranks.add(c.tar);
