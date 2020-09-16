@@ -159,7 +159,7 @@ export const executionTree = createSelector(
                     ..._node,
                     'comm': [..._comm]
                 };
-                console.log("added " + str(_node.key));
+                console.log("added ", _node.key);
                 _comm.forEach(c => {
                     tree.ranks.add(c.src);
                     tree.ranks.add(c.tar);
