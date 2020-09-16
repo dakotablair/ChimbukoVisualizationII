@@ -109,16 +109,9 @@ export const executionTree = createSelector(
             if (d.exit == 0)
                 d.exit = exec.io_step_tend;
         });
-        let added = exec.event_window['exec_window'];
-        console.log('exec_window');
-        console.log(added.length);
-        nodes.concat(exec.event_window['exec_window']); // assume all has exit time
-        console.log("before");
-        console.log(nodes.length);
+        nodes = nodes.concat(exec.event_window['exec_window']); // assume all has exit time
         // remove duplicate
         nodes = [...new Set(nodes)];
-        console.log("after");
-        console.log(nodes.length);
         // prepare time list
         let times = [];
         nodes.forEach((d, i) => {
