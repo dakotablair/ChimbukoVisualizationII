@@ -110,8 +110,12 @@ export const executionTree = createSelector(
                 d.exit = exec.io_step_tend;
         });
         nodes.concat(exec.event_window['exec_window']); // assume all has exit time
+        console.log("before");
+        console.log(nodes.length);
         // remove duplicate
         nodes = [...new Set(nodes)];
+        console.log("after");
+        console.log(nodes.length);
         // prepare time list
         let times = [];
         nodes.forEach((d, i) => {
@@ -136,7 +140,6 @@ export const executionTree = createSelector(
         console.log(comm);
 
         const tree = empty_tree(nodes[times[0][2]].event_id);
-        //tree.height = nodes.length;
         tree.count = nodes.length;
         tree.min_ts = exec.io_step_tstart;
         tree.max_ts = exec.io_step_tend;
@@ -166,6 +169,8 @@ export const executionTree = createSelector(
             else // 'exit'
                 level--;       
         }
+
+        tree.height = max_level;
 
         /*-----call stack only -----
         const nodes = exec.call_stack;
