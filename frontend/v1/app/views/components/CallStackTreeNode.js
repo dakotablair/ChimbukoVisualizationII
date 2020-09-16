@@ -155,10 +155,10 @@ class CallStackTreeNode extends React.Component
             const node = this.props.nodes[key];
             const x = xScale(node.entry),
                   y = yScale(node.level),
-                  w = Math.max(xScale(node.exit) - x, 1); // at least with width 1
+                  w = Math.max(xScale(node.exit) - x, 5); // at least with width 5
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = true; //xScale(node.exit) > 30 && len >= 50;  
+            const showName = xScale(node.exit) > 30 && len >= 50;  
             const highlight = (selected && selected === node.key) ? true: false;     
             nodes.push(
                 <TreeNode

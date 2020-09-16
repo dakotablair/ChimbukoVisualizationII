@@ -22,7 +22,6 @@ export const executionForest = createSelector(
         console.log('Inside executionForest');
         const nodes = {}, comm = {};
         execdata.forEach(d => nodes[d.key] = d); // key and exec is one-to-one
-        //---commdata untouched yet
         commdata.forEach(d => {
             const key = d.execdata_key;
             if (comm[key] == null)
@@ -168,49 +167,6 @@ export const executionTree = createSelector(
         }
 
         tree.height = max_level;
-
-        /*-----call stack only -----
-        const nodes = exec.call_stack;
-        //nodes.concat(exec.event_window['exec_window']); // Todo: may have duplicates
-        nodes.sort((a, b) => a.entry - b.entry); // ASC order
-        const comm = {};
-        exec.event_window['comm_window'].forEach(d => {
-            const key = d.execdata_key;
-            if (comm[key] == null)
-                comm[key] = [];
-            comm[key].push(d); // key and comm is one-to-many
-        });
-        
-        console.log("nodes:");
-        console.log(nodes);
-        console.log("comm");
-        console.log(comm);
-
-        const tree = empty_tree(nodes[0].event_id);
-        tree.height = nodes.length;
-        tree.count = nodes.length;
-        tree.min_ts = exec.io_step_tstart;
-        tree.max_ts = exec.io_step_tend;
-
-        nodes.forEach((d, i) => {
-            d.key = d.event_id; // for compatibility
-            d.name = d.func; // for compatibility
-            d.level = i;
-            if (d.exit == 0) // for the parent event that is not ended
-                d.exit = exec.io_step_tend;
-            let _comm = [];
-            if (comm[d.event_id] != null)
-                _comm = comm[d.event_id];
-            tree.nodes[d.event_id] = {
-                ...d,
-                'comm': [..._comm]
-            };
-            _comm.forEach(c => {
-                tree.ranks.add(c.src);
-                tree.ranks.add(c.tar);
-            });
-        });
-        */
 
         console.log("tree: ");
         console.log(tree);
