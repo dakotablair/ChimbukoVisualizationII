@@ -13,6 +13,7 @@ const empty_tree = (treeid="root") => {
     };
 }
 
+/*  No longer used */
 export const executionForest = createSelector(
     [
         state => state.data.execdata,
@@ -113,6 +114,8 @@ export const executionTree = createSelector(
         });
         const range = [exec.entry, exec.exit]; // range of the local window
         exec.event_window['exec_window'].forEach(d => {
+            if (d.exit == 0)
+                d.exit = exec.io_step_tend;
             if (!seen.hasOwnProperty(d.event_id)) {
                 nodes.push(d);
                 seen[d.event_id] = true;
@@ -167,7 +170,7 @@ export const executionTree = createSelector(
                     ..._node,
                     'comm': [..._comm]
                 };
-                console.log("added ", _node.key);
+                // console.log("added ", _node.key);
                 _comm.forEach(c => {
                     tree.ranks.add(c.src);
                     tree.ranks.add(c.tar);
