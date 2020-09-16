@@ -103,12 +103,13 @@ export const executionTree = createSelector(
         console.log(exec);
 
         // merge call_stack and exec_window
-        const nodes = exec.call_stack;
+        const nodes = [];
         const seen = {}; // hash table for duplicity check
-        nodes.forEach(d => {
+        exec.call_stack.forEach(d => {
             if (d.exit == 0)
                 d.exit = exec.io_step_tend;
             seen[d.event_id] = true;
+            nodes.push(d);
         });
         const range = [exec.entry, exec.exit]; // range of the local window
         exec.event_window['exec_window'].forEach(d => {
@@ -122,7 +123,7 @@ export const executionTree = createSelector(
                 range[1] = d.exit;
         });
         // prepare time list
-        let times = [];
+        const times = [];
         nodes.forEach((d, i) => {
             times.push([d.entry, 'entry', i]);
             times.push([d.exit, 'exit', i]);
