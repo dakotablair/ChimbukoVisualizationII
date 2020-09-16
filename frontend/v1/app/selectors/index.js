@@ -104,14 +104,18 @@ export const executionTree = createSelector(
 
         // merge call_stack and exec_window
         let nodes = exec.call_stack;
+        let seen = {}; // hash table for duplicity check
         nodes.forEach(d => {
             if (d.exit == 0)
                 d.exit = exec.io_step_tend;
+            seen[d.event_id] = true;
         });
-        nodes = nodes.concat(exec.event_window['exec_window']); // assume all has exit time
-        // remove duplicate
-        let uniq = [...new Set(nodes)];
-        console.log("before:", nodes.length, "after: ", uniq.length);
+        exec.event_window['exec_window'].forEach(d => {
+            if (!seen.hasOwnProperty(d.event_id)) {
+                nodes.push(d);
+                seen[d.event_id] = true;
+            }
+        });
         // prepare time list
         let times = [];
         nodes.forEach((d, i) => {
@@ -134,8 +138,6 @@ export const executionTree = createSelector(
         console.log(nodes);
         console.log("comm");
         console.log(comm);
-        console.log("trees:");
-        console.log(times);
 
         const tree = empty_tree(nodes[times[0][2]].event_id);
         tree.count = nodes.length;
