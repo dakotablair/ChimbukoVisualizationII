@@ -108,14 +108,14 @@ export const executionTree = createSelector(
         const seen = {}; // hash table for duplicity check
         exec.call_stack.forEach(d => {
             if (d.exit == 0)
-                d.exit = exec.io_step_tend-1;
+                d.exit = exec.io_step_tend;
             seen[d.event_id] = true;
             nodes.push(d);
         });
         const range = [exec.entry, exec.exit]; // range of the local window
-        exec.event_window['exec_window'].forEach(d => {
+        /*exec.event_window['exec_window'].forEach(d => {
             if (d.exit == 0)
-                d.exit = exec.io_step_tend-1;
+                d.exit = exec.io_step_tend;
             if (!seen.hasOwnProperty(d.event_id)) {
                 nodes.push(d);
                 seen[d.event_id] = true;
@@ -124,7 +124,13 @@ export const executionTree = createSelector(
                 range[0] = d.entry;
             if (d.exit > range[1])
                 range[1] = d.exit;
-        });
+        });*/
+        // when no event_window events, restore range to time frame
+        if (range[0] == exec.entry && range[1] == exec.exit) {
+            range[0] = exec.io_step_tstart;
+            range[1] = exec.io_step_tend;
+        }
+
         // prepare time list
         const times = [];
         nodes.forEach((d, i) => {
