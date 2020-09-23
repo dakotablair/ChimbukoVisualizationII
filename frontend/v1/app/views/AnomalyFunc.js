@@ -198,7 +198,7 @@ class AnomalyFunc extends React.Component
                       },
                     zoom: {
                         enabled: true,
-                        drag: false,
+                        drag: true,
                         mode: "xy",
                         speed: 0.01
                         // limits: {
