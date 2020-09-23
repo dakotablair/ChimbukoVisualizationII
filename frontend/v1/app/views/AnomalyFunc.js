@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import { Scatter } from 'react-chartjs-2';
-// import 'chartjs-plugin-zoom';
+import 'chartjs-plugin-zoom';
 
 import { parseFuncName } from '../utils';
 
