@@ -17,6 +17,7 @@ const INIT_STATE = {
     // execution data 
     // - descending order on entry time
     func_colors: {},
+    func_ids: {},
     execdata_config: {
         app: -1,
         rank: -1,
@@ -41,12 +42,15 @@ const set_stats = (state, newStats) => {
 };
 
 const set_execdata = (state, newData) => {
-    const { func_colors:colors } = state;
+    const { func_colors:colors, func_ids:ids } = state;
     const { config, data } = newData;
     const { exec, comm } = data;
     exec.forEach(d => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
+        }
+        if (!ids.hasOwnProperty(d.fid)) {
+            ids[d.fid] = d.fid;
         }
         d.call_stack.forEach(p => {
             if (!colors.hasOwnProperty(p.fid)) {
@@ -59,10 +63,15 @@ const set_execdata = (state, newData) => {
             }
         });
     });
+    let count = 0;
+    for (var key of Object.keys(ids)) {
+        ids[key] = count++;
+    }
     return {...state, 
         execdata: exec, commdata: comm, 
         execdata_config: config, 
-        func_colors: colors};
+        func_colors: colors,
+        func_ids: ids};
 }
 
 const set_rank = (state, rank) => {

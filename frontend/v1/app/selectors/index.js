@@ -106,17 +106,9 @@ export const executionTree = createSelector(
         // merge call_stack and exec_window
         const nodes = [];
         const seen = {}; // hash table for duplicity check
-        let count = 15; // to control the level of call stack
-        /*for (let i = 0; i < exec.call_stack.length && count > 0; i++) {
-            const d = exec.call_stack[i];
-            if (d.exit == 0)
-                d.exit = exec.io_step_tend;
-            seen[d.event_id] = true;
-            nodes.push(d);
-            count--;
-        }*/
+        const max_height = 15; // to control the level of call stack
         exec.call_stack.forEach( (d, i) => {
-            if (i < count) {
+            if (i < max_height) {
                 if (d.exit == 0)
                     d.exit = exec.io_step_tend;
                 seen[d.event_id] = true;

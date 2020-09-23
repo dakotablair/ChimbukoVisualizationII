@@ -101,9 +101,11 @@ class AnomalyFunc extends React.Component
         }        
     }
 
-    getValue = (d, key) => {
+    getValue = (d, key, ids) => {
         if (key === 'entry' || key === 'exit')
             return d[key] / 1000;
+        else if (key === 'fid')
+            return ids[d[key]];
         return d[key];        
     }
 
@@ -140,7 +142,7 @@ class AnomalyFunc extends React.Component
     }    
 
     render() {
-        const { height, colors, x: xKey, y: yKey } = this.props;
+        const { height, colors, ids, x: xKey, y: yKey } = this.props;
 
         const datasets = {};
         this.props.data.forEach(d => {
@@ -151,8 +153,8 @@ class AnomalyFunc extends React.Component
                     data: []
                 };
             datasets[fid].data.push({
-                x: this.getValue(d, xKey),
-                y: this.getValue(d, yKey),
+                x: this.getValue(d, xKey, ids),
+                y: this.getValue(d, yKey, ids),
                 ...d
             });
         });

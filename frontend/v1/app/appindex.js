@@ -224,7 +224,7 @@ class ChimbukoApp extends React.Component {
 
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
-        const { execdata, execdata_config, func_colors } = this.props;
+        const { execdata, execdata_config, func_colors, func_ids } = this.props;
         const { /*forest, */tree, selected_node } = this.props;
 
         const statKinds = [
@@ -409,6 +409,7 @@ class ChimbukoApp extends React.Component {
                                     data={execdata}
                                     config={execdata_config}
                                     colors={func_colors}
+                                    ids={func_ids}
                                     x={this.state.funcX}
                                     y={this.state.funcY}
                                     onPointClick={this.handleTreeRequest}
@@ -444,6 +445,7 @@ function mapStateToProps(state) {
         execdata: state.data.execdata,
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors,
+        func_ids: state.data.func_ids,
         /*forest: executionForest(state),*/
         tree: executionTree(state),
         selected_node: state.data.node_key
