@@ -193,18 +193,24 @@ class AnomalyFunc extends React.Component
                     pan: {
                         enabled: true,
                         mode: "xy",
-                        speed: 0.01,
-                        threshold: 10
+                        speed: 10,
+                        threshold: 10,
+                        onPan: function({chart}) {console.log("I am panning!");},
+                        onPanComplete: function({chart}) {console.log("I was panned!");}
                       },
                     zoom: {
                         enabled: true,
                         drag: true,
                         mode: "xy",
-                        speed: 0.01,
-                        limits: {
-                           max: 10,
-                           min: 0.5
-                        }
+                        speed: 0.1,
+                        threshold: 2,
+                        sensitivity: 3,
+                        onZoom: function({chart}) {console.log("I am zooming!");},
+                        onZoomComplete: function({chart}) {console.log("I was zoomed!");}
+                        // limits: {
+                        //    max: 10,
+                        //    min: 0.5
+                        // }
                     }                    
                 }}
             />
