@@ -110,18 +110,24 @@ class AnomalyFunc extends React.Component
         return d[key];        
     }
 
-    getAxis = (key) => {
+    getAxis = (key, ids) => {
         let tmin = Infinity;
         let tmax = -Infinity;
         this.props.data.forEach(d => {
-            tmin = Math.min(d[key], tmin);
-            tmax = Math.max(d[key], tmax);
+            if (key === 'fid') {
+                tmin = Math.min(ids[d[key]], tmin);
+                tmax = Math.max(ids[d[key]], tmax);
+            }
+            else {
+                tmin = Math.min(d[key], tmin);
+                tmax = Math.max(d[key], tmax);
+            }
         });
         console.log("min: " + tmin + "max: " + tmax);
         return {
             type: 'linear',
             ticks: {       
-                display: false,
+                display: true,
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
@@ -182,8 +188,8 @@ class AnomalyFunc extends React.Component
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [this.getAxis(xKey)],
-                        yAxes: [this.getAxis(yKey)]
+                        xAxes: [this.getAxis(xKey, ids)],
+                        yAxes: [this.getAxis(yKey, ids)]
                     },
                     tooltips: {
                         callbacks: {
