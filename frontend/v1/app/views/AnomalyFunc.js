@@ -39,7 +39,7 @@ class AnomalyFunc extends React.Component
         if (elem.length == 0 || this.chart == null)
             return;
 
-        this.chart.chart.resetZoom();
+        // this.chart.chart.resetZoom();
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
        
@@ -118,7 +118,7 @@ class AnomalyFunc extends React.Component
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
-                    return tick;
+                    return tick.format('ss.s');
                     //return moment(tick).format('h:mm:ss.SSS a');
                 },                     
             },
