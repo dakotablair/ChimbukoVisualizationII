@@ -118,9 +118,10 @@ class AnomalyFunc extends React.Component
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
-                    return tick.format('ss.s');
+                    return tick;
                     //return moment(tick).format('h:mm:ss.SSS a');
-                },                     
+                },
+                stepSize: 1                     
             },
             scaleLabel: {
                 display: true,
@@ -191,15 +192,15 @@ class AnomalyFunc extends React.Component
                         display: true,
                         position: 'right'
                     },
-                    //pan: {
-                    //    enabled: true,
-                    //    mode: "xy",
-                    //    speed: 1
-                    //    //threshold: 10
-                    //  },
-                    zoom: {
+                    pan: {
                         enabled: true,
-                        drag: false,
+                        mode: "xy",
+                        speed: 1
+                        //threshold: 10
+                      },
+                    zoom: {
+                        enabled: false,
+                        drag: true,
                         mode: "xy",
                         speed: 0.01,
                         // threshold: 2,
