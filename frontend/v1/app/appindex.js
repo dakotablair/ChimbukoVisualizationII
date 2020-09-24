@@ -364,7 +364,7 @@ class ChimbukoApp extends React.Component {
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
-                                    /*onClick={this.handleStatRefresh}*/
+                                    /*onClick={this.chart.resetZoom()}*/
                                 >
                                     {getSelectedName()}
                                 </Button>

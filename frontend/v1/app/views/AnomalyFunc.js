@@ -39,6 +39,7 @@ class AnomalyFunc extends React.Component
         if (elem.length == 0 || this.chart == null)
             return;
 
+        this.chart.resetZoom();
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
        
@@ -200,7 +201,7 @@ class AnomalyFunc extends React.Component
                         enabled: true,
                         drag: false,
                         mode: "xy",
-                        speed: 0.1,
+                        speed: 0.01,
                         // threshold: 2,
                         // sensitivity: 3,
                         limits: {
