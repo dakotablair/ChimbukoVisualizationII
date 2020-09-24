@@ -117,10 +117,11 @@ class AnomalyFunc extends React.Component
             tmin = Math.min(d[key], tmin);
             tmax = Math.max(d[key], tmax);
         });
+        console.log("min: " + tmin + "max: " + tmax);
         return {
             type: 'linear',
             ticks: {       
-                display: true,
+                display: false,
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
