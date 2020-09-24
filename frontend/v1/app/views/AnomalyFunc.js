@@ -114,8 +114,8 @@ class AnomalyFunc extends React.Component
         let tmin = Infinity;
         let tmax = -Infinity;
         this.props.data.forEach(d => {
-            tmin = min(d[key], tmin);
-            tmax = max(d[key], tmax);
+            tmin = Math.min(d[key], tmin);
+            tmax = Math.max(d[key], tmax);
         });
         return {
             type: 'linear',
