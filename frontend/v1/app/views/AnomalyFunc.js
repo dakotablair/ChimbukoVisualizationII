@@ -111,17 +111,27 @@ class AnomalyFunc extends React.Component
     }
 
     getAxis = (key) => {
+        let tmin = Infinity;
+        let tmax = -Infinity;
+        this.props.data.forEach(d => {
+            tmin = min(d[key], tmin);
+            tmax = max(d[key], tmax);
+        });
         return {
             type: 'linear',
             ticks: {       
                 display: true,
-                //userCallback: tick => {
-                //    if (key === 'entry' || key === 'exit')
-                //        return moment(tick).format('ss.SSS');
-                //    return tick;
-                //    //return moment(tick).format('h:mm:ss.SSS a');
-                //},
-                //stepSize: 1                     
+                userCallback: tick => {
+                    if (key === 'entry' || key === 'exit')
+                        return moment(tick).format('ss.SSS');
+                    return tick;
+                    //return moment(tick).format('h:mm:ss.SSS a');
+                },
+                precision: 1,
+                maxRotation: 0,
+                minRotation: 0,
+                min: tmin,
+                max: tmax                 
             },
             scaleLabel: {
                 display: true,
