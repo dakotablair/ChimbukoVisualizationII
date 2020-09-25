@@ -223,7 +223,7 @@ class AnomalyFunc extends React.Component
                     },
                     legend: {
                         display: true,
-                        position: 'right',
+                        position: 'bottom',
                         fullWidth: false
                     },
                     pan: {
