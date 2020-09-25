@@ -123,6 +123,10 @@ class AnomalyFunc extends React.Component
                 tmax = Math.max(d[key], tmax);
             }
         });
+        if (key === 'entry' || key === 'exit') {
+            tmin = tmin / 1000; //moment(tmin).format('ss.SSS');
+            tmax = tmax / 1000; //moment(tmax).format('ss.SSS');
+        }
         console.log("min: " + tmin + "max: " + tmax);
         return {
             type: 'linear',
