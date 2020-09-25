@@ -403,7 +403,7 @@ class ChimbukoApp extends React.Component {
                                 }
                                 </TextField>                                                       
                             </div>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{overflow: scroll}}>
                                 <AnomalyFunc 
                                     height={400}
                                     data={execdata}
