@@ -22,16 +22,20 @@ class AnomalyFunc extends React.Component
     shouldComponentUpdate(nextProps, nextState) {
         console.log("...should component update...");
 
-        const { config:nextConfig, data:nextData } = nextProps;
-        const { config:currConfig, data:currData } = this.props;
+        // const { config:nextConfig, data:nextData } = nextProps;
+        // const { config:currConfig, data:currData } = this.props;
 
-        const is_same_config = (nextConfig.x === currConfig.x && nextConfig.y === currConfig.y);
         // const is_same_config = Object.keys(currConfig).map( key => {
         //     return currConfig[key] === nextConfig[key];
         // }).every(v => v);
 
         // const is_same_data = nextData.length === currData.length;
 
+        const {x: xNext, y: yNext} = nextProps;
+        const {x: xCurr, y: yCurr} = this.props;
+        const is_same_config = (xNext === xCurr && yNext === yCurr);
+        console.log("xNext: " + xNext + " yNext: " + yNext + "\nxCurr: "
+                + xCurr + " yCurr: " + yCurr);
         if (is_same_config)
             return false;
         return true;
