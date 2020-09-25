@@ -167,8 +167,8 @@ class AnomalyFunc extends React.Component
 
     getDataInfo = d => {
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `entry: ${moment(d.entry).format('h:mm:ss.SSS a')}
-            exit: ${moment(d.exit).format('h:mm:ss.SSS a')}
+        const time = `entry: ${moment(d.entry).format('h:mm:ss.SSS')}\n
+            exit: ${moment(d.exit).format('h:mm:ss.SSS')}\n
             inclusive: ${d.runtime/1000}ms\nexclusive: ${d.exclusive/1000}ms`;
         const other = `is_gpu: ${d.is_gpu_event}`; 
         
