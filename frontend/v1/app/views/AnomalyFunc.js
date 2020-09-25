@@ -20,7 +20,7 @@ class AnomalyFunc extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("...should component update...");
+        //console.log("...should component update...");
 
         // const { config:nextConfig, data:nextData } = nextProps;
         // const { config:currConfig, data:currData } = this.props;
@@ -31,6 +31,8 @@ class AnomalyFunc extends React.Component
 
         // const is_same_data = nextData.length === currData.length;
 
+        // redraw only when it is new axis setting or new data
+        // so when zoomed and click one point won't redraw this view
         const {x: xNext, y: yNext, config:nextConfig} = nextProps;
         const {x: xCurr, y: yCurr, config:currConfig} = this.props;
         const is_same_coor = xNext === xCurr && yNext === yCurr;
@@ -118,10 +120,11 @@ class AnomalyFunc extends React.Component
     }
 
     getAxis = (key, ids) => {
+        // prepare correct axis range for zooming
         let tmin = 0;
         let tmax = 1;
         this.props.data.forEach(d => {
-            if (key === 'fid') {
+            if (key === 'fid') { // fid uses index as its axis
                 tmin = Math.min(ids[d[key]], tmin);
                 tmax = Math.max(ids[d[key]], tmax);
             }
@@ -134,20 +137,20 @@ class AnomalyFunc extends React.Component
             tmin = tmin / 1000;
             tmax = tmax / 1000;
         }
-        console.log("min: " + tmin + "max: " + tmax);
+        // console.log("min: " + tmin + "max: " + tmax);
         return {
             type: 'linear',
             ticks: {       
                 display: true,
-                precision: 0,
+                precision: 0, // axis tick must round up
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
-                    return Math.floor(tick);
-                //    //return moment(tick).format('h:mm:ss.SSS a');
+                    return Math.floor(tick); // make sure to round up
+                    // return moment(tick).format('h:mm:ss.SSS a');
                 },
-                maxRotation: 0,
-                minRotation: 0,
+                maxRotation: 0, // prevent tick text rotation
+                minRotation: 0, // prevent tick text rotation
                 min: tmin,
                 max: tmax                 
             },
@@ -164,7 +167,9 @@ class AnomalyFunc extends React.Component
 
     getDataInfo = d => {
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `entry: ${d.entry}\nexit: ${d.exit}\ninclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
+        const time = `entry: ${moment(d.entry).format('h:mm:ss.SSS a')}\n
+            exit: ${moment(d.exit).format('h:mm:ss.SSS a')}\n
+            inclusive: ${d.runtime/1000}ms\nexclusive: ${d.exclusive/1000}ms`;
         const other = `is_gpu: ${d.is_gpu_event}`; 
         
         return `${info}\n${time}\n${other}`;
