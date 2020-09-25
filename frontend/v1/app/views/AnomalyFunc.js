@@ -133,12 +133,12 @@ class AnomalyFunc extends React.Component
             ticks: {       
                 display: true,
                 precision: 0,
-                //userCallback: tick => {
-                //    if (key === 'entry' || key === 'exit')
-                //        return moment(tick).format('ss.SSS');
-                //    return tick;
+                userCallback: tick => {
+                    if (key === 'entry' || key === 'exit')
+                        return moment(tick).format('ss.SSS');
+                    return Math.floor(tick);
                 //    //return moment(tick).format('h:mm:ss.SSS a');
-                //},
+                },
                 maxRotation: 0,
                 minRotation: 0,
                 min: tmin,
