@@ -222,7 +222,7 @@ class AnomalyFunc extends React.Component
                         }
                     },
                     legend: {
-                        display: true,
+                        display: false,
                         position: 'bottom',
                         fullWidth: false
                     },
@@ -236,10 +236,6 @@ class AnomalyFunc extends React.Component
                         drag: false,
                         mode: "xy",
                         speed: 0.05
-                        //limits: {
-                        //   max: 10,
-                        //   min: 0.5
-                        //}
                     }                    
                 }}
             />
