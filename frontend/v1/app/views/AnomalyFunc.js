@@ -31,12 +31,14 @@ class AnomalyFunc extends React.Component
 
         // const is_same_data = nextData.length === currData.length;
 
-        const {x: xNext, y: yNext} = nextProps;
-        const {x: xCurr, y: yCurr} = this.props;
-        const is_same_config = (xNext === xCurr && yNext === yCurr);
-        console.log("xNext: " + xNext + " yNext: " + yNext + "\nxCurr: "
-                + xCurr + " yCurr: " + yCurr);
-        if (is_same_config)
+        const {x: xNext, y: yNext, config:nextConfig} = nextProps;
+        const {x: xCurr, y: yCurr, config:currConfig} = this.props;
+        const is_same_coor = xNext === xCurr && yNext === yCurr;
+        const is_same_config = Object.keys(currConfig).map( key => {
+            return currConfig[key] === nextConfig[key];
+        }).every(v => v);
+        
+        if (is_same_coor && is_same_config)
             return false;
         return true;
     }
