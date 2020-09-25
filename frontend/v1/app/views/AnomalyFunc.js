@@ -135,7 +135,10 @@ class AnomalyFunc extends React.Component
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
-                    return tick;
+                    else if (key === 'runtime' || key === 'exclusive')
+                        return moment(tick).format('ss.SSS');
+                    else
+                        return moment(tick).format('ss');
                     //return moment(tick).format('h:mm:ss.SSS a');
                 },
                 precision: 1,
