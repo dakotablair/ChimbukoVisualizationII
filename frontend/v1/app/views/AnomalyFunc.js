@@ -20,26 +20,27 @@ class AnomalyFunc extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return true;
-        // const { config:nextConfig, data:nextData } = nextProps;
-        // const { config:currConfig, data:currData } = this.props;
+        console.log("...should component update...");
 
+        const { config:nextConfig, data:nextData } = nextProps;
+        const { config:currConfig, data:currData } = this.props;
+
+        const is_same_config = (nextConfig.x === currConfig.x && nextConfig.y === currConfig.y);
         // const is_same_config = Object.keys(currConfig).map( key => {
         //     return currConfig[key] === nextConfig[key];
         // }).every(v => v);
 
         // const is_same_data = nextData.length === currData.length;
 
-        // if (is_same_config && is_same_data)
-        //     return false;
-        // return true;
+        if (is_same_config)
+            return false;
+        return true;
     }
 
     handleChartClick = elem => {
         if (elem.length == 0 || this.chart == null)
             return;
 
-        // this.chart.chart.resetZoom();
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
        
@@ -155,13 +156,12 @@ class AnomalyFunc extends React.Component
         return parseFuncName(name);
     }    
 
-    //------need to update--------
     getDataInfo = d => {
-        const info = `pid: ${d.pid}\nrid: ${d.rid}\ntid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `inclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
-        const other = `label: ${d.label}`; 
-        //`# children: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
-        return `${info}\n${time}`; //\n${other}`;
+        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid}\nfid: ${d.fid}`;
+        const time = `entry: ${d.entry}\nexit: ${d.exit}\ninclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
+        const other = `is_gpu: ${d.is_gpu_event}`; 
+        
+        return `${info}\n${time}\n${other}`;
     }    
 
     render() {
@@ -222,7 +222,7 @@ class AnomalyFunc extends React.Component
                         enabled: true,
                         drag: false,
                         mode: "xy",
-                        speed: 0.01
+                        speed: 0.1
                         //limits: {
                         //   max: 10,
                         //   min: 0.5
