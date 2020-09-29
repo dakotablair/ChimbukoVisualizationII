@@ -168,16 +168,18 @@ class AnomalyFunc extends React.Component
     getDataInfo = d => {
         const entry = moment(d.entry/1000).format('h:mm:ss.SSS a');
         const exit = moment(d.exit/1000).format('h:mm:ss.SSS a');
+        const func_mean = d.func_stats.mean/1000;
+        const func_stddev = d.func_stats.stddev/1000;
 
-        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `entry: ${entry}\nexit: ${exit}\ntotal_runtime: ${d.runtime/1000}ms\nexclusive_runtime: ${d.exclusive/1000}ms`;
-        const funcstats = `normal mean runtime: ${d.func_stats.mean/1000}ms\nnormal stddev: ${d.func_stats.stddev/1000}ms\nencountered: ${d.func_stats.count}`;
+        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid}\n`;
+        const time = `entry:\t${entry}\nexit:\t${exit}\ntotal_runtime:\t${d.runtime/1000}ms\nexclusive_runtime:\t${d.exclusive/1000}ms\n`;
+        const funcstats = `Normal function info:\nmean runtime:\t${func_mean.toPrecision(4)}ms\nstddev:\t${func_stddev.toPrecision(4)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
         let other = ``;
         
         if (d.is_gpu_event)
-            other = `gpu context: ${d.gpu_location.context} gpu device: ${d.gpu_location.device}\ngpu stream: ${d.gpu_location.stream} gpu thread: ${d.gpu_location.thread}`;
+            other = `\nGPU info:\ncontext: ${d.gpu_location.context} device: ${d.gpu_location.device} stream: ${d.gpu_location.stream} thread: ${d.gpu_location.thread}`;
         
-        return `${info}\n${time}\n${funcstats}\n${other}`;
+        return `${info}${time}\n${funcstats}${other}`;
     }    
 
     render() {
