@@ -225,6 +225,7 @@ def load_execution_provdb(pid, rid, step, order):
         #     len(reduced_records)))
 
         # For the data format compatiblity
+        gpu_count = 0
         for record in filtered_records:  # reduced_records:
             record['key'] = record['event_id']
             record['name'] = record['func']
@@ -232,6 +233,9 @@ def load_execution_provdb(pid, rid, step, order):
             record['exclusive'] = record['runtime_exclusive']
             if 'label' not in record:
                 record['label'] = -1
+            if 'is_gpu_event':
+                gpu_count += 1
+        print("...{} are gpu events...".format(gpu_count))
 
         admin.detach_database(address, 0, 'provdb')
         del provider
