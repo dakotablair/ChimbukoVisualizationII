@@ -217,23 +217,21 @@ def load_execution_provdb(pid, rid, step, order):
             len(filtered_records)))
 
         # Temporarily remove small runtime events
-        reduced_records = []
-        for record in filtered_records:
-            if record['runtime_total'] > 1000:
-                reduced_records.append(record)
-        print("...sending {} records to front end...".format(
-            len(reduced_records)))
+        # reduced_records = []
+        # for record in filtered_records:
+        #     if record['runtime_total'] > 1000:
+        #         reduced_records.append(record)
+        # print("...sending {} records to front end...".format(
+        #     len(reduced_records)))
 
         # For the data format compatiblity
-        for record in reduced_records:
+        for record in filtered_records:  # reduced_records:
             record['key'] = record['event_id']
             record['name'] = record['func']
             record['runtime'] = record['runtime_total']
             record['exclusive'] = record['runtime_exclusive']
             if 'label' not in record:
                 record['label'] = -1
-            record['n_children'] = 5
-            record['n_messages'] = 5
             if 'parent' not in record:
                 record['parent'] = 'root'
 
@@ -241,7 +239,7 @@ def load_execution_provdb(pid, rid, step, order):
         del provider
         engine.finalize()
 
-    return reduced_records
+    return filtered_records  # reduced_records
 
 
 @celery.task
