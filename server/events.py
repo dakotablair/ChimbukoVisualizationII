@@ -233,7 +233,7 @@ def load_execution_provdb(pid, rid, step, order):
             record['exclusive'] = record['runtime_exclusive']
             if 'label' not in record:
                 record['label'] = -1
-            if 'is_gpu_event':
+            if record['is_gpu_event']:
                 gpu_count += 1
         print("...{} are gpu events...".format(gpu_count))
 
