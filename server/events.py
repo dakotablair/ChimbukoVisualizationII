@@ -232,8 +232,6 @@ def load_execution_provdb(pid, rid, step, order):
             record['exclusive'] = record['runtime_exclusive']
             if 'label' not in record:
                 record['label'] = -1
-            if 'parent' not in record:
-                record['parent'] = 'root'
 
         admin.detach_database(address, 0, 'provdb')
         del provider

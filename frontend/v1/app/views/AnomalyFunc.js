@@ -170,10 +170,14 @@ class AnomalyFunc extends React.Component
         const exit = moment(d.exit/1000).format('h:mm:ss.SSS a');
 
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `entry: ${entry}\nexit: ${exit}\ninclusive: ${d.runtime/1000}ms\nexclusive: ${d.exclusive/1000}ms`;
-        const other = `is_gpu: ${d.is_gpu_event}`; 
+        const time = `entry: ${entry}\nexit: ${exit}\ntotal_runtime: ${d.runtime/1000}ms\nexclusive_runtime: ${d.exclusive/1000}ms`;
+        const funcstats = `mean: ${d.func_stats.mean}\nstddev: ${d.func_stats.stddev}\ncount: ${d.func_stats.count}`;
+        let other = ``;
         
-        return `${info}\n${time}\n${other}`;
+        if (d.is_gpu_event)
+            other = `gpu context: ${d.gpu_location.context} gpu device: ${d.gpu_location.device}\ngpu stream: ${d.gpu_location.stream} gpu thread: ${d.gpu_location.thread}`;
+        
+        return `${info}\n${time}\n${funcstats}\n${other}`;
     }    
 
     render() {
