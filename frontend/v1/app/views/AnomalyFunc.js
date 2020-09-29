@@ -172,8 +172,8 @@ class AnomalyFunc extends React.Component
         const func_stddev = d.func_stats.stddev/1000;
 
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid}\n`;
-        const time = `entry:\t${entry}\nexit:\t${exit}\ntotal_runtime:\t${d.runtime/1000}ms\nexclusive_runtime:\t${d.exclusive/1000}ms\n`;
-        const funcstats = `Normal function info:\nmean runtime:\t${func_mean.toPrecision(4)}ms\nstddev:\t${func_stddev.toPrecision(4)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
+        const time = `entry:\t${entry}\nexit:\t${exit}\nruntime_total:\t${d.runtime_total/1000}ms\nruntime_exclusive:\t${d.runtime_exclusive/1000}ms\n`;
+        const funcstats = `Normal function info:\nmean runtime:\t${func_mean.toPrecision(3)}ms\nstddev:\t${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
         let other = ``;
         
         if (d.is_gpu_event)

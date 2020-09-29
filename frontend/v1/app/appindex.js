@@ -233,8 +233,8 @@ class ChimbukoApp extends React.Component {
         ];
         const funcFeat = [
             "pid", "rid", "tid", "fid", 
-            "entry", "exit", "runtime", "exclusive",
-            "label" //, "n_children", "n_messages"
+            "entry", "exit", "runtime_total", "runtime_exclusive",
+            "is_gpu_event"
         ];
 
         const { statKind, nQueries } = stats;
