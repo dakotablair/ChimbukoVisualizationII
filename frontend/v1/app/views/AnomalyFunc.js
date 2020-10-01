@@ -54,7 +54,7 @@ class AnomalyFunc extends React.Component
        
         const item = this.chart.props.data.datasets[datasetIndex].data[index];
         if (this.props.onPointClick)
-            this.props.onPointClick(item.key);
+            this.props.onPointClick(item.event_id);
         // if (this.chart == null) 
         //     return;
 
@@ -172,8 +172,8 @@ class AnomalyFunc extends React.Component
         const func_stddev = d.func_stats.stddev/1000;
 
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid}\n`;
-        const time = `entry:\t${entry}\nexit:\t${exit}\nruntime_total:\t${d.runtime_total/1000}ms\nruntime_exclusive:\t${d.runtime_exclusive/1000}ms\n`;
-        const funcstats = `Normal function info:\nmean runtime:\t${func_mean.toPrecision(3)}ms\nstddev:\t${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
+        const time = `entry: ${entry}\nexit: ${exit}\nruntime_total: ${d.runtime_total/1000}ms\nruntime_exclusive: ${d.runtime_exclusive/1000}ms\n`;
+        const funcstats = `Normal function info:\nmean runtime: ${func_mean.toPrecision(3)}ms\nstddev: ${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
         let other = ``;
         
         if (d.is_gpu_event)
@@ -218,7 +218,7 @@ class AnomalyFunc extends React.Component
                             label: (tooltipItem, data) => {
                                 const {datasetIndex, index} = tooltipItem;
                                 const d = data.datasets[datasetIndex].data[index];
-                                return this.getDisplayName(d.name);
+                                return this.getDisplayName(d.func);
                             },
                             afterBody: (tooltipItem, data) => {
                                 const {datasetIndex, index} = tooltipItem[0];

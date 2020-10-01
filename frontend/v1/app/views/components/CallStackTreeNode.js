@@ -112,14 +112,14 @@ class TreeNode extends React.Component
                     fill={text_color}
                 >
                     { (showLabel)
-                        ? parseFuncName(d.name)
+                        ? parseFuncName(d.func)
                         : ""
                     }
                 </text>
                 <Tooltip triggerRef={this.rect}>
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
-                        <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.name)}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.func)}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`EVENT_ID: ${d.event_id}`}</tspan>
                         {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>*/}
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
@@ -159,7 +159,7 @@ class CallStackTreeNode extends React.Component
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
             const showName = xScale(node.exit) > 30 && len >= 50;  
-            const highlight = (selected && selected === node.key) ? true: false;     
+            const highlight = (selected && selected === node.event_id) ? true: false;     
             nodes.push(
                 <TreeNode
                     key={`node-${key}`}

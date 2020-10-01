@@ -24,17 +24,17 @@ def push_data(data, event='updated_data',  namespace='/events'):
     socketio.emit(event, data, namespace=namespace)
 
 
-def load_execution_provdb(pid, rid, step, order):
+def load_execution_provdb(pid, rid, step):
     """Load execution data from provdb as unqlite file"""
 
     filtered_records = []
-    collection = pdb.open('anomalies')
+    collection = pdb.open('anomalies')  # default collection
     jx9_filter = "function($record) { return " \
-            "$record.pid == %d && " \
-            "$record.rid == %d && " \
-            "$record.io_step == %d; } " % (int(pid),
-                                           random.randint(0, 1),
-                                           random.randint(0, 8))
+        "$record.pid == %d && " \
+        "$record.rid == %d && " \
+        "$record.io_step == %d; } " % (int(pid),
+                                       random.randint(0, 1),
+                                       random.randint(0, 8))
     filtered_records = [json.loads(x) for x in
                         collection.filter(jx9_filter)]
     print("...loaded {} records from provdb...".format(
@@ -43,62 +43,19 @@ def load_execution_provdb(pid, rid, step, order):
     # For the data format compatiblity
     gpu_count = 0
     for record in filtered_records:  # reduced_records:
-        record['key'] = record['event_id']
-        record['name'] = record['func']
-        record['runtime'] = record['runtime_total']
-        record['exclusive'] = record['runtime_exclusive']
-        if 'label' not in record:
-            record['label'] = -1
+        # record['key'] = record['event_id']
+        # record['name'] = record['func']
+        # record['runtime'] = record['runtime_total']
+        # record['exclusive'] = record['runtime_exclusive']
         if record['is_gpu_event']:
             gpu_count += 1
     print("...{} are gpu events...".format(gpu_count))
 
-
-    # Create ProvDB object
-    # filename = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
-    # with Engine('na+sm', pymargo.server) as engine:
-    #     provider = SonataProvider(engine, 0)
-    #     address = str(engine.addr())
-    #     admin = SonataAdmin(engine)
-    #     client = SonataClient(engine)
-    #     admin.attach_database(address, 0, 'provdb', 'unqlite',
-    #                           "{ \"path\" : \"%s\" }" % filename)
-    #     database = client.open(address, 0, 'provdb')
-
-    #     collection = database.open('anomalies')
-    #     jx9_filter = "function($record) { return " \
-    #         "$record.pid == %d && " \
-    #         "$record.rid == %d && " \
-    #         "$record.io_step == %d; } " % (int(pid),
-    #                                        random.randint(0, 1),
-    #                                        random.randint(0, 8))
-    #     filtered_records = [json.loads(x) for x in
-    #                         collection.filter(jx9_filter)]
-    #     print("...loaded {} records from provdb...".format(
-    #         len(filtered_records)))
-
-    #     # For the data format compatiblity
-    #     gpu_count = 0
-    #     for record in filtered_records:  # reduced_records:
-    #         record['key'] = record['event_id']
-    #         record['name'] = record['func']
-    #         record['runtime'] = record['runtime_total']
-    #         record['exclusive'] = record['runtime_exclusive']
-    #         if 'label' not in record:
-    #             record['label'] = -1
-    #         if record['is_gpu_event']:
-    #             gpu_count += 1
-    #     print("...{} are gpu events...".format(gpu_count))
-
-    #     admin.detach_database(address, 0, 'provdb')
-    #     del provider
-    #     engine.finalize()
-
     return filtered_records  # reduced_records
 
 
-@celery.task
 @events.route('/query_executions_file', methods=['GET'])
+@make_async
 def get_execution_file():
     """
     Return a list of execution data within a given time range
@@ -130,10 +87,9 @@ def get_execution_file():
     # 1. check if DB has?
     execdata = []
     # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
-    execdata = load_execution_provdb(pid, rid, step, order)
+    execdata = load_execution_provdb(pid, rid, step)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
-    print("===found {} executions in provdb".format(len(execdata)))
 
     # 2. look for file?
     if len(execdata) == 0:

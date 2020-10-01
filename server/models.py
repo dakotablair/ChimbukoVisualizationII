@@ -108,6 +108,7 @@ class AnomalyData(Base):
     # application & rank id's
     app = db.Column(db.Integer, default=0)  # application id
     rank = db.Column(db.Integer, default=0)  # rank id
+    stat_id = db.Columb(db.Integer, default=0)  # stat id: app:rank
 
     # step & the number of detected anomalies
     n_anomalies = db.Column(db.Integer, default=0)
@@ -121,6 +122,7 @@ class AnomalyData(Base):
             'app': self.app,
             'rank': self.rank,
             'n_anomalies': self.n_anomalies,
+            'stat_id': self.stat_id,
             'step': self.step,
             'min_timestamp': self.min_timestamp,
             'max_timestamp': self.max_timestamp
