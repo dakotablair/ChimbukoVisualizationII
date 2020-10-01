@@ -54,9 +54,9 @@ class AnomalyStats extends React.Component
             let stat = [...dataState[index].stat, ...category.stat];
             stat.sort((a, b) => b.created_at - a.created_at);
             stat = stat.filter((d, i) => {
-                    if (keys.has(d.event_id)) 
+                    if (keys.has(d.key)) 
                         return false;
-                    keys.add(d.event_id);
+                    keys.add(d.key);
                     return true;
                 });
             stat.sort((a, b) => b[statKind] - a[statKind]);

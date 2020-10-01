@@ -45,10 +45,6 @@ def load_execution_provdb(pid, rid, step):
     # For the data format compatiblity
     gpu_count = 0
     for record in filtered_records:  # reduced_records:
-        # record['key'] = record['event_id']
-        # record['name'] = record['func']
-        # record['runtime'] = record['runtime_total']
-        # record['exclusive'] = record['runtime_exclusive']
         if record['is_gpu_event']:
             gpu_count += 1
     print("...{} are gpu events...".format(gpu_count))
