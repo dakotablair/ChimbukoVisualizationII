@@ -93,8 +93,8 @@ export const executionTree = createSelector(
 
         let exec = null; 
         execdata.forEach(d => {
-            console.log("node_key " + node_key);
-            console.log(d.event_id);
+            // console.log("node_key " + node_key);
+            // console.log(d.event_id);
             if (d.event_id == node_key)
                 exec = d;
         });
