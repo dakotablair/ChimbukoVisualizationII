@@ -43,7 +43,7 @@ const set_stats = (state, newStats) => {
 const set_execdata = (state, newData) => {
     const { func_colors:colors, func_ids:ids } = state;
     const { config, data } = newData;
-    const exec = data;
+    const { exec } = data;
     exec.forEach(d => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
