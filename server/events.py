@@ -222,7 +222,8 @@ def get_history():
 
     return jsonify(payload)
 
-    @celery.task
+
+@celery.task
 def push_execution(pid, rid, min_ts, max_ts, order, with_comm):
     """-------No longer used--------"""
     """Query execution data and push to socketio clients"""
