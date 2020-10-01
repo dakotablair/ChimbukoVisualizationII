@@ -6,6 +6,11 @@ from celery import Celery
 
 from config import config
 
+import pymargo
+from pymargo.core import Engine
+from pysonata.provider import SonataProvider
+from pysonata.client import SonataClient
+from pysonata.admin import SonataAdmin
 
 # Flask extensions
 db = SQLAlchemy()
@@ -14,6 +19,17 @@ celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
                 backend=os.environ.get('CELERY_BROKER_URL', 'redis://'))
 celery.config_from_object('celeryconfig')
+
+# pysonata provenance db
+pdb_name = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
+pdb_engine = Engine('na+sm', pymargo.server)
+pdb_provider = SonataProvider(pdb_engine, 0)
+pdb_address = str(pdb_engine.addr())
+pdb_admin = SonataAdmin(pdb_engine)
+pdb_client = SonataClient(pdb_engine)
+pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
+                      "{ \"path\" : \"%s\" }" % pdb_name)
+pdb = pdb_client.open(pdb_address, 0, 'provdb')
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa

@@ -2,7 +2,7 @@ import os
 from flask import g, session, Blueprint, current_app, request
 from flask import jsonify, abort, json
 
-from . import db, socketio, celery
+from . import db, socketio, celery, pdb
 from .models import AnomalyStat, AnomalyData, AnomalyStatQuery
 from .models import ExecData, CommData
 
@@ -28,45 +28,71 @@ def load_execution_provdb(pid, rid, step, order):
     """Load execution data from provdb as unqlite file"""
 
     filtered_records = []
-    # Create ProvDB object
-    filename = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
-    with Engine('na+sm', pymargo.server) as engine:
-        provider = SonataProvider(engine, 0)
-        address = str(engine.addr())
-        admin = SonataAdmin(engine)
-        client = SonataClient(engine)
-        admin.attach_database(address, 0, 'provdb', 'unqlite',
-                              "{ \"path\" : \"%s\" }" % filename)
-        database = client.open(address, 0, 'provdb')
-
-        collection = database.open('anomalies')
-        jx9_filter = "function($record) { return " \
+    collection = pdb.open('anomalies')
+    jx9_filter = "function($record) { return " \
             "$record.pid == %d && " \
             "$record.rid == %d && " \
             "$record.io_step == %d; } " % (int(pid),
                                            random.randint(0, 1),
                                            random.randint(0, 8))
-        filtered_records = [json.loads(x) for x in
-                            collection.filter(jx9_filter)]
-        print("...loaded {} records from provdb...".format(
-            len(filtered_records)))
+    filtered_records = [json.loads(x) for x in
+                        collection.filter(jx9_filter)]
+    print("...loaded {} records from provdb...".format(
+        len(filtered_records)))
 
-        # For the data format compatiblity
-        gpu_count = 0
-        for record in filtered_records:  # reduced_records:
-            record['key'] = record['event_id']
-            record['name'] = record['func']
-            record['runtime'] = record['runtime_total']
-            record['exclusive'] = record['runtime_exclusive']
-            if 'label' not in record:
-                record['label'] = -1
-            if record['is_gpu_event']:
-                gpu_count += 1
-        print("...{} are gpu events...".format(gpu_count))
+    # For the data format compatiblity
+    gpu_count = 0
+    for record in filtered_records:  # reduced_records:
+        record['key'] = record['event_id']
+        record['name'] = record['func']
+        record['runtime'] = record['runtime_total']
+        record['exclusive'] = record['runtime_exclusive']
+        if 'label' not in record:
+            record['label'] = -1
+        if record['is_gpu_event']:
+            gpu_count += 1
+    print("...{} are gpu events...".format(gpu_count))
 
-        admin.detach_database(address, 0, 'provdb')
-        del provider
-        engine.finalize()
+
+    # Create ProvDB object
+    # filename = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
+    # with Engine('na+sm', pymargo.server) as engine:
+    #     provider = SonataProvider(engine, 0)
+    #     address = str(engine.addr())
+    #     admin = SonataAdmin(engine)
+    #     client = SonataClient(engine)
+    #     admin.attach_database(address, 0, 'provdb', 'unqlite',
+    #                           "{ \"path\" : \"%s\" }" % filename)
+    #     database = client.open(address, 0, 'provdb')
+
+    #     collection = database.open('anomalies')
+    #     jx9_filter = "function($record) { return " \
+    #         "$record.pid == %d && " \
+    #         "$record.rid == %d && " \
+    #         "$record.io_step == %d; } " % (int(pid),
+    #                                        random.randint(0, 1),
+    #                                        random.randint(0, 8))
+    #     filtered_records = [json.loads(x) for x in
+    #                         collection.filter(jx9_filter)]
+    #     print("...loaded {} records from provdb...".format(
+    #         len(filtered_records)))
+
+    #     # For the data format compatiblity
+    #     gpu_count = 0
+    #     for record in filtered_records:  # reduced_records:
+    #         record['key'] = record['event_id']
+    #         record['name'] = record['func']
+    #         record['runtime'] = record['runtime_total']
+    #         record['exclusive'] = record['runtime_exclusive']
+    #         if 'label' not in record:
+    #             record['label'] = -1
+    #         if record['is_gpu_event']:
+    #             gpu_count += 1
+    #     print("...{} are gpu events...".format(gpu_count))
+
+    #     admin.detach_database(address, 0, 'provdb')
+    #     del provider
+    #     engine.finalize()
 
     return filtered_records  # reduced_records
 
