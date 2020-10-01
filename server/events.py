@@ -42,18 +42,17 @@ def load_execution_provdb(pid, rid, step):
     print("...loaded {} records from provdb...".format(
         len(filtered_records)))
 
-    # For the data format compatiblity
-    gpu_count = 0
-    for record in filtered_records:  # reduced_records:
-        if record['is_gpu_event']:
-            gpu_count += 1
-    print("...{} are gpu events...".format(gpu_count))
+    # gpu_count = 0
+    # for record in filtered_records:  # reduced_records:
+    #     if record['is_gpu_event']:
+    #         gpu_count += 1
+    # print("...{} are gpu events...".format(gpu_count))
 
     return filtered_records  # reduced_records
 
 
 @events.route('/query_executions_file', methods=['GET'])
-# @make_async
+@make_async
 def get_execution_file():
     """
     Return a list of execution data within a given time range
