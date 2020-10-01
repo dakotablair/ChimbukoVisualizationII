@@ -8,6 +8,8 @@ from .models import ExecData, CommData
 
 from sqlalchemy import func, and_
 
+from .tasks import make_async
+
 import pymargo
 from pymargo.core import Engine
 from pysonata.provider import SonataProvider
