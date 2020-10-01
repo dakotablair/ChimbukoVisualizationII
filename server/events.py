@@ -51,8 +51,8 @@ def load_execution_provdb(pid, rid, step):
     return filtered_records  # reduced_records
 
 
-@events.route('/query_executions_file', methods=['GET'])
-def get_execution_file():
+@events.route('/query_executions_pdb', methods=['GET'])
+def get_execution_pdb():
     """
     Return a list of execution data within a given time range
     - required:
@@ -60,7 +60,6 @@ def get_execution_file():
     - options
         max_ts: maximum timestamp
         order: [(asc) | desc]
-        with_comm: 1 or (0)
         pid: program index, default None
         rid: rank index, default None
     """
@@ -76,31 +75,13 @@ def get_execution_file():
 
     # parse options
     order = request.args.get('order', 'asc')
-    with_comm = request.args.get('with_comm', 0)
 
-    from_file = False
-    commdata = None
-    # 1. check if DB has?
     execdata = []
-    # execdata = load_execution_db(pid, rid, min_ts, max_ts, order, with_comm)
     execdata = load_execution_provdb(pid, rid, step)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
-    # 2. look for file?
-    if len(execdata) == 0:
-        execdata, commdata = load_execution_file(pid, rid, step,
-                                                 order, with_comm)
-        from_file = True
-
-    # 3. update & post processing
-    if from_file:
-        # update_execution_db.delay(execdata, commdata)
-
-        sort_desc = order == 'desc'
-        execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
-
-    return jsonify({"exec": execdata, "comm": commdata})
+    return jsonify({"exec": execdata})
     # return jsonify(execdata), 200
 
 

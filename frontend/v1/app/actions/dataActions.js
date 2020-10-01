@@ -33,8 +33,8 @@ export function get_execution(item) {
         const {app, rank, step, min_timestamp, max_timestamp} = item;
         const arg1 = `pid=${app}&rid=${rank}&step=${step}`;
         const arg2 = `min_ts=${min_timestamp}&max_ts=${max_timestamp}`;
-        const arg3 = `order=desc&with_comm=0`;
-        const url = `/events/query_executions_file?${arg1}&${arg2}&${arg3}`;
+        const arg3 = `order=desc`;
+        const url = `/events/query_executions_pdb?${arg1}&${arg2}&${arg3}`;
         axios.get(url)
             .then(resp => {
                 dispatch({
