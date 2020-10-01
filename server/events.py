@@ -57,7 +57,7 @@ def load_execution_provdb(pid, rid, step):
 
 
 @events.route('/query_executions_file', methods=['GET'])
-@make_async
+# @make_async
 def get_execution_file():
     """
     Return a list of execution data within a given time range
