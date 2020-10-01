@@ -193,8 +193,8 @@ export const executionTree = createSelector(
         tree.min_ts = range[0];
         tree.max_ts = range[1];
 
-        console.log("tree: ");
-        console.log(tree);
+        // console.log("tree: ");
+        // console.log(tree);
         return tree;
     }
     /*
