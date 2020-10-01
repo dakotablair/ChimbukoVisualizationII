@@ -216,14 +216,6 @@ def load_execution_provdb(pid, rid, step, order):
         print("...loaded {} records from provdb...".format(
             len(filtered_records)))
 
-        # Temporarily remove small runtime events
-        # reduced_records = []
-        # for record in filtered_records:
-        #     if record['runtime_total'] > 1000:
-        #         reduced_records.append(record)
-        # print("...sending {} records to front end...".format(
-        #     len(reduced_records)))
-
         # For the data format compatiblity
         gpu_count = 0
         for record in filtered_records:  # reduced_records:
@@ -254,7 +246,7 @@ def update_execution_db(execdata, commdata):
         if commdata is not None:
             db.engine.execute(CommData.__table__.insert(), commdata)
 
-
+@celery.task
 @events.route('/query_executions_file', methods=['GET'])
 def get_execution_file():
     """

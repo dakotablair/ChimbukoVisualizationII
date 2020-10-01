@@ -82,7 +82,7 @@ class ChimbukoApp extends React.Component {
         super(props);
         this.state = {
             pause: false,
-            funcX: "runtime",
+            funcX: "runtime_total",
             funcY: "fid",
             run_simulate: false
         };
