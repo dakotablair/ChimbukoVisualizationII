@@ -5,6 +5,8 @@ from . import stats as req_stats
 from . import socketio, celery as mycelery
 from .utils import url_for
 
+from . import pdb_admin, pdb_address, pdb_provider, pdb_engine
+
 main = Blueprint('main', __name__)
 
 
@@ -62,6 +64,11 @@ def stop():
     mycelery.control.broadcast('shutdown')
     socketio.stop()
     "Shutting down SocketIO web server!"
+
+    # terminate provdb
+    pdb_admin.detach_database(pdb_address, 0, 'provdb')
+    del pdb_provider
+    pdb_engine.finalize()
 
 
 @main.route('/')
