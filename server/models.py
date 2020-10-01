@@ -108,7 +108,7 @@ class AnomalyData(Base):
     # application & rank id's
     app = db.Column(db.Integer, default=0)  # application id
     rank = db.Column(db.Integer, default=0)  # rank id
-    stat_id = db.Columb(db.Integer, default=0)  # stat id: app:rank
+    stat_id = db.Column(db.Integer, default=0)  # stat id: app:rank
 
     # step & the number of detected anomalies
     n_anomalies = db.Column(db.Integer, default=0)
