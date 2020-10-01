@@ -93,7 +93,9 @@ export const executionTree = createSelector(
 
         let exec = null; 
         execdata.forEach(d => {
-            if (d.key == node_key)
+            console.log("node_key " + node_key);
+            console.log(d.event_id);
+            if (d.event_id == node_key)
                 exec = d;
         });
 
@@ -167,8 +169,8 @@ export const executionTree = createSelector(
             const t = times[i];
             if (t[1] == 'entry') {
                 const _node = nodes[t[2]];
-                _node.key = _node.event_id;
-                _node.name = _node.func;
+                //_node.key = _node.event_id;
+                //_node.name = _node.func;
                 _node.level = level++;
                 if (max_level < level)
                     max_level = level; 
