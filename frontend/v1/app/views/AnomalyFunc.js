@@ -114,8 +114,8 @@ class AnomalyFunc extends React.Component
     getValue = (d, i, key, ids) => {
         if (key === 'entry' || key === 'exit')
             return d[key] / 1000;
-        else if (key === 'fid')
-            return ids[d[key]];
+        else if (key === 'function_id')
+            return ids[d['fid']];
         else if (key === 'event_id')
             return i;
         return d[key];        
@@ -126,9 +126,9 @@ class AnomalyFunc extends React.Component
         let tmin = 0;
         let tmax = 1;
         this.props.data.forEach((d, i) => {
-            if (key === 'fid') { // fid uses index as its axis
-                tmin = Math.min(ids[d[key]], tmin);
-                tmax = Math.max(ids[d[key]], tmax);
+            if (key === 'function_id') { // fid uses index as its axis
+                tmin = Math.min(ids[d['fid']], tmin);
+                tmax = Math.max(ids[d['fid']], tmax);
             }
             else if (key === 'event_id') { //event_id uses its index as axis
                 tmin = Math.min(i, tmin);
