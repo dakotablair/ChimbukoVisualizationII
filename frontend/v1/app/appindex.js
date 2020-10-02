@@ -83,7 +83,7 @@ class ChimbukoApp extends React.Component {
         this.state = {
             pause: false,
             funcX: "runtime_total",
-            funcY: "fid",
+            funcY: "function_id",
             run_simulate: false
         };
         this.socketio = null;
