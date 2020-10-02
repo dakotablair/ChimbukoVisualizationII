@@ -111,11 +111,13 @@ class AnomalyFunc extends React.Component
         }        
     }
 
-    getValue = (d, key, ids) => {
+    getValue = (d, i, key, ids) => {
         if (key === 'entry' || key === 'exit')
             return d[key] / 1000;
         else if (key === 'fid')
             return ids[d[key]];
+        else if (key === 'event_id')
+            return i;
         return d[key];        
     }
 
@@ -123,12 +125,15 @@ class AnomalyFunc extends React.Component
         // prepare correct axis range for zooming
         let tmin = 0;
         let tmax = 1;
-        this.props.data.forEach(d => {
+        this.props.data.forEach((d, i) => {
             if (key === 'fid') { // fid uses index as its axis
                 tmin = Math.min(ids[d[key]], tmin);
                 tmax = Math.max(ids[d[key]], tmax);
             }
-            else {
+            else if (key === 'event_id') { //event_id uses its index as axis
+                tmin = Math.min(i, tmin);
+                tmax = Math.max(i, tmax);
+            } else {
                 tmin = Math.min(d[key], tmin);
                 tmax = Math.max(d[key], tmax);
             }
@@ -171,7 +176,7 @@ class AnomalyFunc extends React.Component
         const func_mean = d.func_stats.mean/1000;
         const func_stddev = d.func_stats.stddev/1000;
 
-        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid}\n`;
+        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid} event_id: ${d.event_id}\n`;
         const time = `entry: ${entry}\nexit: ${exit}\nruntime_total: ${d.runtime_total/1000}ms\nruntime_exclusive: ${d.runtime_exclusive/1000}ms\n`;
         const funcstats = `Normal function info:\nmean runtime: ${func_mean.toPrecision(3)}ms\nstddev: ${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
         let other = ``;
@@ -186,7 +191,7 @@ class AnomalyFunc extends React.Component
         const { height, colors, ids, x: xKey, y: yKey } = this.props;
 
         const datasets = {};
-        this.props.data.forEach(d => {
+        this.props.data.forEach((d, i) => {
             const fid = d.fid;
             if (!datasets.hasOwnProperty(fid))
                 datasets[fid] = {
@@ -194,8 +199,8 @@ class AnomalyFunc extends React.Component
                     data: []
                 };
             datasets[fid].data.push({
-                x: this.getValue(d, xKey, ids),
-                y: this.getValue(d, yKey, ids),
+                x: this.getValue(d, i, xKey, ids),
+                y: this.getValue(d, i, yKey, ids),
                 ...d
             });
         });

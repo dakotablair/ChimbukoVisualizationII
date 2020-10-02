@@ -41,7 +41,7 @@ const set_stats = (state, newStats) => {
 };
 
 const set_execdata = (state, newData) => {
-    const { func_colors:colors, func_ids:ids } = state;
+    const { func_colors:colors, func_ids:ids} = state;
     const { config, data } = newData;
     const { exec } = data;
     exec.forEach(d => {

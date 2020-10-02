@@ -446,7 +446,6 @@ function mapStateToProps(state) {
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors,
         func_ids: state.data.func_ids,
-        /*forest: executionForest(state),*/
         tree: executionTree(state),
         selected_node: state.data.node_key
     };
