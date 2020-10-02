@@ -232,7 +232,7 @@ class ChimbukoApp extends React.Component {
             "count", "accumulate"
         ];
         const funcFeat = [
-            "fid", "event_id",
+            "function_id", "event_id",
             "entry", "exit", "runtime_total", "runtime_exclusive",
             "is_gpu_event"
         ];

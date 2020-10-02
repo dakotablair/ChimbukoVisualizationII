@@ -176,7 +176,7 @@ class AnomalyFunc extends React.Component
         const func_mean = d.func_stats.mean/1000;
         const func_stddev = d.func_stats.stddev/1000;
 
-        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} fid: ${d.fid} event_id: ${d.event_id}\n`;
+        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} function_id: ${d.fid} event_id: ${d.event_id}\n`;
         const time = `entry: ${entry}\nexit: ${exit}\nruntime_total: ${d.runtime_total/1000}ms\nruntime_exclusive: ${d.runtime_exclusive/1000}ms\n`;
         const funcstats = `Normal function info:\nmean runtime: ${func_mean.toPrecision(3)}ms\nstddev: ${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
         let other = ``;
