@@ -64,7 +64,7 @@ class TreeNode extends React.Component
 
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
-        let tooltip_w = 150;
+        let tooltip_w = Math.max(parseFuncName(d.func).length, 150);
         let tooltip_h = 90;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
@@ -121,13 +121,9 @@ class TreeNode extends React.Component
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
                         <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.func)}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`EVENT_ID: ${d.event_id}`}</tspan>
-                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>*/}
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${(d.exit-d.entry)/1000} ms`}</tspan>
-                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>*/}
-                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>*/}
-                        {/*<tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>*/}
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.is_anomaly}`}</tspan>
                     </text>
                 </Tooltip>
