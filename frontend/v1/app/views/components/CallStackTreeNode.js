@@ -64,7 +64,7 @@ class TreeNode extends React.Component
 
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
-        let tooltip_w = Math.max(parseFuncName(d.func).length, 150);
+        let tooltip_w = Math.max(parseFuncName(d.func).length, 155);
         let tooltip_h = 90;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
@@ -75,7 +75,7 @@ class TreeNode extends React.Component
             //tooltip_w = -150;
             tooltip_offset_x = -tooltip_w;
         }
-        console.log(tooltip_w, tooltip_h, tooltip_offset_x, tooltip_offset_y);
+        console.log(parseFuncName(d.func).length, tooltip_w, tooltip_h, tooltip_offset_x, tooltip_offset_y);
         const comm = [];
         d.comm.forEach( (_comm, i) => {
             const {rid, src, tar, timestamp} = _comm;
