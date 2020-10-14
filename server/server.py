@@ -63,12 +63,13 @@ def stop():
 
     mycelery.control.broadcast('shutdown')
     socketio.stop()
-    "Shutting down SocketIO web server!"
+    print("Shutting down SocketIO web server!")
 
     # terminate provdb
     pdb_admin.detach_database(pdb_address, 0, 'provdb')
     del pdb_provider
     pdb_engine.finalize()
+    print("Shutting down provdb connection!")
 
 
 @main.route('/')
