@@ -111,14 +111,7 @@ class TreeNode extends React.Component
                     {...font}
                     fill={text_color}
                 >
-                    {
-                        (showLabel >= parseFuncName(d.func).length*7)
-                        ? parseFuncName(d.func)
-                        : parseFuncName(d.func).slice(0, Math.floor(showLabel/7)) + "..."
-                    // (showLabel)
-                    //    ? parseFuncName(d.func)
-                    //    : ""
-                    }
+                    {showLabel}
                 </text>
                 <Tooltip triggerRef={this.rect}>
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
@@ -158,7 +151,12 @@ class CallStackTreeNode extends React.Component
                   w = Math.max(xScale(node.exit) - x, 1); // at least with width 5
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = len; //parseFuncName(node.func).length*7 <= len; // xScale(node.exit) > 30 && len >= 50;  
+            const func_name = parseFuncName(node.func);
+            let showName = ""; // xScale(node.exit) > 30 && len >= 50; 
+            if (len >= func_name.length*7) // assume one character is 7 pixels
+                showName = func_name;
+            else if (len >= 9) // at least can show one character
+                showName = func_name.slice(0, Math.floor((len-2)/7)) + "..";
             const highlight = (selected && selected === node.event_id) ? true: false;     
             nodes.push(
                 <TreeNode
