@@ -75,7 +75,7 @@ class TreeNode extends React.Component
             //tooltip_w = -150;
             tooltip_offset_x = -tooltip_w;
         }
-        console.log(parseFuncName(d.func).length, tooltip_w, tooltip_h, tooltip_offset_x, tooltip_offset_y);
+        //console.log(parseFuncName(d.func).length, tooltip_w, tooltip_h, tooltip_offset_x, tooltip_offset_y);
         const comm = [];
         d.comm.forEach( (_comm, i) => {
             const {rid, src, tar, timestamp} = _comm;
@@ -149,7 +149,7 @@ class CallStackTreeNode extends React.Component
         const nodes = [];
         Object.keys(this.props.nodes).forEach(key => {
             const node = this.props.nodes[key];
-            const x = xScale(node.entry),
+            const x = Math.max(xScale(node.entry), 0),
                   y = yScale(node.level),
                   w = Math.max(xScale(node.exit) - x, 1); // at least with width 5
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
