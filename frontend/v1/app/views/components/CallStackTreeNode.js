@@ -64,7 +64,7 @@ class TreeNode extends React.Component
 
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
-        let tooltip_w = Math.max(parseFuncName(d.func).length*8, 156);  // assume 8 is character width
+        let tooltip_w = Math.max(parseFuncName(d.func).length*7, 156);  // assume 7 is character width
         let tooltip_h = 90;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
@@ -120,11 +120,11 @@ class TreeNode extends React.Component
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
                         <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.func)}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`EVENT_ID: ${d.event_id}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${(d.exit-d.entry)/1000} ms`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.is_anomaly}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`event_id: ${d.event_id}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`runtime: ${(d.exit-d.entry)/1000} ms`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`anomaly: ${d.is_anomaly}`}</tspan>
                     </text>
                 </Tooltip>
                 
@@ -149,12 +149,12 @@ class CallStackTreeNode extends React.Component
         const nodes = [];
         Object.keys(this.props.nodes).forEach(key => {
             const node = this.props.nodes[key];
-            const x = Math.max(xScale(node.entry), 0),
+            const x = Math.max(xScale(node.entry), 0), // at least starts at 0
                   y = yScale(node.level),
                   w = Math.max(xScale(node.exit) - x, 1); // at least with width 5
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = xScale(node.exit) > 30 && len >= 50;  
+            const showName = parseFuncName(node.func).length*7 <= len; // xScale(node.exit) > 30 && len >= 50;  
             const highlight = (selected && selected === node.event_id) ? true: false;     
             nodes.push(
                 <TreeNode
