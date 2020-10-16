@@ -28,7 +28,7 @@ pdb_address = str(pdb_engine.addr())
 pdb_admin = SonataAdmin(pdb_engine)
 pdb_client = SonataClient(pdb_engine)
 pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
-                      "{ \"path\" : \"%s\" }" % pdb_name)
+                          "{ \"path\" : \"%s\" }" % pdb_name)
 pdb = pdb_client.open(pdb_address, 0, 'provdb')
 
 # Import models so that they are registered with SQLAlchemy
@@ -40,11 +40,12 @@ from .tasks import run_flask_request  # noqa
 # Import Socket.IO events so that they are registered with Flask-SocketIO
 from . import events  # noqa
 
+
 def create_app(config_name=None, main=True):
     if config_name is None:
         config_name = os.environ.get('SERVER_CONFIG', 'development')
 
-    #print(config_name, config[config_name].SQLALCHEMY_BINDS)
+    # print(config_name, config[config_name].SQLALCHEMY_BINDS)
 
     app = Flask(__name__)
     app.config.from_object(config[config_name])

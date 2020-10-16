@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import backref
 import pickle
 
+
 class AnomalyStatQuery(db.Model):
     __tablename__ = 'anomalystatquery'
     id = db.Column(INTEGER(unsigned=True), primary_key=True)
@@ -281,5 +282,3 @@ class CommData(Base):
             'timestamp': self.timestamp
         })
         return d
-
-

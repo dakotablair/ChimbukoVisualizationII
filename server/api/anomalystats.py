@@ -57,7 +57,7 @@ def process_on_func(data: list, ts):
     func_stat = []
     for d in data:
         key_ts = '{}:{}'.format(d['fid'], ts)
-        base = { 
+        base = {
             'created_at': ts,
             'key_ts': key_ts,
             'fid': d['fid'],

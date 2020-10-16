@@ -25,6 +25,7 @@ def before_request():
 @main.route('/stop')
 def stop():
     import time
+
     def get_inspect():
         from requests import get
         resp = get(url_for('tasks.get_info', _external=True))
@@ -45,11 +46,11 @@ def stop():
 
         active = inspect.get('active')
         if active is not None and isinstance(active, dict):
-            n_tasks += sum([ len(v) for _, v in active.items()])
+            n_tasks += sum([len(v) for _, v in active.items()])
 
         scheduled = inspect.get('scheduled')
         if scheduled is not None and isinstance(scheduled, dict):
-            n_tasks += sum([ len(v) for _, v in scheduled.items()])
+            n_tasks += sum([len(v) for _, v in scheduled.items()])
 
         if n_tasks == 0:
             break
@@ -75,7 +76,7 @@ def stop():
 @main.route('/')
 def index():
     """Serve client-side application"""
-    #return render_template('index_v0.html')
+    # return render_template('index_v0.html')
     return render_template('index.html')
 
 

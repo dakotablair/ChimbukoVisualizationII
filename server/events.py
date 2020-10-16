@@ -126,6 +126,7 @@ def events_connect():
 def events_disconnect():
     print('socketio.on.disconnect')
 
+
 def push_model(model, namespace='/events'):
     """-------No longer used--------"""
     """Push the model to all connected Socket.IO clients."""
@@ -133,6 +134,7 @@ def push_model(model, namespace='/events'):
         'class': model.__class__.__name__,
         'model': model.to_dict()
     }, namespace=namespace)
+
 
 @events.route('/query_history', methods=['POST'])
 def get_history():
