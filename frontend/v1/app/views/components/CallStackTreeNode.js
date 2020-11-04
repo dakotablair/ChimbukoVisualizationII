@@ -124,7 +124,6 @@ class TreeNode extends React.Component
                         <tspan x={tooltip_offset_x + 10} dy="1.2em">{`anomaly: ${d.is_anomaly}`}</tspan>
                     </text>
                 </Tooltip>
-                
                 {comm}
             </g>           
         );

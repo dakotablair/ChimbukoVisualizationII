@@ -1,3 +1,4 @@
+import os
 from flask import request, jsonify, abort, current_app
 
 from .. import db
@@ -11,6 +12,8 @@ from ..events import push_data
 from sqlalchemy.exc import IntegrityError
 from runstats import Statistics
 from sqlalchemy import func, and_
+
+import json
 
 
 def process_on_anomaly(data: list, ts):
@@ -181,6 +184,26 @@ def new_anomalydata():
 
     - structure
     {
+        'anomaly_stats': (dict), (optional) // anomaly stats, see details below
+        'counter_stats': [
+            {
+                'app': (string) // program index,
+                'counter': (string) // counter description,
+                'stats': { // global aggregated statistics
+                    "count": (integer),
+                    "accumulate": (float),
+                    "minimum": (float),
+                    "maximum": (float),
+                    "mean": (float),
+                    "stddev": (float),
+                    "skewness": (float),
+                    "kurtosis": (float)
+                }
+            }
+        ]
+    }
+    - structure for 'anomaly_stats'
+    {
         "created_at": (integer),
         "anomaly": [
             {
@@ -225,14 +248,21 @@ def new_anomalydata():
     # print('new_anomalydata')
     data = request.get_json() or {}
 
-    ts = data.get('created_at', None)
+    # for the case empty anomaly data were sent
+    if 'anomaly_stats' not in data:
+        return jsonify({}), 201
+
+    anomaly_stats = data['anomaly_stats']
+    counter_stats = data['counter_stats']  # ignore for now
+
+    ts = anomaly_stats.get('created_at', None)
     if ts is None:
         abort(400)
 
     # print('processing...')
     anomaly_stat, anomaly_data = \
-        process_on_anomaly(data.get('anomaly', []), ts)
-    func_stat = process_on_func(data.get('func', []), ts)
+        process_on_anomaly(anomaly_stats.get('anomaly', []), ts)
+    func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
     # print('update db...')
     try:
@@ -334,25 +364,29 @@ def get_anomalystats():
 @make_async
 def run_simulation():
     import time
+    import glob
+
     error = 'OK'
+    path = os.environ.get('SIMULATION_JSON', 'json/')
+    json_files = glob.glob(path + '*.json')
     try:
-        step_ts = int(1000000)
-        min_timestamp = db.session.query(func.min(AnomalyData.min_timestamp))\
-            .filter(AnomalyData.min_timestamp > 0).scalar()
-        max_timestamp = db.session.query(func.max(AnomalyData.min_timestamp))\
-            .filter(AnomalyData.min_timestamp > 0).scalar()
-        min_timestamp = int(min_timestamp)
-        max_timestamp = int(max_timestamp)
-        # print("min_timestamp: ", min_timestamp)
-        # print("max_timestamp: ", max_timestamp)
-        for ts in range(min_timestamp, max_timestamp+step_ts, step_ts):
-            data = AnomalyData.query.filter(
-                and_(
-                    AnomalyData.min_timestamp >= ts,
-                    AnomalyData.min_timestamp < ts + step_ts
-                )
-            )
-            data = [d.to_dict() for d in data.all()]
+        for filename in json_files:
+            data = None
+            with open(filename) as f:
+                loaded = json.load(f)
+                if 'anomaly_stats' in loaded:
+                    data = loaded['anomaly_stats']  # ignore counter_stats now
+                else:
+                    continue
+
+            ts = data.get('created_at', None)
+            if ts is None:
+                abort(400)
+
+            # print('processing...')
+            anomaly_stat, anomaly_data = \
+                process_on_anomaly(data.get('anomaly', []), ts)
+            func_stat = process_on_func(data.get('func', []), ts)
 
             q = AnomalyStatQuery.query. \
                 order_by(AnomalyStatQuery.created_at.desc()).first()
@@ -367,8 +401,11 @@ def run_simulation():
                 db.session.commit()
 
             # print("ts: {}, data: {}", ts, len(data))
-            if len(data):
-                push_anomaly_data(q, data)
+            if len(anomaly_stat):
+                push_anomaly_stat(q, anomaly_stat)
+
+            if len(anomaly_data):
+                push_anomaly_data(q, anomaly_data)
 
             time.sleep(1)
     except Exception as e:
