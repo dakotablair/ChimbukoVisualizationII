@@ -369,8 +369,11 @@ def run_simulation():
     error = 'OK'
     path = os.environ.get('SIMULATION_JSON', 'json/')
     json_files = glob.glob(path + '*.json')
+    ids = [int(f.split('_')[-1][:-5]) for f in json_files]  # extract number as index
+    inds = sorted(range(len(ids)), key=lambda k: ids[k])  # sort as numeric values
+    files = [json_files[i] for i in inds]  # files in correct order
     try:
-        for filename in json_files:
+        for filename in files:
             data = None
             with open(filename) as f:
                 loaded = json.load(f)
@@ -407,7 +410,7 @@ def run_simulation():
             if len(anomaly_data):
                 push_anomaly_data(q, anomaly_data)
 
-            time.sleep(1)
+            time.sleep(3)
     except Exception as e:
         print('Exception on run simulation: ', e)
         error = 'exception while running simulation'
