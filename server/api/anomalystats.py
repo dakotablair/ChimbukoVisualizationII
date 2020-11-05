@@ -379,10 +379,10 @@ def run_simulation():
             data = None
             with open(filename) as f:
                 loaded = json.load(f)
-                if 'anomaly_stats' in loaded:
-                    data = loaded['anomaly_stats']  # ignore counter_stats now
-                else:
-                    continue
+                data = loaded.get('anomaly_stats', [])  # ignore counter_stats
+
+            if data is []:
+                continue
 
             ts = data.get('created_at', None)
             if ts is None:
