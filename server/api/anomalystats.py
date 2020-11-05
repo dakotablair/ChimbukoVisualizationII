@@ -379,9 +379,10 @@ def run_simulation():
             data = None
             with open(filename) as f:
                 loaded = json.load(f)
-                data = loaded.get('anomaly_stats', [])  # ignore counter_stats
+                data = loaded.get('anomaly_stats', None)
+                # ignore counter_stats for now
 
-            if data is []:
+            if data is None:
                 print("empty file")
                 continue
 
