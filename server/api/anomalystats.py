@@ -382,6 +382,7 @@ def run_simulation():
                 data = loaded.get('anomaly_stats', [])  # ignore counter_stats
 
             if data is []:
+                print("empty file")
                 continue
 
             ts = data.get('created_at', None)
