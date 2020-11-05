@@ -35,8 +35,8 @@ def load_execution_provdb(pid, rid, step):
         "$record.pid == %d && " \
         "$record.rid == %d && " \
         "$record.io_step == %d; } " % (int(pid),
-                                       random.randint(0, 1),
-                                       random.randint(0, 8))
+                                       int(rid),  # random.randint(0, 1),
+                                       int(step))  # random.randint(0, 8))
     filtered_records = [json.loads(x) for x in
                         collection.filter(jx9_filter)]
     print("...loaded {} records from provdb...".format(
@@ -71,7 +71,7 @@ def get_execution_pdb():
     if all(v is None for v in [pid, rid, step]):
         abort(400)
 
-    print(pid, rid, step, min_ts, max_ts)
+    print("queried:", pid, rid, step, min_ts, max_ts)
 
     # parse options
     order = request.args.get('order', 'asc')
