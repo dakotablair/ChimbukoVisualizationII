@@ -373,6 +373,11 @@ def run_simulation():
     # sort as numeric values
     inds = sorted(range(len(ids)), key=lambda k: ids[k])
     files = [json_files[i] for i in inds]  # files in correct order
+
+    # clean up db before the simulation
+    delete_old_anomaly()
+    delete_old_func()
+
     try:
         for filename in files:
             data = None
@@ -393,6 +398,25 @@ def run_simulation():
             anomaly_stat, anomaly_data = \
                 process_on_anomaly(data.get('anomaly', []), ts)
             func_stat = process_on_func(data.get('func', []), ts)
+
+            # print('update db...')
+            try:
+                if len(anomaly_stat):
+                    db.get_engine(app=current_app,
+                                  bind='anomaly_stats').execute(
+                        AnomalyStat.__table__.insert(), anomaly_stat
+                    )
+                    db.get_engine(app=current_app,
+                                  bind='anomaly_data').execute(
+                        AnomalyData.__table__.insert(), anomaly_data
+                    )
+                if len(func_stat):
+                    db.get_engine(app=current_app, bind='func_stats').execute(
+                        FuncStat.__table__.insert(), func_stat
+                    )
+
+            except Exception as e:
+                print(e)
 
             q = AnomalyStatQuery.query. \
                 order_by(AnomalyStatQuery.created_at.desc()).first()
