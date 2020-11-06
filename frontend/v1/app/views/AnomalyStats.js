@@ -65,7 +65,7 @@ class AnomalyStats extends React.Component
             dataState[index].stat = stat;
         });
 
-        console.log(dataState);
+        // console.log(dataState);
 
         this.setState({...this.state, data: dataState, colors});
     }
@@ -120,6 +120,7 @@ class AnomalyStats extends React.Component
                 height={height}
                 getElementAtEvent={this.handleBarClick}
                 options={{
+                    yAxisID: statKind,
                     maintainAspectRatio: false,
                     tooltips: {
                         callbacks: {
