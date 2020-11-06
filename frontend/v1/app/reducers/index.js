@@ -10,7 +10,7 @@ const INIT_STATE = {
     // stats_colors: {},
 
     // anomaly history
-    watched_ranks: [0, 1],
+    watched_ranks: [],
     rank_colors: {},
     history: {},
 
