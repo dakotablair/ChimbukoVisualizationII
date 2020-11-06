@@ -375,8 +375,8 @@ def run_simulation():
     files = [json_files[i] for i in inds]  # files in correct order
 
     # clean up db before the simulation
-    delete_old_anomaly()
-    delete_old_func()
+    # delete_old_anomaly()
+    # delete_old_func()
 
     try:
         for filename in files:
