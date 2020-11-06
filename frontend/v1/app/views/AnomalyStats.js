@@ -58,7 +58,7 @@ class AnomalyStats extends React.Component
                         return false;
                     keys.add(d.key);
                     return true;
-                });
+                }); // when merged, only keep latest
             stat.sort((a, b) => b[statKind] - a[statKind]);
             if (nQueries < stat.length)
                 stat = stat.slice(0, nQueries);
@@ -107,6 +107,9 @@ class AnomalyStats extends React.Component
             labels: Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
+        console.log("ready to show AnomalyStats:");
+        console.log(ranks);
+        console.log(_data);
 
         return (
             <Bar 
