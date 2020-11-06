@@ -422,7 +422,7 @@ def run_simulation():
 
     push_data({'result': error}, 'run_simulation')
 
-    return jsonify({})
+    return jsonify({}), 200
 
 
 @api.route('/get_anomalydata', methods=['GET'])
