@@ -141,7 +141,7 @@ def push_anomaly_stat(q, anomaly_stats: list):
     if anomaly_stats is not None and len(anomaly_stats):
         nQueries = min(nQueries, len(anomaly_stats))
         top_stats = anomaly_stats[:nQueries]
-        # bottom_stats = anomaly_stats[-nQueries::-1]
+        bottom_stats = anomaly_stats[-nQueries::-1]
 
     # ---------------------------------------------------
     # processing data for the front-end
@@ -151,15 +151,15 @@ def push_anomaly_stat(q, anomaly_stats: list):
             'name': 'Top Anomalous Ranks',
             'stat': top_stats,
         }
-        # bottom_dataset = {
-        #     'name': 'BOTTOM',
-        #     'stat': bottom_stats
-        # }
-        # broadcast the statistics to all clients
+        bottom_dataset = {
+            'name': 'BOTTOM',
+            'stat': bottom_stats
+        }
+        broadcast the statistics to all clients
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
-            'data': [top_stats]  # [top_dataset, bottom_dataset]
+            'data': [top_dataset, bottom_dataset]
         }, 'update_stats')
 
 
