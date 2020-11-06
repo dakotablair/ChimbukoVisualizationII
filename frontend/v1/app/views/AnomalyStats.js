@@ -92,7 +92,6 @@ class AnomalyStats extends React.Component
         data.forEach(category => {
             const rgb = category.color;
             barData.push({
-                yAxisID: statKind,
                 label: category.name,
                 data: category.stat.map(d => d[statKind]),
                 backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
