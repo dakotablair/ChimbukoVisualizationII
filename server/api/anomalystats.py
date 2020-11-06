@@ -146,16 +146,16 @@ def push_anomaly_stat(q, anomaly_stats: list):
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
-    if len(top_stats):  # and len(bottom_stats):
+    if len(top_stats) and len(bottom_stats):
         top_dataset = {
-            'name': 'Top Anomalous Ranks',
+            'name': 'TOP',
             'stat': top_stats,
         }
         bottom_dataset = {
             'name': 'BOTTOM',
             'stat': bottom_stats
         }
-        broadcast the statistics to all clients
+        # broadcast the statistics to all clients
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
