@@ -65,6 +65,8 @@ class AnomalyStats extends React.Component
             dataState[index].stat = stat;
         });
 
+        console.log(dataState);
+
         this.setState({...this.state, data: dataState, colors});
     }
                 
@@ -107,9 +109,9 @@ class AnomalyStats extends React.Component
             labels: Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
-        console.log("ready to show AnomalyStats:");
-        console.log(ranks);
-        console.log(_data);
+        // console.log("ready to show AnomalyStats:");
+        // console.log(ranks);
+        // console.log(_data);
 
         return (
             <Bar 
