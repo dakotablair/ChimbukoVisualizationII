@@ -30,8 +30,7 @@ pdb_client = SonataClient(pdb_engine)
 pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
                           "{ \"path\" : \"%s\" }" % pdb_name)
 pdb = pdb_client.open(pdb_address, 0, 'provdb')
-with pdb.open('anomalies') as collection:
-    print("There are", collection.size, "records in total.")
+pdb_collection = pdb.open('anomalies')
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
