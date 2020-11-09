@@ -28,16 +28,16 @@ def test(engine, path):
     for i, f in enumerate(files):
         pdb_name = 'provdb.' + str(i)
         pdb_names.append(pdb_name)
-        pdb_admin.attach_database(address, 0, pdb_name, 'unqlite',
+        admin.attach_database(address, 0, pdb_name, 'unqlite',
                                   "{ \"path\" : \"%s\" }" % f)
-        pdb = pdb_client.open(address, 0, pdb_name)
+        pdb = client.open(address, 0, pdb_name)
         pdb_collections.append(pdb.open('anomalies'))
 
     all_records = []
-    for col in pdb_collections:
+    for i, col in enumerate(pdb_collections):
         record = [json.loads(x) for x in col.all]
         all_records += record
-        print(col.size)
+        print(i, 'pdb has', col.size)
     
     iostep_dict = {}
     pids = []
@@ -57,20 +57,22 @@ def test(engine, path):
     print("There are {} categories in total:".format(len(iostep_dict)))
     stat = [(x, len(iostep_dict[x])) for x in iostep_dict]
     stat.sort(key=lambda d: d[0])
-    print(*stat, sep='\n')
+    #print(*stat, sep='\n')
+
+    print("test length:", len(iostep_dict[(0,54,3)]))
 
     #pids, rids, iosteps = [0], [0,1], [0,1,2,3,4,5,6,7,8]
-    for pid in pids:
-        for rid in rids:
-            for iostep in iosteps:
-                t0 = time.clock()
-                jx9_filter = "function($record) { return $record.pid == %d &&" \
-                        "$record.rid == %d && $record.io_step == %d; }" % (pid, rid, iostep)
-                filtered_records = [ json.loads(x) for x in collection.filter(jx9_filter) ]
-                t1 = time.clock() - t0
-                print("{}, {}, {}: {:.2f} seconds with {}\texecutions of memory" \
-                        "size {:.2f}KB".format(pid, rid, iostep, t1, len(filtered_records), \
-                        sys.getsizeof(filtered_records)*1./1024))
+    #for pid in pids:
+    #    for rid in rids:
+    #        for iostep in iosteps:
+    #            t0 = time.clock()
+    #            jx9_filter = "function($record) { return $record.pid == %d &&" \
+    #                    "$record.rid == %d && $record.io_step == %d; }" % (pid, rid, iostep)
+    #            filtered_records = [ json.loads(x) for x in pdb_collection.filter(jx9_filter) ]
+    #            t1 = time.clock() - t0
+    #            print("{}, {}, {}: {:.2f} seconds with {}\texecutions of memory" \
+    #                    "size {:.2f}KB".format(pid, rid, iostep, t1, len(filtered_records), \
+    #                    sys.getsizeof(filtered_records)*1./1024))
 
     for i, f in enumerate(files):
         admin.detach_database(address, 0, pdb_names[i])
