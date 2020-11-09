@@ -437,7 +437,7 @@ def run_simulation():
             if len(anomaly_data):
                 push_anomaly_data(q, anomaly_data)
 
-            time.sleep(5)
+            time.sleep(1)
     except Exception as e:
         print('Exception on run simulation: ', e)
         error = 'exception while running simulation'

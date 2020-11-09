@@ -2,6 +2,7 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+
 def get_execdata_binds():
     N_APP_MPI = os.environ.get('N_APP_MPI', 5)
     EXECDATA_URI_PREFIX = os.environ.get(
@@ -14,10 +15,12 @@ def get_execdata_binds():
         execdata_binds["execdata-{}".format(i)] = db_uri
     return execdata_binds
 
+
 class Config(object):
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.environ.get('SECRET_KEY', '51f52814-0071-11e6-a2477-000ec6c2372c')
+    SECRET_KEY = os.environ.get('SECRET_KEY',
+                                '51f52814-0071-11e6-a2477-000ec6c2372c')
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'main.sqlite'))
     SQLALCHEMY_BINDS = {
@@ -41,9 +44,7 @@ class Config(object):
         'SOCKETIO_MESSAGE_QUEUE',
         os.environ.get('CELERY_BROKER_URL', 'redis://')
     )
-    EXECUTION_PATH = os.environ.get('EXECUTION_PATH', None)
-
-
+    # EXECUTION_PATH = os.environ.get('EXECUTION_PATH', None)
 
 
 class DevelopmentConfig(Config):
@@ -52,9 +53,6 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     pass
-
-
-
 
 
 class TestingConfig(Config):

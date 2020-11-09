@@ -15,13 +15,16 @@ cd "${WORK_DIR}" #cd command must use doublequote to take space in filename
 #DATA_NAME="."
 
 # for data from summit
-DATA_NAME="nwchem-104-8-SST"
-DATA_TAR="${WORK_DIR}/${DATA_NAME}.tar.gz"
-if [ ! -d "${WORK_DIR}/${DATA_NAME}" ]; then
-    tar -xzvf "$DATA_TAR"
-fi
-DB_DIR="${DATA_NAME}/db"
+#DATA_NAME="nwchem-104-8-SST"
+#DATA_TAR="${WORK_DIR}/${DATA_NAME}.tar.gz"
+#if [ ! -d "${WORK_DIR}/${DATA_NAME}" ]; then
+#    tar -xzvf "$DATA_TAR"
+#fi
+#DB_DIR="${DATA_NAME}/db"
 
+# for test data
+DATA_NAME="96rank_sharded_vizdump"
+DB_DIR="${DATA_NAME}/db"
 
 # server config
 export SERVER_CONFIG="production"
@@ -29,9 +32,19 @@ export DATABASE_URL="sqlite:///${WORK_DIR}/${DB_DIR}/main.sqlite"
 export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_stats.sqlite"
 export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_data.sqlite"
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
-export EXECUTION_PATH="${WORK_DIR}/${DATA_NAME}/executions"
-export PROVENANCE_DB="${WORK_DIR}/provdb/provdb.unqlite"
-export SIMULATION_JSON="${WORK_DIR}/provdb/"
+export PROVENANCE_DB="${WORK_DIR}/provdb/"
+export SHADED_NUM=20
+export SIMULATION_JSON="${WORK_DIR}/stats/"
+
+# server config
+# export SERVER_CONFIG="production"
+# export DATABASE_URL="sqlite:///${WORK_DIR}/${DB_DIR}/main.sqlite"
+# export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_stats.sqlite"
+# export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_data.sqlite"
+# export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
+# export EXECUTION_PATH="${WORK_DIR}/${DATA_NAME}/executions"
+# export PROVENANCE_DB="${WORK_DIR}/provdb/provdb.unqlite"
+# export SIMULATION_JSON="${WORK_DIR}/provdb/"
 
 echo "run redis ..."
 cd "$ROOT_DIR"

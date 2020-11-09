@@ -20,17 +20,29 @@ celery = Celery(__name__,
                 backend=os.environ.get('CELERY_BROKER_URL', 'redis://'))
 celery.config_from_object('celeryconfig')
 
+
 # pysonata provenance db
-pdb_name = os.environ.get('PROVENANCE_DB', 'provdb.unqlite')
-pdb_engine = Engine('na+sm', pymargo.server)
-pdb_provider = SonataProvider(pdb_engine, 0)
-pdb_address = str(pdb_engine.addr())
-pdb_admin = SonataAdmin(pdb_engine)
-pdb_client = SonataClient(pdb_engine)
-pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
-                          "{ \"path\" : \"%s\" }" % pdb_name)
-pdb = pdb_client.open(pdb_address, 0, 'provdb')
-pdb_collection = pdb.open('anomalies')
+def create_pdb():
+    pdb_path = os.environ.get('PROVENANCE_DB', 'provdb')
+    pdb_sharded_num = os.environ.get('SHARED_NUM', 1)
+
+    pdb_engine = Engine('na+sm', pymargo.server)
+    pdb_provider = SonataProvider(pdb_engine, 0)
+    pdb_address = str(pdb_engine.addr())
+    pdb_admin = SonataAdmin(pdb_engine)
+    pdb_client = SonataClient(pdb_engine)
+
+    pdb_collections = []
+    for i in range(pdb_sharded_num):
+        pdb_name = pdb_path + 'provdb.' + str(i) + '.unqlite'
+        pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
+                                  "{ \"path\" : \"%s\" }" % pdb_name)
+        pdb = pdb_client.open(pdb_address, 0, 'provdb')
+        pdb_collections.append(pdb.open('anomalies'))
+    return pdb_collections
+
+
+pdb_collections = create_pdb()
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
