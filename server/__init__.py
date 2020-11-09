@@ -33,16 +33,19 @@ def create_pdb():
     pdb_client = SonataClient(pdb_engine)
 
     pdb_collections = []
+    pdb_names = []
     for i in range(pdb_sharded_num):
-        pdb_name = pdb_path + 'provdb.' + str(i) + '.unqlite'
-        pdb_admin.attach_database(pdb_address, 0, 'provdb', 'unqlite',
-                                  "{ \"path\" : \"%s\" }" % pdb_name)
-        pdb = pdb_client.open(pdb_address, 0, 'provdb')
+        pdb_name = 'provdb.' + str(i)
+        pdb_names.append(pdb_name)
+        file_name = pdb_path + pdb_name + '.unqlite'
+        pdb_admin.attach_database(pdb_address, 0, pdb_name, 'unqlite',
+                                  "{ \"path\" : \"%s\" }" % file_name)
+        pdb = pdb_client.open(pdb_address, 0, pdb_name)
         pdb_collections.append(pdb.open('anomalies'))
-    return pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine
+    return pdb_collections, pdb_names, pdb_provider, pdb_admin, pdb_address, pdb_engine
 
 
-pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine = create_pdb()
+pdb_collections, pdb_names, pdb_provider, pdb_admin, pdb_address, pdb_engine = create_pdb()
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
