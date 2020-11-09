@@ -24,15 +24,14 @@ cd "${WORK_DIR}" #cd command must use doublequote to take space in filename
 
 # for test data
 DATA_NAME="96rank_sharded_vizdump"
-DB_DIR="${DATA_NAME}/db"
 
 # server config
 export SERVER_CONFIG="production"
-export DATABASE_URL="sqlite:///${WORK_DIR}/${DB_DIR}/main.sqlite"
-export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_stats.sqlite"
-export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_data.sqlite"
-export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
-export PROVENANCE_DB="${WORK_DIR}/provdb/"
+export DATABASE_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/main.sqlite"
+export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_stats.sqlite"
+export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_data.sqlite"
+export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/func_stats.sqlite"
+export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/provdb/"
 export SHARDED_NUM=20
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
