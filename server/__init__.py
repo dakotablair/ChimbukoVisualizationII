@@ -39,10 +39,11 @@ def create_pdb():
                                   "{ \"path\" : \"%s\" }" % pdb_name)
         pdb = pdb_client.open(pdb_address, 0, 'provdb')
         pdb_collections.append(pdb.open('anomalies'))
-    return pdb_collections
+    return pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine
 
 
-pdb_collections = create_pdb()
+pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine
+= create_pdb()
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
