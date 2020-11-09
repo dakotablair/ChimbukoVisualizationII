@@ -373,7 +373,8 @@ def run_simulation():
     # sort as numeric values
     inds = sorted(range(len(ids)), key=lambda k: ids[k])
     files = [json_files[i] for i in inds]  # files in correct order
-
+    print("Total stats files: {}".format(len(files)))
+    
     # clean up db before the simulation
     # delete_old_anomaly()
     # delete_old_func()
