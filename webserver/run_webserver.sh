@@ -33,8 +33,8 @@ export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_stats.sqlite"
 export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DB_DIR}/anomaly_data.sqlite"
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DB_DIR}/func_stats.sqlite"
 export PROVENANCE_DB="${WORK_DIR}/provdb/"
-export SHADED_NUM=20
-export SIMULATION_JSON="${WORK_DIR}/stats/"
+export SHARDED_NUM=20
+export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
 # server config
 # export SERVER_CONFIG="production"
