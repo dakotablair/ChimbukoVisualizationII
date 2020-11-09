@@ -42,8 +42,7 @@ def create_pdb():
     return pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine
 
 
-pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine
-= create_pdb()
+pdb_collections, pdb_provider, pdb_admin, pdb_address, pdb_engine = create_pdb()
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
