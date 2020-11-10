@@ -24,7 +24,7 @@ celery.config_from_object('celeryconfig')
 # pysonata provenance db
 def create_pdb():
     pdb_path = os.environ.get('PROVENANCE_DB', 'provdb')
-    pdb_sharded_num = os.environ.get('SHARED_NUM', 1)
+    pdb_sharded_num = os.environ.get('SHARDED_NUM', 1)
 
     pdb_engine = Engine('na+sm', pymargo.server)
     pdb_provider = SonataProvider(pdb_engine, 0)
