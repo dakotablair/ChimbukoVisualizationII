@@ -124,6 +124,14 @@ class AnomalyStats extends React.Component
                                 return `Rank-${rank}`;
                             }
                         }
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: statKind
+                            }
+                        }]
                     }         
                 }}
             />
