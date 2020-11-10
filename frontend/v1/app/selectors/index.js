@@ -18,7 +18,7 @@ export const executionTree = createSelector(
         state => state.data.execdata,
     ],
     (node_key, execdata) => {
-        console.log("...run executionTree...");
+        // console.log("...run executionTree...");
 
         let exec = null; 
         execdata.forEach(d => {
@@ -31,8 +31,8 @@ export const executionTree = createSelector(
         if (exec == null)
             return empty_tree();
 
-        console.log("...continued...");
-        console.log(exec);
+        // console.log("...continued...");
+        // console.log(exec);
 
         // merge call_stack and exec_window
         const nodes = [];

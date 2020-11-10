@@ -40,7 +40,7 @@ def load_execution_provdb(pid, rid, step):
     for col in pdb_collections:
         result = [json.loads(x) for x in col.filter(jx9_filter)]
         filtered_records += result
-    print("...loaded {} records from provdb...".format(
+    print("{} records from provdb".format(
         len(filtered_records)))
 
     # gpu_count = 0

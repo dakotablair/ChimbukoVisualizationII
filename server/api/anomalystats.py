@@ -392,7 +392,7 @@ def run_simulation():
 
     try:
         for filename in files:
-            print("File {} out of {} files.".format(filename, len(files)))
+            # print("File {} out of {} files.".format(filename, len(files)))
             data = None
             with open(filename) as f:
                 loaded = json.load(f)

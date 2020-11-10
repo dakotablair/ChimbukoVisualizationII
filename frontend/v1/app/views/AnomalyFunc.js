@@ -102,12 +102,12 @@ class AnomalyFunc extends React.Component
             pointBorderColor: `rgba(${r}, ${g}, ${b}, 1)`,
             pointBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.3)`, //'#fff',
             pointBorderWidth: 1,
-            pointHoverRadius: 8,
-            pointHoverBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.1)`,
+            pointHoverRadius: 10,
+            pointHoverBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.3)`,
             pointHoverBorderColor: `rgba(${r}, ${g}, ${b}, 1)`,
             pointHoverBorderWidth: 2,
             pointRadius: 5,
-            pointHitRadius: 8,                
+            pointHitRadius: 10,                
         }        
     }
 
