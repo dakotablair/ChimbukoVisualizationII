@@ -388,7 +388,7 @@ def run_simulation():
     files = [json_files[i] for i in inds]  # files in correct order
 
     # clean up db before the simulation
-    delete_all_db()
+    # delete_all_db()
 
     try:
         for filename in files:
@@ -401,7 +401,7 @@ def run_simulation():
 
             if data is None:
                 print("empty file")
-                sleep(1)
+                time.sleep(1)
                 continue
 
             ts = data.get('created_at', None)
