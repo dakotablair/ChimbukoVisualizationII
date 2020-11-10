@@ -33,16 +33,10 @@ class AnomalyStats extends React.Component
         let { colors, data:dataState } = this.state;
 
         if (dataState.length === 0) {
-            newData.forEach(category => {
-                const getRandomColor = () => {
-                    return {
-                        r: Math.floor(Math.random() * 255),
-                        g: Math.floor(Math.random() * 255),
-                        b: Math.floor(Math.random() * 255)
-                    }
-                }          
+            newData.forEach((category, i) => {
+                color = [{r: 150, g: 255, b: 255}, {r: 255, g: 150, b: 150}];
                 dataState.push({
-                    'color': getRandomColor(),
+                    'color': color[i],
                     'name': category.name,
                     'stat': []
                 });      

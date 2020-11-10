@@ -400,8 +400,7 @@ def run_simulation():
                 # ignore counter_stats for now
 
             if data is None:
-                print("empty file")
-                time.sleep(1)
+                time.sleep(0.2)
                 continue
 
             ts = data.get('created_at', None)
