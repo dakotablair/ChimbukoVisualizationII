@@ -154,7 +154,7 @@ def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
     if anomaly_stats is not None and len(anomaly_stats):
         nQueries = min(nQueries, len(anomaly_stats))
         top_stats = anomaly_stats[:nQueries]
-        #bottom_stats = anomaly_stats[-nQueries:][::-1]
+        bottom_stats = anomaly_stats[-nQueries:][::-1]
 
     # ---------------------------------------------------
     # processing data for the front-end
@@ -164,15 +164,15 @@ def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
             'name': 'Top Ranks',
             'stat': top_stats,
         }
-        counter_dataset = {
+        bottom_dataset = {
             'name': 'CPU/GPU Counters',
-            'stat': [],  # anomaly_counters[:min(nQueries, len(anomaly_counters))]
+            'stat': bottom_stats,  # anomaly_counters[:min(nQueries, len(anomaly_counters))]
         }
         # broadcast the statistics to all clients
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
-            'data': [top_dataset, counter_dataset]
+            'data': [top_dataset, bottom_dataset]  # counter_dataset]
         }, 'update_stats')
 
 
