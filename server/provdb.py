@@ -8,10 +8,10 @@ from pysonata.admin import SonataAdmin
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=1):
         self.pdb_engine = Engine('na+sm', pymargo.server)
-        self.pdb_provider = SonataProvider(pdb_engine, 0)
-        self.pdb_address = str(pdb_engine.addr())
-        self.pdb_admin = SonataAdmin(pdb_engine)
-        self.pdb_client = SonataClient(pdb_engine)
+        self.pdb_provider = SonataProvider(self.pdb_engine, 0)
+        self.pdb_address = str(self.pdb_engine.addr())
+        self.pdb_admin = SonataAdmin(self.pdb_engine)
+        self.pdb_client = SonataClient(self.pdb_engine)
 
         self.pdb_names = []
         self.pdb_collections = []
