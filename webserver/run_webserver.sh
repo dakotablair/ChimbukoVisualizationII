@@ -27,7 +27,7 @@ python3 manager.py celery --loglevel=info &
 sleep 10
 
 echo "run db ..."
-python3 manager.py creatdb
+python3 manager.py createdb
 
 echo "run webserver ..."
 python3 manager.py runserver --host 0.0.0.0 --port 5002 --no-debug
