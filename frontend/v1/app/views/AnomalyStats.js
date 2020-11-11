@@ -86,7 +86,7 @@ class AnomalyStats extends React.Component
         data.forEach(category => {
             const rgb = category.color;
             barData.push({
-                label: category.name,
+                label: category.stat.map(d => d.rank),
                 data: category.stat.map(d => d[statKind]),
                 backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
                 borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
@@ -103,9 +103,9 @@ class AnomalyStats extends React.Component
             labels: Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
-        console.log("ready to show AnomalyStats:");
-        console.log(ranks);
-        console.log(_data);
+        // console.log("ready to show AnomalyStats:");
+        // console.log(ranks);
+        // console.log(_data);
 
         return (
             <Bar 
