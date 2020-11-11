@@ -107,16 +107,18 @@ class AnomalyStats extends React.Component
                 ranks.push(category.stat.map(d => d.rank));
             }
             else {
-                barData.push({
-                    label: category.name,
-                    data: category.stat.stats.map(d => d[statKind]),
-                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                    borderWidth: 1,
-                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-                });
-                ranks.push(category.stat.map(d => d.counter));
+                if (category.stat.length != 0) {
+                    barData.push({
+                        label: category.name,
+                        data: category.stat.stats.map(d => d[statKind]),
+                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                        borderWidth: 1,
+                        hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                        hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                    });
+                    ranks.push(category.stat.map(d => d.counter));
+                }
             }
 
             if (category.stat.length > maxLen)
