@@ -407,7 +407,7 @@ def run_simulation():
             with open(filename) as f:
                 loaded = json.load(f)
                 data = loaded.get('anomaly_stats', None)
-                counter = loaded.get('counter_stats', None)
+                counter_stats = loaded.get('counter_stats', None)
 
             if data is None:
                 time.sleep(0.2)
