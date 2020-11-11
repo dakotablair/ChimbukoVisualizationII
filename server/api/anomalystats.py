@@ -277,8 +277,8 @@ def new_anomalydata():
                          'cpu: Idle %']
     if counter_stats:
         for d in counter_stats:
-            if d['counter'] == 'GPU Occupancy (Warps)' or
-            d['counter'] in selected_counters:
+            if d['counter'] == 'GPU Occupancy (Warps)' or \
+               d['counter'] in selected_counters:
                 anomaly_counters[d['counter']] = d['stats']['mean']
 
     # print('processing...')
@@ -419,12 +419,12 @@ def run_simulation():
 
             # process counter stats
             anomaly_counters = {}
-            selected_counters = ['cpu: User %', 'cpu: Nice %', 'cpu: I/O Wait %',
-                                'cpu: Idle %']
+            selected_counters = ['cpu: User %', 'cpu: Nice %',
+                                 'cpu: I/O Wait %', 'cpu: Idle %']
             if counter_stats:
                 for d in counter_stats:
-                    if d['counter'] == 'GPU Occupancy (Warps)' or
-                    d['counter'] in selected_counters:
+                    if d['counter'] == 'GPU Occupancy (Warps)' or \
+                       d['counter'] in selected_counters:
                         anomaly_counters[d['counter']] = d['stats']['mean']
 
             # print('processing...')
