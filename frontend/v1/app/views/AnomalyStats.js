@@ -103,9 +103,9 @@ class AnomalyStats extends React.Component
             labels: Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
-        // console.log("ready to show AnomalyStats:");
+        console.log("ready to show AnomalyStats:");
         console.log(ranks);
-        // console.log(_data);
+        console.log(_data);
 
         return (
             <Bar 

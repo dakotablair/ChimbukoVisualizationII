@@ -286,32 +286,32 @@ def new_anomalydata():
         process_on_anomaly(anomaly_stats.get('anomaly', []), ts)
     func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
-    # print('update db...')
-    # try:
-    #     if len(anomaly_stat):
-    #         db.get_engine(app=current_app, bind='anomaly_stats').execute(
-    #             AnomalyStat.__table__.insert(), anomaly_stat
-    #         )
-    #         db.get_engine(app=current_app, bind='anomaly_data').execute(
-    #             AnomalyData.__table__.insert(), anomaly_data
-    #         )
-    #     if len(func_stat):
-    #         db.get_engine(app=current_app, bind='func_stats').execute(
-    #             FuncStat.__table__.insert(), func_stat
-    #         )
+    print('update db...')
+    try:
+        if len(anomaly_stat):
+            db.get_engine(app=current_app, bind='anomaly_stats').execute(
+                AnomalyStat.__table__.insert(), anomaly_stat
+            )
+            db.get_engine(app=current_app, bind='anomaly_data').execute(
+                AnomalyData.__table__.insert(), anomaly_data
+            )
+        if len(func_stat):
+            db.get_engine(app=current_app, bind='func_stats').execute(
+                FuncStat.__table__.insert(), func_stat
+            )
 
-    #     # although we have defined models to enable cascased delete operation,
-    #     # it actually didn't work. The reason is that we do the bulk insertion
-    #     # to get performance and, for now, I couldn't figure out how to define
-    #     # backreference in the above bulk insertion. So that, we do delete
-    #     # Stat rows manually (but using bulk deletion)
+        # although we have defined models to enable cascased delete operation,
+        # it actually didn't work. The reason is that we do the bulk insertion
+        # to get performance and, for now, I couldn't figure out how to define
+        # backreference in the above bulk insertion. So that, we do delete
+        # Stat rows manually (but using bulk deletion)
 
-    #     # currently this is error prone!!!
+        # currently this is error prone!!!
 
-    #     # delete_old_anomaly()
-    #     # delete_old_func()
-    # except Exception as e:
-    #     print(e)
+        # delete_old_anomaly()
+        # delete_old_func()
+    except Exception as e:
+        print(e)
 
     try:
         # get query condition from database
@@ -377,7 +377,7 @@ def get_anomalystats():
         )
     ).all()
 
-    push_anomaly_stat(query, [st.to_dict() for st in stats])
+    push_anomaly_stat(query, [st.to_dict() for st in stats], {})
     return jsonify({}), 200
     # return jsonify([st.to_dict() for st in stats])
 
@@ -433,23 +433,23 @@ def run_simulation():
             func_stat = process_on_func(data.get('func', []), ts)
 
             # print('update db...')
-            # try:
-            #     if len(anomaly_stat):
-            #         db.get_engine(app=current_app,
-            #                       bind='anomaly_stats').execute(
-            #             AnomalyStat.__table__.insert(), anomaly_stat
-            #         )
-            #         db.get_engine(app=current_app,
-            #                       bind='anomaly_data').execute(
-            #             AnomalyData.__table__.insert(), anomaly_data
-            #         )
-            #     if len(func_stat):
-            #         db.get_engine(app=current_app, bind='func_stats').execute(
-            #             FuncStat.__table__.insert(), func_stat
-            #         )
+            try:
+                if len(anomaly_stat):
+                    db.get_engine(app=current_app,
+                                  bind='anomaly_stats').execute(
+                        AnomalyStat.__table__.insert(), anomaly_stat
+                    )
+                    db.get_engine(app=current_app,
+                                  bind='anomaly_data').execute(
+                        AnomalyData.__table__.insert(), anomaly_data
+                    )
+                if len(func_stat):
+                    db.get_engine(app=current_app, bind='func_stats').execute(
+                        FuncStat.__table__.insert(), func_stat
+                    )
 
-            # except Exception as e:
-            #     print(e)
+            except Exception as e:
+                print(e)
 
             q = AnomalyStatQuery.query. \
                 order_by(AnomalyStatQuery.created_at.desc()).first()
