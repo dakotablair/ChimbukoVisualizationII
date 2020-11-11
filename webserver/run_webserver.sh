@@ -27,7 +27,7 @@ python3 manager.py celery --loglevel=info &
 sleep 10
 
 echo "run db ..."
-python3 manager.py createdb --drop_first='True' &
+python3 manager.py createdb True &
 sleep 10
 
 echo "run webserver ..."
