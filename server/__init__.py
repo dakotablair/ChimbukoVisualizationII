@@ -3,7 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from celery import Celery
-from provdb import ProvDB
+from .provdb import ProvDB
 from config import config
 
 # Flask extensions
