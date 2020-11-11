@@ -27,8 +27,10 @@ class ProvDB():
             self.pdb_collections.append(pdb.open('anomalies'))
 
     def __del__(self):
+        del self.pdb_client
         for name in self.pdb_names:
             self.pdb_admin.detach_database(self.pdb_address, 0, name)
+        del self.pdb_admin
         del self.pdb_provider
         self.pdb_engine.finalize()
         print("Provdb connection shut down!")
