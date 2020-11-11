@@ -141,7 +141,7 @@ def delete_old_func():
     # )
 
 
-def push_anomaly_stat(q, anomaly_stats: list):
+def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
 
     # query arguments
     nQueries = q.nQueries
@@ -154,25 +154,25 @@ def push_anomaly_stat(q, anomaly_stats: list):
     if anomaly_stats is not None and len(anomaly_stats):
         nQueries = min(nQueries, len(anomaly_stats))
         top_stats = anomaly_stats[:nQueries]
-        bottom_stats = anomaly_stats[-nQueries:][::-1]
+        #bottom_stats = anomaly_stats[-nQueries:][::-1]
 
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
     if len(top_stats) and len(bottom_stats):
         top_dataset = {
-            'name': 'Most Anomalous Ranks',
+            'name': 'Top Ranks',
             'stat': top_stats,
         }
-        bottom_dataset = {
-            'name': 'Least Anomalous Ranks',
-            'stat': bottom_stats
+        counter_dataset = {
+            'name': 'CPU/GPU Counters',
+            'stat': [],  # anomaly_counters[:min(nQueries, len(anomaly_counters))]
         }
         # broadcast the statistics to all clients
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
-            'data': [top_dataset, bottom_dataset]
+            'data': [top_dataset, counter_dataset]
         }, 'update_stats')
 
 
@@ -265,11 +265,21 @@ def new_anomalydata():
         return jsonify({}), 201
 
     anomaly_stats = data['anomaly_stats']
-    counter_stats = data['counter_stats']  # ignore for now
+    counter_stats = data['counter_stats']
 
     ts = anomaly_stats.get('created_at', None)
     if ts is None:
         abort(400)
+
+    # process counter stats
+    anomaly_counters = {}
+    selected_counters = ['cpu: User %', 'cpu: Nice %', 'cpu: I/O Wait %',
+                         'cpu: Idle %']
+    if counter_stats:
+        for d in counter_stats:
+            if d['counter'] == 'GPU Occupancy (Warps)' or
+            d['counter'] in selected_counters:
+                anomaly_counters[d['counter']] = d['stats']['mean']
 
     # print('processing...')
     anomaly_stat, anomaly_data = \
@@ -318,7 +328,7 @@ def new_anomalydata():
             db.session.commit()
 
         if len(anomaly_stat):
-            push_anomaly_stat(q, anomaly_stat)
+            push_anomaly_stat(q, anomaly_stat, anomaly_counters)
 
         if len(anomaly_data):
             push_anomaly_data(q, anomaly_data)
@@ -397,7 +407,7 @@ def run_simulation():
             with open(filename) as f:
                 loaded = json.load(f)
                 data = loaded.get('anomaly_stats', None)
-                # ignore counter_stats for now
+                counter = loaded.get('counter_stats', None)
 
             if data is None:
                 time.sleep(0.2)
@@ -406,6 +416,16 @@ def run_simulation():
             ts = data.get('created_at', None)
             if ts is None:
                 abort(400)
+
+            # process counter stats
+            anomaly_counters = {}
+            selected_counters = ['cpu: User %', 'cpu: Nice %', 'cpu: I/O Wait %',
+                                'cpu: Idle %']
+            if counter_stats:
+                for d in counter_stats:
+                    if d['counter'] == 'GPU Occupancy (Warps)' or
+                    d['counter'] in selected_counters:
+                        anomaly_counters[d['counter']] = d['stats']['mean']
 
             # print('processing...')
             anomaly_stat, anomaly_data = \
@@ -445,7 +465,7 @@ def run_simulation():
 
             # print("ts: {}, data: {}", ts, len(data))
             if len(anomaly_stat):
-                push_anomaly_stat(q, anomaly_stat)
+                push_anomaly_stat(q, anomaly_stat, anomaly_counters)
 
             if len(anomaly_data):
                 push_anomaly_data(q, anomaly_data)

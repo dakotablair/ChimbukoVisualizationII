@@ -104,7 +104,7 @@ class AnomalyStats extends React.Component
             datasets: barData
         };
         // console.log("ready to show AnomalyStats:");
-        // console.log(ranks);
+        console.log(ranks);
         // console.log(_data);
 
         return (
