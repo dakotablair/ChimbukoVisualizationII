@@ -4,7 +4,7 @@ import { getRandomColor } from '../utils';
 const INIT_STATE = {
     // anomaly statistics
     stats: {
-        statKind: 'stddev',
+        statKind: 'mean',
         nQueries: 5
     },
     // stats_colors: {},

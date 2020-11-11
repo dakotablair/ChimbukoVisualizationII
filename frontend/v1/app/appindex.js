@@ -271,7 +271,7 @@ class ChimbukoApp extends React.Component {
                                 <TextField
                                     id="stat-kind"
                                     label="Anomaly statistics"
-                                    value={statKind || "stddev"}
+                                    value={statKind || "mean"}
                                     onChange={this.handleStatChange('statKind')}
                                     select
                                     className={clsx(classes.margin, classes.textField)}
