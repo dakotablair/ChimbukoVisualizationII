@@ -33,5 +33,5 @@ class ProvDB():
         del self.pdb_address
         del self.pdb_admin
         del self.pdb_provider
-        self.pdb_engine.finalize()
+        #self.pdb_engine.finalize()
         print("Provdb connection shut down!")
