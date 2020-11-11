@@ -43,8 +43,8 @@ class AnomalyStats extends React.Component
             });
         }
 
-        // if (newData.length == 2)
-        //     console.log(newData[1]);
+        if (newData.length == 2)
+            console.log(newData[1]);
 
         newData.forEach( (category, index) => {
             if (index == 0) {
