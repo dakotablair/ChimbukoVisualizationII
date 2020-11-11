@@ -150,29 +150,29 @@ def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
     anomaly_stats.sort(key=lambda d: d[statKind], reverse=True)
 
     top_stats = []
-    bottom_stats = []
+    # bottom_stats = []
     if anomaly_stats is not None and len(anomaly_stats):
         nQueries = min(nQueries, len(anomaly_stats))
         top_stats = anomaly_stats[:nQueries]
-        bottom_stats = anomaly_stats[-nQueries:][::-1]
+        # bottom_stats = anomaly_stats[-nQueries:][::-1]
 
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
-    if len(top_stats) and len(bottom_stats):
+    if len(top_stats):  # and len(bottom_stats):
         top_dataset = {
             'name': 'Top Ranks',
             'stat': top_stats,
         }
         bottom_dataset = {
             'name': 'CPU/GPU Counters',
-            'stat': bottom_stats,  # anomaly_counters[:min(nQueries, len(anomaly_counters))]
+            'stat': anomaly_counters,
         }
         # broadcast the statistics to all clients
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
-            'data': [top_dataset, bottom_dataset]  # counter_dataset]
+            'data': [top_dataset, bottom_dataset]
         }, 'update_stats')
 
 
@@ -272,14 +272,14 @@ def new_anomalydata():
         abort(400)
 
     # process counter stats
-    anomaly_counters = {}
+    anomaly_counters = []
     selected_counters = ['cpu: User %', 'cpu: Nice %', 'cpu: I/O Wait %',
                          'cpu: Idle %']
     if counter_stats:
         for d in counter_stats:
             if d['counter'] == 'GPU Occupancy (Warps)' or \
                d['counter'] in selected_counters:
-                anomaly_counters[d['counter']] = d['stats']['mean']
+                anomaly_counters.append(d)
 
     # print('processing...')
     anomaly_stat, anomaly_data = \
@@ -377,7 +377,7 @@ def get_anomalystats():
         )
     ).all()
 
-    push_anomaly_stat(query, [st.to_dict() for st in stats], {})
+    push_anomaly_stat(query, [st.to_dict() for st in stats], [])
     return jsonify({}), 200
     # return jsonify([st.to_dict() for st in stats])
 
@@ -418,14 +418,14 @@ def run_simulation():
                 abort(400)
 
             # process counter stats
-            anomaly_counters = {}
+            anomaly_counters = []
             selected_counters = ['cpu: User %', 'cpu: Nice %',
                                  'cpu: I/O Wait %', 'cpu: Idle %']
             if counter_stats:
                 for d in counter_stats:
                     if d['counter'] == 'GPU Occupancy (Warps)' or \
                        d['counter'] in selected_counters:
-                        anomaly_counters[d['counter']] = d['stats']['mean']
+                        anomaly_counters.append(d)
 
             # print('processing...')
             anomaly_stat, anomaly_data = \

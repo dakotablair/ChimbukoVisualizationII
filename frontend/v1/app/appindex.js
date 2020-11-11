@@ -135,6 +135,10 @@ class ChimbukoApp extends React.Component {
     }
 
     handleHistoryRequest = rank => {
+        console.log('onBarClick: ' + rank);
+        if (isNaN(rank))
+            return;
+            
         const watched_ranks = [...this.props.watched_ranks];
 
         if (watched_ranks.indexOf(rank) >= 0)

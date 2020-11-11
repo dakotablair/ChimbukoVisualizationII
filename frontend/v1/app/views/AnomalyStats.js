@@ -44,19 +44,28 @@ class AnomalyStats extends React.Component
         }
 
         newData.forEach( (category, index) => {
-            const keys = new Set([]);
-            let stat = [...dataState[index].stat, ...category.stat];
-            stat.sort((a, b) => b.created_at - a.created_at);
-            stat = stat.filter((d, i) => {
-                    if (keys.has(d.key)) 
-                        return false;
-                    keys.add(d.key);
-                    return true;
-                }); // when merged, only keep latest
-            stat.sort((a, b) => b[statKind] - a[statKind]);
-            if (nQueries < stat.length)
-                stat = stat.slice(0, nQueries);
-            dataState[index].stat = stat;
+            if (index == 0) {
+                const keys = new Set([]);
+                let stat = [...dataState[index].stat, ...category.stat];
+                stat.sort((a, b) => b.created_at - a.created_at);
+                stat = stat.filter((d, i) => {
+                        if (keys.has(d.key)) 
+                            return false;
+                        keys.add(d.key);
+                        return true;
+                    }); // when merged, only keep latest
+                stat.sort((a, b) => b[statKind] - a[statKind]);
+                if (nQueries < stat.length)
+                    stat = stat.slice(0, nQueries);
+                dataState[index].stat = stat;
+            }
+            else {
+                let stat = category.stat;
+                stat.sort((a, b) => b.stats.mean - a.stats.mean); // only consider mean for now
+                if (nQueries < stat.length)
+                    stat = stat.slice(0, nQueries);
+                dataState[index].stat = stat;
+            }
         });
 
         // console.log(dataState);
@@ -83,18 +92,33 @@ class AnomalyStats extends React.Component
         const ranks = [];
         const barData = [];
         let maxLen = 0;
-        data.forEach(category => {
+        data.forEach((category, index) => {
             const rgb = category.color;
-            barData.push({
-                label: category.name,
-                data: category.stat.map(d => d[statKind]),
-                backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                borderWidth: 1,
-                hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-            });
-            ranks.push(category.stat.map(d => d.rank));
+            if (index == 0) {
+                barData.push({
+                    label: category.name,
+                    data: category.stat.map(d => d[statKind]),
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                    borderWidth: 1,
+                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                });
+                ranks.push(category.stat.map(d => d.rank));
+            }
+            else {
+                barData.push({
+                    label: category.name,
+                    data: category.stat.stats.map(d => d[statKind]),
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                    borderWidth: 1,
+                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                });
+                ranks.push(category.stat.map(d => d.counter));
+            }
+
             if (category.stat.length > maxLen)
                 maxLen = category.stat.length;
         });
@@ -120,8 +144,13 @@ class AnomalyStats extends React.Component
                             title: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
-                                const rank = ranks[datasetIndex][index];
-                                return `Rank-${rank}`;
+                                const content = ranks[datasetIndex][index];
+                                if (datasetIndex == 0) {    
+                                    return `Rank-${content}`;
+                                }
+                                else {
+                                    return content;
+                                }
                             }
                         }
                     },
