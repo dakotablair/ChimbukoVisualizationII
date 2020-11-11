@@ -90,7 +90,7 @@ manager.add_command("celery", CeleryWorker())
 
 
 @manager.command
-def createdb(drop_first):
+def createdb(drop_first=True):
     """Creates the database."""
     if drop_first:
         db.drop_all()
