@@ -3,14 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from celery import Celery
-
+from provdb import ProvDB
 from config import config
-
-import pymargo
-from pymargo.core import Engine
-from pysonata.provider import SonataProvider
-from pysonata.client import SonataClient
-from pysonata.admin import SonataAdmin
 
 # Flask extensions
 db = SQLAlchemy()
@@ -19,33 +13,8 @@ celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
                 backend=os.environ.get('CELERY_BROKER_URL', 'redis://'))
 celery.config_from_object('celeryconfig')
-
-
-# pysonata provenance db
-def create_pdb():
-    pdb_path = os.environ.get('PROVENANCE_DB', 'data/sample/provdb/')
-    pdb_sharded_num = int(os.environ.get('SHARDED_NUM', 1))
-
-    pdb_engine = Engine('na+sm', pymargo.server)
-    pdb_provider = SonataProvider(pdb_engine, 0)
-    pdb_address = str(pdb_engine.addr())
-    pdb_admin = SonataAdmin(pdb_engine)
-    pdb_client = SonataClient(pdb_engine)
-
-    pdb_collections = []
-    pdb_names = []
-    for i in range(pdb_sharded_num):
-        pdb_name = 'provdb.' + str(i)
-        pdb_names.append(pdb_name)
-        file_name = pdb_path + pdb_name + '.unqlite'
-        pdb_admin.attach_database(pdb_address, 0, pdb_name, 'unqlite',
-                                  "{ \"path\" : \"%s\" }" % file_name)
-        pdb = pdb_client.open(pdb_address, 0, pdb_name)
-        pdb_collections.append(pdb.open('anomalies'))
-    return pdb_collections, pdb_names, pdb_provider, pdb_admin, pdb_address, pdb_engine
-
-
-pdb_collections, pdb_names, pdb_provider, pdb_admin, pdb_address, pdb_engine = create_pdb()
+pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', 'data/sample/provdb/'),
+             pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 1)))
 
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa

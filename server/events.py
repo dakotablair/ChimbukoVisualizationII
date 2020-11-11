@@ -2,7 +2,7 @@ import os
 from flask import g, session, Blueprint, current_app, request
 from flask import jsonify, abort, json
 
-from . import db, socketio, celery, pdb_collections
+from . import db, socketio, celery, pdb
 from .models import AnomalyStat, AnomalyData, AnomalyStatQuery
 from .models import ExecData, CommData
 
@@ -37,7 +37,7 @@ def load_execution_provdb(pid, rid, step):
         "$record.io_step == %d; } " % (int(pid),
                                        int(rid),  # random.randint(0, 1),
                                        int(step))  # random.randint(0, 8))
-    for col in pdb_collections:
+    for col in pdb.pdb_collections:
         result = [json.loads(x) for x in col.filter(jx9_filter)]
         filtered_records += result
     print("{} records from provdb".format(
