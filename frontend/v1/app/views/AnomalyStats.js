@@ -100,7 +100,7 @@ class AnomalyStats extends React.Component
         });
 
         const _data = {
-            labels: ranks[0], // Array(maxLen).fill(0).map((_, i) => i),
+            labels: maxLen==0?[]:ranks[0], // Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
         // console.log("ready to show AnomalyStats:");
