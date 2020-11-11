@@ -110,7 +110,7 @@ class AnomalyStats extends React.Component
                 if (category.stat.length != 0) {
                     barData.push({
                         label: category.name,
-                        data: category.stat.stats.map(d => d[statKind]),
+                        data: category.stat.map(d => d.stats[statKind]),
                         backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
                         borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
                         borderWidth: 1,
