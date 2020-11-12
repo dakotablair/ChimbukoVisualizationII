@@ -141,7 +141,7 @@ class ServerTests(unittest.TestCase):
         anomaly_payload = {
             'anomaly_stats': anomaly_stats,
             'counter_stats': counter_stats,
-            'current_app': this.app
+            'current_app': self.app
         }
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
