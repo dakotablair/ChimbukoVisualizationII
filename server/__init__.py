@@ -15,7 +15,7 @@ celery = Celery(__name__,
 celery.config_from_object('celeryconfig')
 #pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', 'data/sample/provdb/'),
 #             pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 1)))
-
+pdb = None
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
 
