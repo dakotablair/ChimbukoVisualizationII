@@ -143,7 +143,7 @@ class ServerTests(unittest.TestCase):
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
         time.sleep(5)
-        self.assertEqual(s, 201)
+        self.assertEqual(s, 202)
         time.sleep(0.1)
 
         # check anomaly statistics
