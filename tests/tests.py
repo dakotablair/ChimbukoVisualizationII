@@ -177,7 +177,7 @@ class ServerTests(unittest.TestCase):
             r, s, h = self.get('/api/get_funcstats?fid={}'.format(fid))
             self.assertEqual(s, 200)
             r = r[0]
-            for k, v in func_payload['func'][fid].items():
+            for k, v in func_payload['anomaly_stats']['func'][fid].items():
                 if isinstance(v, dict):
                     for k1, v1 in v.items():
                         self.assertEqual(r[k][k1], v1)
@@ -186,13 +186,15 @@ class ServerTests(unittest.TestCase):
 
         # post both
         payload = {
-            'created_at': 124,
-            'anomaly': [
-                get_random_anomaly(0, 0, 10, 15),
-                get_random_anomaly(0, 1, 5, 10),
-                get_random_anomaly(0, 2, 3, 8)
-            ],
-            'func': get_random_func(10)
+            'anomaly_stats': {
+                'created_at': 124,
+                'anomaly': [
+                    get_random_anomaly(0, 0, 10, 15),
+                    get_random_anomaly(0, 1, 5, 10),
+                    get_random_anomaly(0, 2, 3, 8)
+                ],
+                'func': get_random_func(10)
+            }
         }
 
         print("......", self.app)
@@ -200,6 +202,7 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(s, 202)
         time.sleep(0.1)
 
+        payload = payload['anomaly_stats']
         # check anomaly statistics
         for d in payload['anomaly']:
             app, rank = d['key'].split(':')
@@ -208,9 +211,9 @@ class ServerTests(unittest.TestCase):
             r = r[0]
             self.assertEqual(r['created_at'], 124)
             for k, v in d['stats'].items():
-                self.assertEqual(v, r['stats'][k])
+                self.assertEqual(v, r[k])
 
-            r, s, h = self.get('/api/anomalydata?app={}&rank={}&limit=5'.format(app, rank))
+            r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             for i, dd in enumerate(d['data']):
                 [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
