@@ -100,7 +100,7 @@ def createdb(drop_first=True):
 @manager.command
 def test():
     """Runs unit tests."""
-    tests = subprocess.call(['python', '-c', 'import tests; tests.run()'])
+    tests = subprocess.call(['python3', '-c', 'import tests; tests.run()'])
     sys.exit(tests)
 
 
