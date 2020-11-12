@@ -501,8 +501,6 @@ def get_anomalystats():
             AnomalyStat.app == int(app),
             AnomalyStat.rank == int(rank),
         )
-    ).order_by(
-        AnomalyStat.step.desc()
     ).all()
 
     push_anomaly_stat(query, [st.to_dict() for st in stats], [])
