@@ -265,7 +265,7 @@ def new_anomalydata():
         return jsonify({}), 201
 
     anomaly_stats = data['anomaly_stats']
-    counter_stats = data['counter_stats']
+    counter_stats = data.get('counter_stats', [])
 
     ts = anomaly_stats.get('created_at', None)
     if ts is None:
@@ -382,8 +382,8 @@ def get_anomalystats():
     ).all()
 
     push_anomaly_stat(query, [st.to_dict() for st in stats], [])
-    return jsonify({}), 200
-    # return jsonify([st.to_dict() for st in stats])
+    # return jsonify({}), 200
+    return jsonify([st.to_dict() for st in stats])
 
 
 @api.route('/run_simulation', methods=['GET'])
@@ -491,7 +491,6 @@ def run_simulation():
 
 @api.route('/get_anomalydata', methods=['GET'])
 def get_anomalydata():
-    """xw: old pull model, consider to remove"""
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
     limit = request.args.get('limit', default=None)

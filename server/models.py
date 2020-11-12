@@ -206,79 +206,79 @@ class FuncStat(Base):
         return d
 
 
-class ExecData(Base):
-    __tablename__ = 'execdata'
+# class ExecData(Base):
+#     __tablename__ = 'execdata'
 
-    pid = db.Column(db.Integer, default=0)
-    rid = db.Column(db.Integer, default=0)
-    tid = db.Column(db.Integer, default=0)
+#     pid = db.Column(db.Integer, default=0)
+#     rid = db.Column(db.Integer, default=0)
+#     tid = db.Column(db.Integer, default=0)
 
-    fid = db.Column(db.Integer, default=0)
-    name = db.Column(db.String(), default="unknown")
+#     fid = db.Column(db.Integer, default=0)
+#     name = db.Column(db.String(), default="unknown")
 
-    entry = db.Column(db.Float, default=0)
-    exit = db.Column(db.Float, default=0)
-    runtime = db.Column(db.Float, default=0)
-    exclusive = db.Column(db.Float, default=0)
+#     entry = db.Column(db.Float, default=0)
+#     exit = db.Column(db.Float, default=0)
+#     runtime = db.Column(db.Float, default=0)
+#     exclusive = db.Column(db.Float, default=0)
 
-    label = db.Column(db.Integer, default=0)
+#     label = db.Column(db.Integer, default=0)
 
-    parent = db.Column(db.String(), default='root')
-    n_children = db.Column(db.Integer, default=0)
-    n_messages = db.Column(db.Integer, default=0)
+#     parent = db.Column(db.String(), default='root')
+#     n_children = db.Column(db.Integer, default=0)
+#     n_messages = db.Column(db.Integer, default=0)
 
-    # communication
-    # - one-to-many, cascaded delete, delete-orphan
-    comm = db.relationship(
-        'CommData', lazy='dynamic',
-        cascade='all,delete-orphan',
-        single_parent=True,
-        backref=backref('exec', cascade="all"))
+#     # communication
+#     # - one-to-many, cascaded delete, delete-orphan
+#     comm = db.relationship(
+#         'CommData', lazy='dynamic',
+#         cascade='all,delete-orphan',
+#         single_parent=True,
+#         backref=backref('exec', cascade="all"))
 
-    def to_dict(self, with_comm=0):
-        d = super().to_dict()
-        d.update({
-            'pid': self.pid,
-            'rid': self.rid,
-            'tid': self.tid,
-            'fid': self.fid,
-            'name': self.name,
-            'entry': self.entry,
-            'exit': self.exit,
-            'runtime': self.runtime,
-            'exclusive': self.exclusive,
-            'label': self.label,
-            'parent': self.parent,
-            'n_children': self.n_children,
-            'n_messages': self.n_messages
-        })
-        # if int(with_comm) > 0:
-        #     d.update({
-        #         'comm': [c.to_dict() for c in self.comm.all()]
-        #     })
-        return d
+#     def to_dict(self, with_comm=0):
+#         d = super().to_dict()
+#         d.update({
+#             'pid': self.pid,
+#             'rid': self.rid,
+#             'tid': self.tid,
+#             'fid': self.fid,
+#             'name': self.name,
+#             'entry': self.entry,
+#             'exit': self.exit,
+#             'runtime': self.runtime,
+#             'exclusive': self.exclusive,
+#             'label': self.label,
+#             'parent': self.parent,
+#             'n_children': self.n_children,
+#             'n_messages': self.n_messages
+#         })
+#         # if int(with_comm) > 0:
+#         #     d.update({
+#         #         'comm': [c.to_dict() for c in self.comm.all()]
+#         #     })
+#         return d
 
 
-class CommData(Base):
-    __tablename__ = 'commdata'
-    execdata_key = db.Column(db.String(), db.ForeignKey('execdata.key'))
+# class CommData(Base):
+#     __tablename__ = 'commdata'
+#     execdata_key = db.Column(db.String(), db.ForeignKey('execdata.key'))
 
-    type = db.Column(db.String())
-    src = db.Column(db.Integer, default=0)
-    tar = db.Column(db.Integer, default=0)
-    size = db.Column(db.Integer, default=0)  # in bytes
-    tag = db.Column(db.Integer, default=0)
-    timestamp = db.Column(db.Integer, default=0)  # usec
+#     type = db.Column(db.String())
+#     src = db.Column(db.Integer, default=0)
+#     tar = db.Column(db.Integer, default=0)
+#     size = db.Column(db.Integer, default=0)  # in bytes
+#     tag = db.Column(db.Integer, default=0)
+#     timestamp = db.Column(db.Integer, default=0)  # usec
 
-    def to_dict(self):
-        d = super().to_dict()
-        d.update({
-            'execdata_key': self.execdata_key,
-            'type': self.type,
-            'src': self.src,
-            'tar': self.tar,
-            'size': self.size,
-            'tag': self.tag,
-            'timestamp': self.timestamp
-        })
-        return d
+#     def to_dict(self):
+#         d = super().to_dict()
+#         d.update({
+#             'execdata_key': self.execdata_key,
+#             'type': self.type,
+#             'src': self.src,
+#             'tar': self.tar,
+#             'size': self.size,
+#             'tag': self.tag,
+#             'timestamp': self.timestamp
+#         })
+#         return d
