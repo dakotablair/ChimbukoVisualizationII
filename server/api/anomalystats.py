@@ -291,7 +291,7 @@ def new_anomalydata():
     func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
     # print('update db...')
-    print('----a_stat: {}-----'.format(len(anomaly_stat)))
+    print("Server's app is {}".format(current_app.app_context()))
 
     try:
         if len(anomaly_stat):

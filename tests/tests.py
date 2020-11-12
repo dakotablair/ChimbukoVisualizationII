@@ -7,11 +7,12 @@ from server import create_app, db
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
-        print(".....test setUp......")
         self.app = create_app()
 
         self.ctx = self.app.app_context()
         self.ctx.push()
+
+        print("Test's app context is {}".format(self.app.app_context()))
 
         db.drop_all()  # just in case
         db.create_all()
@@ -23,8 +24,7 @@ class ServerTests(unittest.TestCase):
         # it will cause error. How to smoothly resolve this problem?
         # currently, I make sure each test containing celery task
         # to be completed before calling tearDown.
-        print(".....test tearDown......")
-        db.drop_all()
+        # db.drop_all()
         self.ctx.pop()
 
     def get_headers(self):
