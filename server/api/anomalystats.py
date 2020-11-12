@@ -496,15 +496,27 @@ def get_anomalystats():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
 
-    stats = AnomalyStat.query.filter(
-        and_(
-            AnomalyStat.app == int(app),
-            AnomalyStat.rank == int(rank),
-        )
-    ).all()
+    subq = db.session.query(
+        AnomalyStat.app,
+        AnomalyStat.rank,
+        func.max(AnomalyStat.created_at).label('max_ts')
+    ).group_by(AnomalyStat.app, AnomalyStat.rank).subquery('t2')
 
-    push_anomaly_stat(query, [st.to_dict() for st in stats], [])
-    # return jsonify({}), 200
+    stats = db.session.query(AnomalyStat).join(
+        subq,
+        and_(
+            AnomalyStat.app == subq.c.app,
+            AnomalyStat.rank == subq.c.rank,
+            AnomalyStat.created_at == subq.c.max_ts
+        )
+    )
+
+    if app is None or rank is None:
+        stats = stats.all()
+    else:
+        stats = stats.filter(AnomalyStat.app == int(app) and
+                             AnomalyStat.rank == int(rank)).all()
+
     return jsonify([st.to_dict() for st in stats])
 
 
