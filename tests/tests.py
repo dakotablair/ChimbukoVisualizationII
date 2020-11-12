@@ -2,6 +2,7 @@ import unittest
 import json
 
 from server import create_app, db
+from flask import _request_ctx_stack
 # from server.provdb import ProvDB
 
 
@@ -10,10 +11,14 @@ class ServerTests(unittest.TestCase):
         print("=====setUp=====")
         self.app = create_app()
 
+        print("before push: {}".format(_request_ctx_stack))
+
         self.ctx = self.app.app_context()
         self.ctx.push()
 
         print("Test's app context is {}".format(self.app.app_context()))
+
+        print("after push: {}".format(_request_ctx_stack))
 
         db.drop_all()  # just in case
         db.create_all()
@@ -28,6 +33,7 @@ class ServerTests(unittest.TestCase):
         print("======tearDown=====")
         # db.drop_all()
         self.ctx.pop()
+        print("after pop: {}".format(_request_ctx_stack))
 
     def get_headers(self):
         headers = {
@@ -140,8 +146,7 @@ class ServerTests(unittest.TestCase):
 
         anomaly_payload = {
             'anomaly_stats': anomaly_stats,
-            'counter_stats': counter_stats,
-            'current_app': self.app
+            'counter_stats': counter_stats
         }
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)

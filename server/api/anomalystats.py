@@ -1,5 +1,5 @@
 import os
-from flask import request, jsonify, abort, current_app
+from flask import request, jsonify, abort, current_app, _request_ctx_stack
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
@@ -292,9 +292,7 @@ def new_anomalydata():
 
     # print('update db...')
     print("Server's app is {}".format(current_app.app_context()))
-    if 'current_app' in data:
-        print("Passed along app is {}".format(data['current_app'].app_context()))
-        current_app = data['current_app']
+    print("Server's view of ctx stack: {}".format(_request_ctx_stack))
 
     try:
         if len(anomaly_stat):
