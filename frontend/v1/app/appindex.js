@@ -200,7 +200,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleStatRefresh = ev => {
-        const url = '/api/get_anomalystats';
+        const url = '/api/anomalystats';
         axis.get(url)
             .then(resp => {
                 console.log('handleStatRefresh: ', resp);

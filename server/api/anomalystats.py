@@ -340,19 +340,14 @@ def new_anomalydata():
     except Exception as e:
         print(e)
 
-    print("======done======")
     # todo: make information output with Location
     return jsonify({}), 201
 
 
-@api.route('/get_anomalystats', methods=['GET'])
-def get_anomalystats():
-    """
-    Return anomaly stat specified by app and rank index
-    - (e.g.) /api/get_anomalystats will return all available statistics
-    - (e.g.) /api/get_anomalystats?app=0&rank=0 will return statistics of
-                 application index is 0 and rank index is 0.
-    - return 400 error if there are no available statistics
+@api.route('/anomalystats', methods=['GET'])
+def new_anomalystats():
+    """Push model to query and broadcast current query condition
+    data to the front end client
     """
     # get query condition from database
     query = AnomalyStatQuery.query. \
@@ -383,8 +378,7 @@ def get_anomalystats():
     ).all()
 
     push_anomaly_stat(query, [st.to_dict() for st in stats], [])
-    # return jsonify({}), 200
-    return jsonify([st.to_dict() for st in stats])
+    return jsonify({}), 200
 
 
 @api.route('/run_simulation', methods=['GET'])
@@ -488,6 +482,32 @@ def run_simulation():
     push_data({'result': error}, 'run_simulation')
 
     return jsonify({}), 200
+
+
+@api.route('/get_anomalystats', methods=['GET'])
+def get_anomalystats():
+    """
+    Return anomaly stat specified by app and rank index
+    - (e.g.) /api/get_anomalystats will return all available statistics
+    - (e.g.) /api/get_anomalystats?app=0&rank=0 will return statistics of
+                 application index is 0 and rank index is 0.
+    - return 400 error if there are no available statistics
+    """
+    app = request.args.get('app', default=None)
+    rank = request.args.get('rank', default=None)
+
+    stats = AnomalyStat.query.filter(
+        and_(
+            AnomalyStat.app == int(app),
+            AnomalyStat.rank == int(rank),
+        )
+    ).order_by(
+        AnomalyStat.step.desc()
+    ).all()
+
+    push_anomaly_stat(query, [st.to_dict() for st in stats], [])
+    # return jsonify({}), 200
+    return jsonify([st.to_dict() for st in stats])
 
 
 @api.route('/get_anomalydata', methods=['GET'])
