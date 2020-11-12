@@ -494,21 +494,16 @@ def run_simulation():
 def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
-    limit = request.args.get('limit', default=None)
 
-    stat = AnomalyStat.query.filter(
+    data = AnomalyData.query.filter(
         and_(
-            AnomalyStat.app == int(app),
-            AnomalyStat.rank == int(rank)
+            AnomalyData.app == int(app),
+            AnomalyData.rank == int(rank)
         )
     ).order_by(
-        AnomalyStat.created_at.desc()
-    ).first()
+        AnomalyData.step.desc()
+    ).all()
 
-    if limit is None:
-        data = stat.hist.order_by(AnomalyData.step.desc()).all()
-    else:
-        data = stat.hist.order_by(AnomalyData.step.desc()).limit(limit).all()
     data.reverse()
 
     return jsonify([dd.to_dict() for dd in data])
