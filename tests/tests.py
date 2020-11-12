@@ -20,6 +20,15 @@ class ServerTests(unittest.TestCase):
 
         self.client = self.app.test_client()
 
+    def tearDown(self):
+        # If I drop DB before any asynchronous tasks are completed,
+        # it will cause error. How to smoothly resolve this problem?
+        # currently, I make sure each test containing celery task
+        # to be completed before calling tearDown.
+        print("======tearDown=====")
+        # db.drop_all()
+        self.ctx.pop()
+
     def get_headers(self):
         headers = {
             'Accept': 'application/json',
@@ -131,7 +140,8 @@ class ServerTests(unittest.TestCase):
 
         anomaly_payload = {
             'anomaly_stats': anomaly_stats,
-            'counter_stats': counter_stats
+            'counter_stats': counter_stats,
+            'current_app': this.app
         }
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
@@ -234,13 +244,3 @@ class ServerTests(unittest.TestCase):
     #         result = [json.loads(x) for x in col.filter(jx9_filter)]
     #         filtered_records += result
     #     self.assertEqual(len(filtered_records), 124)
-
-    #def tearDown(self):
-        # If I drop DB before any asynchronous tasks are completed,
-        # it will cause error. How to smoothly resolve this problem?
-        # currently, I make sure each test containing celery task
-        # to be completed before calling tearDown.
-
-        # print("======tearDown=====")
-        # db.drop_all()
-        # self.ctx.pop()

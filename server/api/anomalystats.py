@@ -292,6 +292,9 @@ def new_anomalydata():
 
     # print('update db...')
     print("Server's app is {}".format(current_app.app_context()))
+    if 'current_app' in data:
+        print("Passed along app is {}".format(data['current_app'].app_context()))
+        current_app = data['current_app']
 
     try:
         if len(anomaly_stat):
