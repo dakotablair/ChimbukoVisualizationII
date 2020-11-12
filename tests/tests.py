@@ -235,12 +235,12 @@ class ServerTests(unittest.TestCase):
     #         filtered_records += result
     #     self.assertEqual(len(filtered_records), 124)
 
-    def tearDown(self):
+    #def tearDown(self):
         # If I drop DB before any asynchronous tasks are completed,
         # it will cause error. How to smoothly resolve this problem?
         # currently, I make sure each test containing celery task
         # to be completed before calling tearDown.
 
-        print("======tearDown=====")
+        # print("======tearDown=====")
         # db.drop_all()
         # self.ctx.pop()
