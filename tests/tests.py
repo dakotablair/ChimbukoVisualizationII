@@ -2,23 +2,24 @@ import unittest
 import json
 
 from server import create_app, db
-from flask import _request_ctx_stack
+from flask import _app_ctx_stack
 # from server.provdb import ProvDB
 
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
         print("=====setUp=====")
+
         self.app = create_app()
 
-        print("before push: {}".format(_request_ctx_stack))
+        print("before push: {}".format(_app_ctx_stack.top))
 
         self.ctx = self.app.app_context()
         self.ctx.push()
 
         print("Test's app context is {}".format(self.app.app_context()))
 
-        print("after push: {}".format(_request_ctx_stack))
+        print("after push: {}".format(_app_ctx_stack.top))
 
         db.drop_all()  # just in case
         db.create_all()
