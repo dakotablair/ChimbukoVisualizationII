@@ -12,7 +12,7 @@ class ServerTests(unittest.TestCase):
 
         self.app = create_app()
 
-        print("before push, app is {}".format(app.app_context()))
+        print("before push, app is {}".format(self.app.app_context()))
         self.ctx = self.app.app_context()
         self.ctx.push()
 
