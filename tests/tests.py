@@ -2,7 +2,7 @@ import unittest
 import json
 
 from server import create_app, db
-from flask import _app_ctx_stack
+from flask import current_app
 # from server.provdb import ProvDB
 
 
@@ -12,14 +12,13 @@ class ServerTests(unittest.TestCase):
 
         self.app = create_app()
 
-        print("before push: {}".format(_app_ctx_stack.top))
-
+        print("before push, current_app is {}".format(current_app.app_context))
         self.ctx = self.app.app_context()
         self.ctx.push()
 
-        print("Test's app context is {}".format(self.app.app_context()))
+        print("after push, app is {}".format(self.app.app_context))
 
-        print("after push: {}".format(_app_ctx_stack.top))
+        print("after push, current_app is {}".format(current_app.app_context))
 
         db.drop_all()  # just in case
         db.create_all()
