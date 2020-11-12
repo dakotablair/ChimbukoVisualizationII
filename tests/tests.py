@@ -174,7 +174,7 @@ class ServerTests(unittest.TestCase):
 
         # check func statistics
         for fid in range(10):
-            r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
+            r, s, h = self.get('/api/get_funcstats?fid={}'.format(fid))
             self.assertEqual(s, 200)
             r = r[0]
             for k, v in func_payload['func'][fid].items():
