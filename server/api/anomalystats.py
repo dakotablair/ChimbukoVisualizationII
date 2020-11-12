@@ -316,6 +316,7 @@ def new_anomalydata():
         # delete_old_anomaly()
         # delete_old_func()
     except Exception as e:
+        print("---------can't store to db----------")
         print(e)
 
     try:
@@ -339,6 +340,7 @@ def new_anomalydata():
             push_anomaly_data(q, anomaly_data)
 
     except Exception as e:
+        print("-----------can't do anomalystatquery-----------")
         print(e)
 
     # todo: make information output with Location
