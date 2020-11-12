@@ -1,5 +1,5 @@
 import os
-from flask import request, jsonify, abort, current_app
+from flask import request, jsonify, abort, current_app, _app_ctx_stack
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
@@ -291,7 +291,8 @@ def new_anomalydata():
     func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
     # print('update db...')
-    print("Server's app is {}".format(current_app.app_context()))
+    print("Server's stack top is: {}, current_app is {}".format(_app_ctx_stack.top,
+                                                        current_app.app_context()))
 
     try:
         if len(anomaly_stat):
@@ -344,6 +345,7 @@ def new_anomalydata():
         print("-----------can't do anomalystatquery-----------")
         print(e)
 
+    print("======done======")
     # todo: make information output with Location
     return jsonify({}), 201
 

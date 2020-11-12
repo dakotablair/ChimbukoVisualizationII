@@ -2,24 +2,18 @@ import unittest
 import json
 
 from server import create_app, db
-from flask import current_app
+from flask import _app_ctx_stack, current_app
+
 # from server.provdb import ProvDB
 
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
-        print("=====setUp=====")
-
         self.app = create_app()
 
-        print("before push, app is {}".format(self.app.app_context()))
         self.ctx = self.app.app_context()
         self.ctx.push()
-
-        print("after push, app is {}".format(self.app.app_context()))
-
-        print("after push, current_app is {}".format(current_app.app_context()))
-
+        print("stack top: {}, current_app: {}".format(_app_ctx_stack.top, current_app.app_context()))
         db.drop_all()  # just in case
         db.create_all()
 
@@ -30,11 +24,8 @@ class ServerTests(unittest.TestCase):
         # it will cause error. How to smoothly resolve this problem?
         # currently, I make sure each test containing celery task
         # to be completed before calling tearDown.
-        print("======tearDown=====")
         # db.drop_all()
         self.ctx.pop()
-        print("after pop: current_app is {}".format(current_app.app_context()))
-        print("after pop: app is {}".format(self.app.app_context()))
 
     def get_headers(self):
         headers = {
