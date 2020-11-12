@@ -36,7 +36,8 @@ def create_app(config_name=None, main=True):
     app.config.from_object(config[config_name])
 
     # Initialize flask extensions
-    db.init_app(app)
+    with app.app_context():
+        db.init_app(app)
     if main:
         # Initialize socketio server and attach it to the message queue, so
         # that everything works even when there are multiple servers or
