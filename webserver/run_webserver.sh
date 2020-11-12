@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+source /spack/spack/share/spack/setup-env.sh
+spack load py-mochi-sonata
+export C_FORCE_ROOT=1
 
 ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
