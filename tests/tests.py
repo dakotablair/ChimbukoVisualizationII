@@ -12,13 +12,13 @@ class ServerTests(unittest.TestCase):
 
         self.app = create_app()
 
-        print("before push, current_app is {}".format(current_app.app_context))
+        print("before push, current_app is {}".format(current_app.app_context()))
         self.ctx = self.app.app_context()
         self.ctx.push()
 
-        print("after push, app is {}".format(self.app.app_context))
+        print("after push, app is {}".format(self.app.app_context()))
 
-        print("after push, current_app is {}".format(current_app.app_context))
+        print("after push, current_app is {}".format(current_app.app_context()))
 
         db.drop_all()  # just in case
         db.create_all()
@@ -33,7 +33,8 @@ class ServerTests(unittest.TestCase):
         print("======tearDown=====")
         # db.drop_all()
         self.ctx.pop()
-        print("after pop: {}".format(_request_ctx_stack))
+        print("after pop: current_app is {}".format(current_app.app_context()))
+        print("after pop: app is {}".format(self.app.app_context()))
 
     def get_headers(self):
         headers = {
