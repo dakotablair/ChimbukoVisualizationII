@@ -14,6 +14,7 @@ class ProvDB():
         self.pdb_client = SonataClient(self.pdb_engine)
 
         self.pdb_names = []
+        self.pdb_databases = []
         self.pdb_collections = []
 
         for i in range(pdb_sharded_num):
@@ -24,9 +25,12 @@ class ProvDB():
                                            'unqlite',
                                            "{ \"path\" : \"%s\" }" % file_name)
             pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
+            self.pdb_databases.append(pdb)
             self.pdb_collections.append(pdb.open('anomalies'))
 
     def __del__(self):
+        del self.pdb_collections
+        del self.pdb_databases
         del self.pdb_client
         for name in self.pdb_names:
             self.pdb_admin.detach_database(self.pdb_address, 0, name)
@@ -34,4 +38,5 @@ class ProvDB():
         del self.pdb_admin
         del self.pdb_provider
         self.pdb_engine.finalize()
+        del self.pdb_engine
         print("Provdb connection shut down!")
