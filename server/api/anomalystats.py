@@ -1,5 +1,5 @@
 import os
-from flask import request, jsonify, abort, current_app, _app_ctx_stack
+from flask import request, jsonify, abort, current_app
 
 from .. import db
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
@@ -291,9 +291,6 @@ def new_anomalydata():
     func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
     # print('update db...')
-    print("Server's stack top is: {}, current_app is {}".format(_app_ctx_stack.top,
-                                                        current_app.app_context()))
-
     try:
         if len(anomaly_stat):
             db.get_engine(app=current_app, bind='anomaly_stats').execute(
@@ -318,7 +315,6 @@ def new_anomalydata():
         # delete_old_anomaly()
         # delete_old_func()
     except Exception as e:
-        print("---------can't store to db----------")
         print(e)
 
     try:
@@ -342,7 +338,6 @@ def new_anomalydata():
             push_anomaly_data(q, anomaly_data)
 
     except Exception as e:
-        print("-----------can't do anomalystatquery-----------")
         print(e)
 
     print("======done======")

@@ -13,7 +13,7 @@ class ServerTests(unittest.TestCase):
 
         self.ctx = self.app.app_context()
         self.ctx.push()
-        print("stack top: {}, current_app: {}".format(_app_ctx_stack.top, current_app.app_context()))
+        
         db.drop_all()  # just in case
         db.create_all()
 
@@ -142,7 +142,8 @@ class ServerTests(unittest.TestCase):
         }
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
-        self.assertEqual(s, 202)
+        time.sleep(5)
+        self.assertEqual(s, 201)
         time.sleep(0.1)
 
         # check anomaly statistics
