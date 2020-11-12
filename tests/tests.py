@@ -7,6 +7,7 @@ from server import create_app, db
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
+        print("=====setUp=====")
         self.app = create_app()
 
         self.ctx = self.app.app_context()
@@ -18,14 +19,6 @@ class ServerTests(unittest.TestCase):
         db.create_all()
 
         self.client = self.app.test_client()
-
-    def tearDown(self):
-        # If I drop DB before any asynchronous tasks are completed,
-        # it will cause error. How to smoothly resolve this problem?
-        # currently, I make sure each test containing celery task
-        # to be completed before calling tearDown.
-        # db.drop_all()
-        self.ctx.pop()
 
     def get_headers(self):
         headers = {
@@ -241,3 +234,13 @@ class ServerTests(unittest.TestCase):
     #         result = [json.loads(x) for x in col.filter(jx9_filter)]
     #         filtered_records += result
     #     self.assertEqual(len(filtered_records), 124)
+
+    def tearDown(self):
+        # If I drop DB before any asynchronous tasks are completed,
+        # it will cause error. How to smoothly resolve this problem?
+        # currently, I make sure each test containing celery task
+        # to be completed before calling tearDown.
+
+        print("======tearDown=====")
+        # db.drop_all()
+        # self.ctx.pop()
