@@ -197,38 +197,38 @@ class ServerTests(unittest.TestCase):
             }
         }
 
-        print("......", self.app)
-        r, s, h = self.post('/api/anomalydata', payload)
-        self.assertEqual(s, 202)
-        time.sleep(0.1)
+        # print("......", self.app)
+        # r, s, h = self.post('/api/anomalydata', payload)
+        # self.assertEqual(s, 202)
+        # time.sleep(0.1)
 
-        payload = payload['anomaly_stats']
-        # check anomaly statistics
-        for d in payload['anomaly']:
-            app, rank = d['key'].split(':')
-            r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
-            self.assertEqual(s, 200)
-            r = r[0]
-            self.assertEqual(r['created_at'], 124)
-            for k, v in d['stats'].items():
-                self.assertEqual(v, r[k])
+        # payload = payload['anomaly_stats']
+        # # check anomaly statistics
+        # for d in payload['anomaly']:
+        #     app, rank = d['key'].split(':')
+        #     r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
+        #     self.assertEqual(s, 200)
+        #     r = r[0]
+        #     self.assertEqual(r['created_at'], 124)
+        #     for k, v in d['stats'].items():
+        #         self.assertEqual(v, r[k])
 
-            r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
-            self.assertEqual(s, 200)
-            for i, dd in enumerate(d['data']):
-                [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
+        #     r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
+        #     self.assertEqual(s, 200)
+        #     for i, dd in enumerate(d['data']):
+        #         [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
 
-        # check func statistics
-        for fid in range(10):
-            r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
-            self.assertEqual(s, 200)
-            r = r[0]
-            for k, v in payload['func'][fid].items():
-                if isinstance(v, dict):
-                    for k1, v1 in v.items():
-                        self.assertEqual(r[k][k1], v1)
-                else:
-                    self.assertEqual(r[k], v)
+        # # check func statistics
+        # for fid in range(10):
+        #     r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
+        #     self.assertEqual(s, 200)
+        #     r = r[0]
+        #     for k, v in payload['func'][fid].items():
+        #         if isinstance(v, dict):
+        #             for k1, v1 in v.items():
+        #                 self.assertEqual(r[k][k1], v1)
+        #         else:
+        #             self.assertEqual(r[k], v)
 
     # def test_provdb(self):
     #     filtered_records = []
