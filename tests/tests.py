@@ -2,7 +2,7 @@ import unittest
 import json
 
 from server import create_app, db
-from provdb import ProvDB
+from server.provdb import ProvDB
 
 
 class ServerTests(unittest.TestCase):
