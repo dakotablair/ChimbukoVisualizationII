@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, render_template, Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
-from . import socketio, pdb, celery as mycelery
+from . import socketio, celery as mycelery
+from . import pdb
 from .utils import url_for
 
 main = Blueprint('main', __name__)
