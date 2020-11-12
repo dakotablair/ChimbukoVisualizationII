@@ -349,8 +349,8 @@ def new_anomalydata():
 def get_anomalystats():
     """
     Return anomaly stat specified by app and rank index
-    - (e.g.) /api/anomalystats will return all available statistics
-    - (e.g.) /api/anomalystats?app=0&rank=0 will return statistics of
+    - (e.g.) /api/get_anomalystats will return all available statistics
+    - (e.g.) /api/get_anomalystats?app=0&rank=0 will return statistics of
                  application index is 0 and rank index is 0.
     - return 400 error if there are no available statistics
     """
