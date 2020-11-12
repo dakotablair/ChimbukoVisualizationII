@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, render_template, Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
-from . import socketio, celery as mycelery
+from . import socketio, pdb, celery as mycelery
 from .utils import url_for
 
 main = Blueprint('main', __name__)
@@ -63,6 +63,10 @@ def stop():
     mycelery.control.broadcast('shutdown')
     socketio.stop()
     print("Shutting down SocketIO web server!")
+
+    if pdb:
+        del pdb
+    print("Shutting down provdb!")
 
 
 @main.route('/')
