@@ -22,5 +22,5 @@ python3 manager.py test
 # wait $ws_pid
 
 # kill celery and redis
-echo "shutdown server ..."
-./webserver/shutdown_webserver.sh
+#echo "shutdown server ..."
+#./webserver/shutdown_webserver.sh

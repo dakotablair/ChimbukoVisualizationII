@@ -194,6 +194,8 @@ class ServerTests(unittest.TestCase):
             ],
             'func': get_random_func(10)
         }
+
+        print("......", self.app)
         r, s, h = self.post('/api/anomalydata', payload)
         self.assertEqual(s, 202)
         time.sleep(0.1)

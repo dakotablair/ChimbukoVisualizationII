@@ -290,7 +290,8 @@ def new_anomalydata():
         process_on_anomaly(anomaly_stats.get('anomaly', []), ts)
     func_stat = process_on_func(anomaly_stats.get('func', []), ts)
 
-    print('update db...')
+    # print('update db...')
+    print('oooooooooo', current_app)
     try:
         if len(anomaly_stat):
             db.get_engine(app=current_app, bind='anomaly_stats').execute(
