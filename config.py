@@ -24,6 +24,9 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'main.sqlite'))
     SQLALCHEMY_BINDS = {
+        'anomaly_stats_query': os.environ.get(
+            'DATABASE_URL',
+            'sqlite:///' + os.path.join(basedir, 'main.sqlite')),
         'anomaly_stats': os.environ.get(
             'ANOMALY_STATS_URL',
             'sqlite:///' + os.path.join(basedir, 'anomaly_stats.sqlite')),

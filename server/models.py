@@ -8,6 +8,7 @@ import pickle
 
 
 class AnomalyStatQuery(db.Model):
+    __bind_key__ = 'anomaly_stats_query'
     __tablename__ = 'anomalystatquery'
     id = db.Column(INTEGER(unsigned=True), primary_key=True)
 
