@@ -149,14 +149,14 @@ class ServerTests(unittest.TestCase):
         # check anomaly statistics
         for d in anomaly_payload['anomaly_stats']['anomaly']:
             app, rank = d['key'].split(':')
-            r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             r = r[0]
             self.assertEqual(r['created_at'], 123)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r['stats'][k])
 
-            r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             for dd in d['data']:
                 step = dd['step']
