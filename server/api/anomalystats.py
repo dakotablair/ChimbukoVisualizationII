@@ -559,6 +559,10 @@ def get_anomalydata():
 
     data.reverse()
 
+    for dd in data:
+        obj = dd.to_dict()
+        if obj['app'] == 0 and obj['rank'] == 1 and obj['step'] == 0:
+            print("found obj: ".format(obj['id']))
     return jsonify([dd.to_dict() for dd in data])
 
 
