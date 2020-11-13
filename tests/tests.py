@@ -2,9 +2,8 @@ import unittest
 import json
 
 from server import create_app, db
-from flask import _app_ctx_stack, current_app
 
-# from server.provdb import ProvDB
+from server.provdb import ProvDB
 
 
 class ServerTests(unittest.TestCase):
@@ -149,18 +148,21 @@ class ServerTests(unittest.TestCase):
         data_payload = anomaly_payload['anomaly_stats']['anomaly']
         for d in data_payload:
             app, rank = d['key'].split(':')
-            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(
+                app, rank))
             self.assertEqual(s, 200)
             r = r[0]
             self.assertEqual(r['created_at'], 123)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
 
-            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(
+                app, rank))
             self.assertEqual(s, 200)
             for dd in d['data']:
                 step = dd['step']
-                [self.assertEqual(v, r[step][k]) for k, v in dd.items() if k in r[step]]
+                [self.assertEqual(v, r[step][k]) for k, v in dd.items()
+                    if k in r[step]]
 
         # post only func statistics
         func_payload = {
@@ -210,17 +212,20 @@ class ServerTests(unittest.TestCase):
         # check anomaly statistics
         for d in payload['anomaly']:
             app, rank = d['key'].split(':')
-            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(
+                app, rank))
             self.assertEqual(s, 200)
             r = r[0]
             self.assertEqual(r['created_at'], 124)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
 
-            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(
+                app, rank))
             self.assertEqual(s, 200)
             for i, dd in enumerate(d['data']):
-                [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
+                [self.assertEqual(v, r[i][k]) for k, v in dd.items()
+                 if k in r[i]]
 
         # check func statistics
         for fid in range(10):
@@ -234,17 +239,17 @@ class ServerTests(unittest.TestCase):
                 else:
                     self.assertEqual(r[k], v)
 
-    # def test_provdb(self):
-    #     filtered_records = []
-    #     jx9_filter = "function($record) { return " \
-    #         "$record.pid == %d && " \
-    #         "$record.rid == %d && " \
-    #         "$record.io_step == %d; } " % (0, 1, 5)
+    def test_provdb(self):
+        filtered_records = []
+        jx9_filter = "function($record) { return " \
+            "$record.pid == %d && " \
+            "$record.rid == %d && " \
+            "$record.io_step == %d; } " % (0, 1, 5)
 
-    #     provdb = ProvDB(pdb_path='data/sample/provdb/',
-    #                     pdb_sharded_num=1)
-    #     collections = provdb.pdb_collections
-    #     for col in collections:
-    #         result = [json.loads(x) for x in col.filter(jx9_filter)]
-    #         filtered_records += result
-    #     self.assertEqual(len(filtered_records), 124)
+        provdb = ProvDB(pdb_path='data/sample/provdb/',
+                        pdb_sharded_num=1)
+        collections = provdb.pdb_collections
+        for col in collections:
+            result = [json.loads(x) for x in col.filter(jx9_filter)]
+            filtered_records += result
+        self.assertEqual(len(filtered_records), 124)

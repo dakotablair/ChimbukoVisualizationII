@@ -3,7 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from celery import Celery
-#from .provdb import ProvDB
+from .provdb import ProvDB
 from config import config
 
 # Flask extensions
@@ -13,9 +13,9 @@ celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
                 backend=os.environ.get('CELERY_BROKER_URL', 'redis://'))
 celery.config_from_object('celeryconfig')
-#pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', 'data/sample/provdb/'),
-#             pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 1)))
-pdb = None
+pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', 'data/sample/provdb/'),
+             pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 1)))
+
 # Import models so that they are registered with SQLAlchemy
 from . import models  # noqa
 

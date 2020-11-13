@@ -27,12 +27,19 @@ class ProvDB():
             pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
             self.pdb_databases.append(pdb)
             self.pdb_collections.append(pdb.open('anomalies'))
+        print("ProvDB objects initiated.")
 
     def __del__(self):
         if self.pdb_collections:
+            for col in self.pdb_collections:
+                del col
+                col = None
             del self.pdb_collections
             self.pdb_collections = []
         if self.pdb_databases:
+            for datab in self.pdb_databases:
+                del datab
+                datab = None
             del self.pdb_databases
             self.pdb_databases = []
         if self.pdb_client:
@@ -55,4 +62,4 @@ class ProvDB():
             self.pdb_engine.finalize()
             del self.pdb_engine
             self.pdb_engine = None
-        print("Provdb object cleaned up.")
+        print("Provdb objects cleaned up.")
