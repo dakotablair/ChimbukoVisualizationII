@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
-source /spack/spack/share/spack/setup-env.sh
-spack load py-mochi-sonata
-export C_FORCE_ROOT=1
+
+ROOT_DIR=$(pwd)
+WORK_DIR="${ROOT_DIR}/data"
+cd "${WORK_DIR}" #cd command must use doublequote to take space in filename
+
+# for test data
+DATA_NAME="sample"
+export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/provdb/"
+export SHARDED_NUM=1
 
 # run Redis
 ./webserver/run-redis.sh &
