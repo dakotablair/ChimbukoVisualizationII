@@ -14,6 +14,7 @@ from runstats import Statistics
 from sqlalchemy import func, and_
 
 import json
+import time
 
 
 def process_on_anomaly(data: list, ts):
@@ -559,7 +560,7 @@ def get_anomalydata():
         ).all()
 
     data.reverse()
-
+    time.sleep(5)
     return jsonify([dd.to_dict() for dd in data])
 
 
