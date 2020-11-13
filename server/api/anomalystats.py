@@ -495,7 +495,7 @@ def get_anomalystats():
     """
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
-    print("querry app {} and rank {}".format(int(app), int(rank)))
+    # print("querry app {} and rank {}".format(int(app), int(rank)))
 
     subq = db.session.query(
         AnomalyStat.app,
@@ -530,14 +530,32 @@ def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
 
-    data = AnomalyData.query.filter(
+    subq = db.session.query(
+        AnomalyData.app,
+        AnomalyData.rank,
+        func.max(AnomalyData.created_at).label('max_ts')
+    ).group_by(AnomalyData.app, AnomalyData.rank).subquery('t2')
+
+    data = db.session.query(AnomalyData).join(
+        subq,
         and_(
-            AnomalyData.app == int(app),
-            AnomalyData.rank == int(rank)
+            AnomalyData.app == subq.c.app,
+            AnomalyData.rank == subq.c.rank,
+            AnomalyData.created_at == subq.c.max_ts
         )
-    ).order_by(
-        AnomalyData.step.desc()
-    ).all()
+    )
+
+    if app is None or rank is None:
+        data = data.all()
+    else:
+        data = data.filter(
+            and_(
+                AnomalyData.app == int(app),
+                AnomalyData.rank == int(rank)
+            )
+        ).order_by(
+            AnomalyData.step.desc()
+        ).all()
 
     data.reverse()
 

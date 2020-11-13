@@ -219,8 +219,6 @@ class ServerTests(unittest.TestCase):
             r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             r = r[0]
-            print("r is {}".format(r))
-            print("d is {}".format(d['stats']))
             self.assertEqual(r['created_at'], 124)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
