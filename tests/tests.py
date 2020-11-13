@@ -207,22 +207,21 @@ class ServerTests(unittest.TestCase):
         # check anomaly statistics
         for d in payload['anomaly']:
             app, rank = d['key'].split(':')
-            r, s, h = self.get('/api/anomalystats?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
-            print(r)
             r = r[0]
             self.assertEqual(r['created_at'], 124)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
 
-            r, s, h = self.get('/api/anomalydata?app={}&rank={}'.format(app, rank))
+            r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             for i, dd in enumerate(d['data']):
                 [self.assertEqual(v, r[i][k]) for k, v in dd.items() if k in r[i]]
 
         # check func statistics
         for fid in range(10):
-            r, s, h = self.get('/api/funcstats?fid={}'.format(fid))
+            r, s, h = self.get('/api/get_funcstats?fid={}'.format(fid))
             self.assertEqual(s, 200)
             r = r[0]
             for k, v in payload['func'][fid].items():
