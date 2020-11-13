@@ -152,6 +152,8 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(s, 200)
             r = r[0]
             self.assertEqual(r['created_at'], 123)
+            print("r is {}".format(r))
+            print("d is {}".format(d['stats']))
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
 
