@@ -529,6 +529,7 @@ def get_anomalystats():
 def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
+    print("querry app {} and rank {}".format(int(app), int(rank)))
 
     subq = db.session.query(
         AnomalyData.app,
@@ -561,8 +562,7 @@ def get_anomalydata():
 
     for dd in data:
         obj = dd.to_dict()
-        if obj['app'] == 0 and obj['rank'] == 1 and obj['step'] == 0:
-            print("found obj: ".format(obj['id']))
+        print("id {}".format(obj['id']))
     return jsonify([dd.to_dict() for dd in data])
 
 
