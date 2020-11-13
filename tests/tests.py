@@ -242,10 +242,10 @@ class ServerTests(unittest.TestCase):
         jx9_filter = "function($record) { return " \
             "$record.pid == %d && " \
             "$record.rid == %d && " \
-            "$record.io_step == %d; } " % (0, 1, 5)
+            "$record.io_step == %d; } " % (0, 0, 0)
 
         collections = pdb.pdb_collections
         for col in collections:
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result
-        self.assertEqual(len(filtered_records), 124)
+        self.assertEqual(len(filtered_records), 64)
