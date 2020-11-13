@@ -19,8 +19,8 @@ class ProvDB():
         self.pdb_databases = []
         self.pdb_collections = []
 
-        if pdb_path and pdb_sharded_num > 0:
-            for i in range(pdb_sharded_num):
+        if pdb_path and int(pdb_sharded_num) > 0:
+            for i in range(int(pdb_sharded_num)):
                 pdb_name = 'provdb.' + str(i)
                 self.pdb_names.append(pdb_name)
                 file_name = pdb_path + pdb_name + '.unqlite'
