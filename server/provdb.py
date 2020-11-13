@@ -9,7 +9,7 @@ import gc
 
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=0):
-        self.pdb_engine = Engine('na+sm', pymargo.server)
+        self.pdb_engine = Engine('na+sm', pymargo.client)
         self.pdb_provider = SonataProvider(self.pdb_engine, 0)
         self.pdb_address = str(self.pdb_engine.addr())
         self.pdb_admin = SonataAdmin(self.pdb_engine)
@@ -25,20 +25,20 @@ class ProvDB():
                 self.pdb_names.append(pdb_name)
                 file_name = pdb_path + pdb_name + '.unqlite'
                 self.pdb_admin.attach_database(self.pdb_address, 0, pdb_name,
-                                            'unqlite',
-                                            "{ \"path\" : \"%s\" }" % file_name)
+                                               'unqlite',
+                                               "{ \"path\" : \"%s\" }"
+                                               % file_name)
                 database = self.pdb_client.open(self.pdb_address, 0, pdb_name)
                 self.pdb_databases.append(database)
                 self.pdb_collections.append(database.open('anomalies'))
 
-        print("=-=-=-=-=Initiated ProvDB engine {}=-=-=-=-=".format(
+        print("=-=-=-=-=Initiated ProvDB instance {}=-=-=-=-=".format(
             self.pdb_address))
 
     def __del__(self):
         # if self.pdb_databases:
         #     for database, name in zip(self.pdb_databases, self.pdb_names):
         #         self.pdb_admin.destroy_database(self.pdb_address, 0, name)
-        print("=-=-=-=-=Starting ProvDB deletion for engine {}=-=-=-=-=".format(self.pdb_address))
         if self.pdb_collections:
             for col in self.pdb_collections:
                 del col
@@ -74,4 +74,5 @@ class ProvDB():
             gc.collect()
             del self.pdb_engine
             self.pdb_engine = None
-        print("=-=-=-=-=Finished Provdb instance deletion=-=-=-=-=")
+        print("=-=-=-=-=Finished Provdb instance {} deletion=-=-=-=-="
+              ).format(self.pdb_address)
