@@ -503,9 +503,7 @@ def get_anomalystats():
         )
     ).order_by(
         AnomalyStat.created_at.desc()
-    ).all()
-
-    stats.reverse()
+    ).first()
 
     return jsonify([st.to_dict() for st in stats])
 
