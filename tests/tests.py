@@ -194,7 +194,7 @@ class ServerTests(unittest.TestCase):
                     get_random_anomaly(0, 2, 3, 8)
                 ],
                 'func': get_random_func(10)
-            }
+            },
             'counter_stats': get_random_counter(0, 15)
         }
 
