@@ -505,6 +505,8 @@ def get_anomalystats():
         AnomalyStat.created_at.desc()
     ).all()
 
+    data.reverse()
+
     return jsonify([st.to_dict() for st in stats])
 
 
