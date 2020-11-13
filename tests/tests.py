@@ -160,6 +160,8 @@ class ServerTests(unittest.TestCase):
 
             r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
+            print("r is {}".format(r))
+            print("d is {}".format(d['data']))
             for dd in d['data']:
                 step = dd['step']
                 [self.assertEqual(v, r[step][k]) for k, v in dd.items() if k in r[step]]
