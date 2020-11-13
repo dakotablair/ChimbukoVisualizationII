@@ -184,6 +184,8 @@ class ServerTests(unittest.TestCase):
                 else:
                     self.assertEqual(r[k], v)
 
+        print("test one done, now start for test two.")
+
         # post both
         payload = {
             'anomaly_stats': {
@@ -197,6 +199,10 @@ class ServerTests(unittest.TestCase):
             },
             'counter_stats': get_random_counter(0, 15)
         }
+
+        db.drop_all()
+        db.create_all()
+        time.sleep(10)
 
         print("......", self.app)
         r, s, h = self.post('/api/anomalydata', payload)
