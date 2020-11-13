@@ -32,25 +32,25 @@ class ProvDB():
         print("ProvDB objects initiated.")
 
     def __del__(self):
-        if self.pdb_databases:
-            for database, name in zip(self.pdb_databases, self.pdb_names):
-                self.pdb_admin.destroy_database(self.pdb_address, 0, name)
+        # if self.pdb_databases:
+        #     for database, name in zip(self.pdb_databases, self.pdb_names):
+        #         self.pdb_admin.destroy_database(self.pdb_address, 0, name)
         if self.pdb_collections:
             for col in self.pdb_collections:
                 del col
                 col = None
             del self.pdb_collections
             self.pdb_collections = []
-        # if self.pdb_databases:
-        #     for datab in self.pdb_databases:
-        #         del datab
-        #         datab = None
-        #     del self.pdb_databases
-        #     self.pdb_databases = []
-        # if self.pdb_names:
-        #     for name in self.pdb_names:
-        #         self.pdb_admin.detach_database(self.pdb_address, 0, name)
-        #     self.pdb_names = []
+        if self.pdb_names:
+            for name in self.pdb_names:
+                self.pdb_admin.detach_database(self.pdb_address, 0, name)
+            self.pdb_names = []
+        if self.pdb_databases:
+            for datab in self.pdb_databases:
+                del datab
+                datab = None
+            del self.pdb_databases
+            self.pdb_databases = []
         if self.pdb_client:
             del self.pdb_client
             self.pdb_client = None
