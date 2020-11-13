@@ -4,6 +4,8 @@ from pysonata.provider import SonataProvider
 from pysonata.client import SonataClient
 from pysonata.admin import SonataAdmin
 
+import gc
+
 
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=1):
@@ -60,6 +62,7 @@ class ProvDB():
             self.pdb_provider = None
         if self.pdb_engine:
             self.pdb_engine.finalize()
+            gc.collect()
             del self.pdb_engine
             self.pdb_engine = None
         print("Provdb objects cleaned up.")
