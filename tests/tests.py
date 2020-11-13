@@ -3,7 +3,7 @@ import json
 
 from server import create_app, db
 
-from server.provdb import ProvDB
+#from server.provdb import ProvDB
 
 
 class ServerTests(unittest.TestCase):
@@ -239,17 +239,17 @@ class ServerTests(unittest.TestCase):
                 else:
                     self.assertEqual(r[k], v)
 
-    def test_provdb(self):
-        filtered_records = []
-        jx9_filter = "function($record) { return " \
-            "$record.pid == %d && " \
-            "$record.rid == %d && " \
-            "$record.io_step == %d; } " % (0, 1, 5)
+    #def test_provdb(self):
+    #    filtered_records = []
+    #    jx9_filter = "function($record) { return " \
+    #        "$record.pid == %d && " \
+    #        "$record.rid == %d && " \
+    #        "$record.io_step == %d; } " % (0, 1, 5)
 
-        provdb = ProvDB(pdb_path='data/sample/provdb/',
-                        pdb_sharded_num=1)
-        collections = provdb.pdb_collections
-        for col in collections:
-            result = [json.loads(x) for x in col.filter(jx9_filter)]
-            filtered_records += result
-        self.assertEqual(len(filtered_records), 124)
+    #    provdb = ProvDB(pdb_path='data/sample/provdb/',
+    #                    pdb_sharded_num=1)
+    #    collections = provdb.pdb_collections
+    #    for col in collections:
+    #        result = [json.loads(x) for x in col.filter(jx9_filter)]
+    #        filtered_records += result
+    #    self.assertEqual(len(filtered_records), 124)
