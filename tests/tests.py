@@ -1,9 +1,7 @@
 import unittest
 import json
 
-from server import create_app, db
-
-from server.provdb import ProvDB
+from server import create_app, db, pdb
 
 
 class ServerTests(unittest.TestCase):
@@ -246,9 +244,7 @@ class ServerTests(unittest.TestCase):
             "$record.rid == %d && " \
             "$record.io_step == %d; } " % (0, 1, 5)
 
-        provdb = ProvDB(pdb_path='data/sample/provdb/',
-                        pdb_sharded_num=1)
-        collections = provdb.pdb_collections
+        collections = pdb.pdb_collections
         for col in collections:
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result

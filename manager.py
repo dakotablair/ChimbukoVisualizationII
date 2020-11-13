@@ -118,4 +118,6 @@ def lint():
 if __name__ == '__main__':
     if sys.argv[1] == 'test' or sys.argv[1] == 'lint':
         os.environ['SERVER_CONFIG'] = 'testing'
+        os.environ['PROVENANCE_DB'] = 'data/sample/provdb/'
+        os.environ['SHARDED_NUM'] = 1
     manager.run()
