@@ -495,6 +495,7 @@ def get_anomalystats():
     """
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
+    print("querry app {} and rank {}".format(int(app), int(rank)))
 
     subq = db.session.query(
         AnomalyStat.app,
@@ -514,6 +515,7 @@ def get_anomalystats():
     if app is None or rank is None:
         stats = stats.all()
     else:
+        print("take partial queried results")
         stats = stats.filter(AnomalyStat.app == int(app) and
                              AnomalyStat.rank == int(rank)).all()
 
