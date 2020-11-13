@@ -515,9 +515,12 @@ def get_anomalystats():
     if app is None or rank is None:
         stats = stats.all()
     else:
-        print("take partial queried results")
-        stats = stats.filter(AnomalyStat.app == int(app) and
-                             AnomalyStat.rank == int(rank)).all()
+        stats = stats.filter(
+            and_(
+                AnomalyStat.app == int(app),
+                AnomalyStat.rank == int(rank)
+            )
+        ).all()
 
     return jsonify([st.to_dict() for st in stats])
 
