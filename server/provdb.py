@@ -47,10 +47,10 @@ class ProvDB():
         #         datab = None
         #     del self.pdb_databases
         #     self.pdb_databases = []
-        if self.pdb_names:
-            for name in self.pdb_names:
-                self.pdb_admin.detach_database(self.pdb_address, 0, name)
-            self.pdb_names = []
+        # if self.pdb_names:
+        #     for name in self.pdb_names:
+        #         self.pdb_admin.detach_database(self.pdb_address, 0, name)
+        #     self.pdb_names = []
         if self.pdb_client:
             del self.pdb_client
             self.pdb_client = None
