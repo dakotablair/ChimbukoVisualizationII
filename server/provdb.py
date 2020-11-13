@@ -9,7 +9,7 @@ import gc
 
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=1):
-        self.pdb_engine = Engine('na+sm', pymargo.client)
+        self.pdb_engine = Engine('na+sm', pymargo.server)
         self.pdb_provider = SonataProvider(self.pdb_engine, 0)
         self.pdb_address = str(self.pdb_engine.addr())
         self.pdb_admin = SonataAdmin(self.pdb_engine)
@@ -26,31 +26,34 @@ class ProvDB():
             self.pdb_admin.attach_database(self.pdb_address, 0, pdb_name,
                                            'unqlite',
                                            "{ \"path\" : \"%s\" }" % file_name)
-            pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
-            self.pdb_databases.append(pdb)
-            self.pdb_collections.append(pdb.open('anomalies'))
+            database = self.pdb_client.open(self.pdb_address, 0, pdb_name)
+            self.pdb_databases.append(database)
+            self.pdb_collections.append(database.open('anomalies'))
         print("ProvDB objects initiated.")
 
     def __del__(self):
+        if self.pdb_databases:
+            for database, name in zip(self.pdb_databases, self.pdb_names):
+                self.pdb_admin.destroy_database(self.pdb_address, 0, name)
         if self.pdb_collections:
             for col in self.pdb_collections:
                 del col
                 col = None
             del self.pdb_collections
             self.pdb_collections = []
-        if self.pdb_databases:
-            for datab in self.pdb_databases:
-                del datab
-                datab = None
-            del self.pdb_databases
-            self.pdb_databases = []
-        if self.pdb_client:
-            del self.pdb_client
-            self.pdb_client = None
+        # if self.pdb_databases:
+        #     for datab in self.pdb_databases:
+        #         del datab
+        #         datab = None
+        #     del self.pdb_databases
+        #     self.pdb_databases = []
         if self.pdb_names:
             for name in self.pdb_names:
                 self.pdb_admin.detach_database(self.pdb_address, 0, name)
             self.pdb_names = []
+        if self.pdb_client:
+            del self.pdb_client
+            self.pdb_client = None
         if self.pdb_address:
             del self.pdb_address
             self.pdb_address = None
