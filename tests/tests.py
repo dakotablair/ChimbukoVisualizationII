@@ -200,9 +200,9 @@ class ServerTests(unittest.TestCase):
             'counter_stats': get_random_counter(0, 15)
         }
 
-        db.drop_all()
-        db.create_all()
-        time.sleep(10)
+        # db.drop_all()
+        # db.create_all()
+        # time.sleep(10)
 
         print("......", self.app)
         r, s, h = self.post('/api/anomalydata', payload)

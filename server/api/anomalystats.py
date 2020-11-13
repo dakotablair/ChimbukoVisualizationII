@@ -501,6 +501,8 @@ def get_anomalystats():
             AnomalyStat.app == int(app),
             AnomalyStat.rank == int(rank),
         )
+    ).order_by(
+        AnomalyStat.created_at.desc()
     ).all()
 
     return jsonify([st.to_dict() for st in stats])
