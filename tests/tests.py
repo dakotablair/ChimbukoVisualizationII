@@ -143,7 +143,7 @@ class ServerTests(unittest.TestCase):
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
         self.assertEqual(s, 202)
-        time.sleep(1)  # wait until celery worker is done
+        time.sleep(5)  # wait until celery worker is done
 
         # check anomaly statistics
         data_payload = anomaly_payload['anomaly_stats']['anomaly']
@@ -160,9 +160,9 @@ class ServerTests(unittest.TestCase):
 
             r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
-            print("\n")
-            print("r is {}".format(r))
-            print("d is {}".format(d['data']))
+            #print("\n")
+            #print("r is {}".format(r))
+            #print("d is {}".format(d['data']))
             for dd in d['data']:
                 step = dd['step']
                 [self.assertEqual(v, r[step][k]) for k, v in dd.items() if k in r[step]]
