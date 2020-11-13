@@ -37,7 +37,7 @@ def load_execution_provdb(pid, rid, step):
         "$record.io_step == %d; } " % (int(pid),
                                        int(rid),  # random.randint(0, 1),
                                        int(step))  # random.randint(0, 8))
-    if pdb:
+    if pdb and pdb.pdb_collections:
         for col in pdb.pdb_collections:
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result
