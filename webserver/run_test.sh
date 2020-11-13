@@ -2,7 +2,6 @@
 
 ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
-cd "${WORK_DIR}" #cd command must use doublequote to take space in filename
 
 # for test data
 DATA_NAME="sample"
