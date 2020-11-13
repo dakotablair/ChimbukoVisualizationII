@@ -560,9 +560,6 @@ def get_anomalydata():
 
     data.reverse()
 
-    for dd in data:
-        obj = dd.to_dict()
-        print("id {}".format(obj['id']))
     return jsonify([dd.to_dict() for dd in data])
 
 

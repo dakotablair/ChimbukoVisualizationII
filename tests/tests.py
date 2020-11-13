@@ -143,7 +143,7 @@ class ServerTests(unittest.TestCase):
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
         self.assertEqual(s, 202)
-        time.sleep(10)  # wait until celery worker is done
+        time.sleep(5)  # wait until celery worker is done
 
         # check anomaly statistics
         data_payload = anomaly_payload['anomaly_stats']['anomaly']
@@ -152,17 +152,12 @@ class ServerTests(unittest.TestCase):
             r, s, h = self.get('/api/get_anomalystats?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
             r = r[0]
-            # print("app {} rank {} r: {}".format(app, rank, r))
-            # print("d: {}".format(d['stats']))
             self.assertEqual(r['created_at'], 123)
             for k, v in d['stats'].items():
                 self.assertEqual(v, r[k])
 
             r, s, h = self.get('/api/get_anomalydata?app={}&rank={}'.format(app, rank))
             self.assertEqual(s, 200)
-            #print("\n")
-            #print("r is {}".format(r))
-            #print("d is {}".format(d['data']))
             for dd in d['data']:
                 step = dd['step']
                 [self.assertEqual(v, r[step][k]) for k, v in dd.items() if k in r[step]]
@@ -176,7 +171,7 @@ class ServerTests(unittest.TestCase):
         }
         r, s, h = self.post('/api/anomalydata', func_payload)
         self.assertEqual(s, 202)
-        time.sleep(10)
+        time.sleep(5)  # wait until celery worker is done
 
         # check func statistics
         for fid in range(10):
@@ -206,14 +201,10 @@ class ServerTests(unittest.TestCase):
             'counter_stats': get_random_counter(0, 15)
         }
 
-        # db.drop_all()
-        # db.create_all()
-        # time.sleep(10)
-
         print("......", self.app)
         r, s, h = self.post('/api/anomalydata', payload)
         self.assertEqual(s, 202)
-        time.sleep(5)
+        time.sleep(10)
 
         payload = payload['anomaly_stats']
         # check anomaly statistics
