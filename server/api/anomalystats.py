@@ -530,7 +530,7 @@ def get_anomalystats():
 def get_anomalydata():
     app = request.args.get('app', default=None)
     rank = request.args.get('rank', default=None)
-    print("query app {} and rank {}".format(int(app), int(rank)))
+    print("\nquery app {} and rank {}".format(int(app), int(rank)))
 
     subq = db.session.query(
         AnomalyData.app,
@@ -560,7 +560,7 @@ def get_anomalydata():
         ).all()
 
     data.reverse()
-    time.sleep(10)
+    time.sleep(10)  # wait for db query to complete
     return jsonify([dd.to_dict() for dd in data])
 
 
