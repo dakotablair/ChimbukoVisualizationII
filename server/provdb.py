@@ -8,7 +8,7 @@ import gc
 
 
 class ProvDB():
-    def __init__(self, pdb_path='', pdb_sharded_num=1):
+    def __init__(self, pdb_path='', pdb_sharded_num=0):
         self.pdb_engine = Engine('na+sm', pymargo.server)
         self.pdb_provider = SonataProvider(self.pdb_engine, 0)
         self.pdb_address = str(self.pdb_engine.addr())
@@ -19,17 +19,18 @@ class ProvDB():
         self.pdb_databases = []
         self.pdb_collections = []
 
-        for i in range(pdb_sharded_num):
-            pdb_name = 'provdb.' + str(i)
-            self.pdb_names.append(pdb_name)
-            file_name = pdb_path + pdb_name + '.unqlite'
-            self.pdb_admin.attach_database(self.pdb_address, 0, pdb_name,
-                                           'unqlite',
-                                           "{ \"path\" : \"%s\" }" % file_name)
-            database = self.pdb_client.open(self.pdb_address, 0, pdb_name)
-            self.pdb_databases.append(database)
-            self.pdb_collections.append(database.open('anomalies'))
-        print("ProvDB objects initiated.")
+        if pdb_path and pdb_sharded_num > 0:
+            for i in range(pdb_sharded_num):
+                pdb_name = 'provdb.' + str(i)
+                self.pdb_names.append(pdb_name)
+                file_name = pdb_path + pdb_name + '.unqlite'
+                self.pdb_admin.attach_database(self.pdb_address, 0, pdb_name,
+                                            'unqlite',
+                                            "{ \"path\" : \"%s\" }" % file_name)
+                database = self.pdb_client.open(self.pdb_address, 0, pdb_name)
+                self.pdb_databases.append(database)
+                self.pdb_collections.append(database.open('anomalies'))
+            print("ProvDB objects initiated.")
 
     def __del__(self):
         # if self.pdb_databases:
@@ -44,6 +45,8 @@ class ProvDB():
         if self.pdb_names:
             for name in self.pdb_names:
                 self.pdb_admin.detach_database(self.pdb_address, 0, name)
+                del name
+                name = None
             self.pdb_names = []
         if self.pdb_databases:
             for datab in self.pdb_databases:
