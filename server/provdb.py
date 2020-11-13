@@ -39,6 +39,8 @@ class ProvDB():
         # if self.pdb_databases:
         #     for database, name in zip(self.pdb_databases, self.pdb_names):
         #         self.pdb_admin.destroy_database(self.pdb_address, 0, name)
+        print("=-=-=-=-=Finished Provdb instance {} deletion=-=-=-=-="
+              ).format(self.pdb_address)
         if self.pdb_collections:
             for col in self.pdb_collections:
                 del col
@@ -74,5 +76,3 @@ class ProvDB():
             gc.collect()
             del self.pdb_engine
             self.pdb_engine = None
-        print("=-=-=-=-=Finished Provdb instance {} deletion=-=-=-=-="
-              ).format(self.pdb_address)
