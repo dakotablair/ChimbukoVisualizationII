@@ -9,7 +9,7 @@ import gc
 
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=0):
-        self.pdb_engine = Engine('na+sm', pymargo.client)
+        self.pdb_engine = Engine('na+sm', pymargo.server)
         self.pdb_provider = SonataProvider(self.pdb_engine, 0)
         self.pdb_address = str(self.pdb_engine.addr())
         self.pdb_admin = SonataAdmin(self.pdb_engine)
