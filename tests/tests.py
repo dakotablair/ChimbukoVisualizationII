@@ -140,7 +140,7 @@ class ServerTests(unittest.TestCase):
 
         r, s, h = self.post('/api/anomalydata', anomaly_payload)
         self.assertEqual(s, 202)
-        time.sleep(5)  # wait until celery worker is done
+        time.sleep(10)  # wait until celery worker is done
 
         # check anomaly statistics
         data_payload = anomaly_payload['anomaly_stats']['anomaly']
@@ -171,7 +171,7 @@ class ServerTests(unittest.TestCase):
         }
         r, s, h = self.post('/api/anomalydata', func_payload)
         self.assertEqual(s, 202)
-        time.sleep(5)  # wait until celery worker is done
+        time.sleep(10)  # wait until celery worker is done
 
         # check func statistics
         for fid in range(10):

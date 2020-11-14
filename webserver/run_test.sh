@@ -4,9 +4,13 @@ ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
 
 # for test data
-DATA_NAME="sample"
-export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/provdb/"
+DATA_NAME="test"
+export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/"
 export SHARDED_NUM=1
+export DATABASE_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/main.sqlite"
+export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/anomaly_stats.sqlite"
+export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/anomaly_data.sqlite"
+export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/func_stats.sqlite"
 
 # run Redis
 ./webserver/run-redis.sh &
