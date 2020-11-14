@@ -15,8 +15,10 @@ import random
 from collections import defaultdict
 from runstats import Statistics
 
+
 def timestamp():
     return int(round(time.time() * 1000))
+
 
 def generate_random_data(n_ranks, step, dist):
     dataset = []
@@ -32,6 +34,7 @@ def generate_random_data(n_ranks, step, dist):
         })
     return dataset
 
+
 def generate_random_normal(n_ranks):
     dist = {}
     for rank in range(n_ranks):
@@ -40,13 +43,14 @@ def generate_random_normal(n_ranks):
         dist[rank] = [mean, stddev]
     return dist
 
+
 if __name__ == '__main__':
     import sys
 
     n_ranks = 1000  # total number of MPI processors
     max_steps = 10000  # large number for long test
     interval = 1  # sec
-    url = 'http://127.0.0.1:5000/api/anomalydata'  # vis server
+    url = 'http://127.0.0.1:5002/api/anomalydata'  # vis server
 
     if len(sys.argv) > 1:
         n_ranks = int(sys.argv[1])
@@ -70,7 +74,7 @@ if __name__ == '__main__':
         dataset = generate_random_data(n_ranks, step, dist)
 
         # update runstats & make payload
-        payload = []
+        anomaly = []
         for rank, data in enumerate(dataset):
             n_anomaly = data['n_anomaly']
             stats[rank].push(n_anomaly)
@@ -86,7 +90,7 @@ if __name__ == '__main__':
             except ZeroDivisionError:
                 pass
 
-            payload.append({
+            anomaly.append({
                 'app': 0,
                 'rank': rank,
                 'stats': {
@@ -102,6 +106,13 @@ if __name__ == '__main__':
                 'data': [data]
             })
 
+        payload = {
+            'anomaly_stats': {
+                'created_at': timestamp(),
+                'anomaly': anomaly
+            },
+            'counter_stats': []
+        }
         # post request
         requests.post(url=url, json=payload)
 

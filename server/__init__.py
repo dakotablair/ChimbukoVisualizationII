@@ -3,12 +3,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from celery import Celery
-
+from .provdb import ProvDB
 from config import config
 
 # Flask extensions
 db = SQLAlchemy()
 socketio = SocketIO()
+pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', ''),
+             pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 0)))
 celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
                 backend=os.environ.get('CELERY_BROKER_URL', 'redis://'))
@@ -28,7 +30,7 @@ def create_app(config_name=None, main=True):
     if config_name is None:
         config_name = os.environ.get('SERVER_CONFIG', 'development')
 
-    #print(config_name, config[config_name].SQLALCHEMY_BINDS)
+    # print(config_name, config[config_name].SQLALCHEMY_BINDS)
 
     app = Flask(__name__)
     app.config.from_object(config[config_name])

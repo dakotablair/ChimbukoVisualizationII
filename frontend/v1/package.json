@@ -1,6 +1,6 @@
 {
-  "name": "ChimbukoVisualization",
-  "version": "1.0.0",
+  "name": "chimbuko-vis",
+  "version": "2.0.0",
   "description": "Front-end package of Chimbuko visualization",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev-build": "webpack --progress -d --config webpack.config.js",
     "watch": "webpack --progress -d --config webpack.config.js --watch"
   },
-  "author": "Sungsoo Ha",
+  "author": "Sungsoo Ha, Wei Xu",
   "license": "ISC",
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -19,11 +19,11 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "css-loader": "^3.2.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
     "style-loader": "^1.0.0",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.8"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "@material-ui/core": "^4.4.0",
@@ -31,9 +31,9 @@
     "@material-ui/lab": "^4.0.0-alpha.29",
     "@material-ui/styles": "^4.3.3",
     "axios": "^0.19.0",
-    "chart.js": "^2.8.0",
+    "chart.js": "2.8.0",
     "chartjs-plugin-streaming": "^1.8.0",
-    "chartjs-plugin-zoom": "^0.7.4",
+    "chartjs-plugin-zoom": "^0.7.7",
     "clsx": "^1.0.4",
     "d3": "^5.12.0",
     "history": "^4.9.0",

@@ -11,6 +11,7 @@ from server import create_app, db, socketio
 
 manager = Manager(create_app)
 
+
 # Note that socketio.run(app) runs a production ready server
 # when eventlet or gevent are installed. If neither of these
 # are installed, then the application runs on Flask's developement
@@ -65,6 +66,7 @@ class Server(_Server):
                 use_debugger = True
         if use_reloader is None:
             use_reloader = app.debug
+        print("host:", host, "port:", port)
         socketio.run(app,
                      host=host,
                      port=port,
@@ -99,7 +101,7 @@ def createdb(drop_first=False):
 @manager.command
 def test():
     """Runs unit tests."""
-    tests = subprocess.call(['python', '-c', 'import tests; tests.run()'])
+    tests = subprocess.call(['python3', '-c', 'import tests; tests.run()'])
     sys.exit(tests)
 
 
@@ -116,4 +118,6 @@ def lint():
 if __name__ == '__main__':
     if sys.argv[1] == 'test' or sys.argv[1] == 'lint':
         os.environ['SERVER_CONFIG'] = 'testing'
+        os.environ['PROVENANCE_DB'] = 'data/sample/provdb/'
+        os.environ['SHARDED_NUM'] = '1'
     manager.run()

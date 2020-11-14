@@ -11,7 +11,7 @@ import {
 } from './actions/dataActions'
 
 import {
-    executionForest,
+    /*executionForest,*/
     executionTree
 } from './selectors';
 
@@ -83,8 +83,8 @@ class ChimbukoApp extends React.Component {
         super(props);
         this.state = {
             pause: false,
-            funcX: "runtime",
-            funcY: "fid",
+            funcX: "runtime_total",
+            funcY: "function_id",
             run_simulate: false
         };
         this.socketio = null;
@@ -136,6 +136,10 @@ class ChimbukoApp extends React.Component {
     }
 
     handleHistoryRequest = rank => {
+        // console.log('onBarClick: ' + rank);
+        if (isNaN(rank))
+            return;
+
         const watched_ranks = [...this.props.watched_ranks];
 
         if (watched_ranks.indexOf(rank) >= 0)
@@ -197,7 +201,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleStatRefresh = ev => {
-        const url = '/api/get_anomalystats';
+        const url = '/api/anomalystats';
         axis.get(url)
             .then(resp => {
                 console.log('handleStatRefresh: ', resp);
@@ -225,17 +229,17 @@ class ChimbukoApp extends React.Component {
 
     render() {
         const { classes, stats, watched_ranks, rank_colors } = this.props;
-        const { execdata, execdata_config, func_colors } = this.props;
-        const { forest, tree, selected_node } = this.props;
+        const { execdata, execdata_config, func_colors, func_ids } = this.props;
+        const { /*forest, */tree, selected_node } = this.props;
 
         const statKinds = [
             "minimum", "maximum", "mean", "stddev", "kurtosis", "skewness",
             "count", "accumulate"
         ];
         const funcFeat = [
-            "pid", "rid", "tid", "fid", 
-            "entry", "exit", "runtime", "exclusive",
-            "label", "n_children", "n_messages"
+            "function_id", "event_id",
+            "entry", "exit", "runtime_total", "runtime_exclusive",
+            "is_gpu_event"
         ];
 
         const { statKind, nQueries } = stats;
@@ -261,7 +265,7 @@ class ChimbukoApp extends React.Component {
                             className={classes.title} 
                             variant="h6"
                         >
-                            Chimbuko Visualization
+                            Chimbuko Visualization II
                         </Typography>
                     </Toolbar>
                 </AppBar>
@@ -272,7 +276,7 @@ class ChimbukoApp extends React.Component {
                                 <TextField
                                     id="stat-kind"
                                     label="Anomaly statistics"
-                                    value={statKind || "stddev"}
+                                    value={statKind || "mean"}
                                     onChange={this.handleStatChange('statKind')}
                                     select
                                     className={clsx(classes.margin, classes.textField)}
@@ -369,7 +373,14 @@ class ChimbukoApp extends React.Component {
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
-                                <Chip className={classes.chip} label={getSelectedName()} />
+                                {/*<Chip className={classes.chip} label={getSelectedName()} />*/}
+                                <Button 
+                                    variant="contained" 
+                                    className={classes.button} 
+                                    /*onClick={this.chart.resetZoom()}*/
+                                >
+                                    {getSelectedName()}
+                                </Button>
                                 <TextField
                                     id="func-x"
                                     label="X-axis"
@@ -405,12 +416,13 @@ class ChimbukoApp extends React.Component {
                                 }
                                 </TextField>                                                       
                             </div>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{overflow: scroll}}>
                                 <AnomalyFunc 
                                     height={400}
                                     data={execdata}
                                     config={execdata_config}
                                     colors={func_colors}
+                                    ids={func_ids}
                                     x={this.state.funcX}
                                     y={this.state.funcY}
                                     onPointClick={this.handleTreeRequest}
@@ -446,7 +458,7 @@ function mapStateToProps(state) {
         execdata: state.data.execdata,
         execdata_config: state.data.execdata_config,
         func_colors: state.data.func_colors,
-        forest: executionForest(state),
+        func_ids: state.data.func_ids,
         tree: executionTree(state),
         selected_node: state.data.node_key
     };

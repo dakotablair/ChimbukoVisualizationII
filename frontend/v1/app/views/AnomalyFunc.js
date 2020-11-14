@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import { Scatter } from 'react-chartjs-2';
-// import 'chartjs-plugin-zoom';
+import 'chartjs-plugin-zoom';
 
 import { parseFuncName } from '../utils';
 
@@ -20,7 +20,8 @@ class AnomalyFunc extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return true;
+        //console.log("...should component update...");
+
         // const { config:nextConfig, data:nextData } = nextProps;
         // const { config:currConfig, data:currData } = this.props;
 
@@ -30,9 +31,18 @@ class AnomalyFunc extends React.Component
 
         // const is_same_data = nextData.length === currData.length;
 
-        // if (is_same_config && is_same_data)
-        //     return false;
-        // return true;
+        // redraw only when it is new axis setting or new data
+        // so when zoomed and click one point won't redraw this view
+        const {x: xNext, y: yNext, config:nextConfig} = nextProps;
+        const {x: xCurr, y: yCurr, config:currConfig} = this.props;
+        const is_same_coor = xNext === xCurr && yNext === yCurr;
+        const is_same_config = Object.keys(currConfig).map( key => {
+            return currConfig[key] === nextConfig[key];
+        }).every(v => v);
+        
+        if (is_same_coor && is_same_config)
+            return false;
+        return true;
     }
 
     handleChartClick = elem => {
@@ -44,7 +54,7 @@ class AnomalyFunc extends React.Component
        
         const item = this.chart.props.data.datasets[datasetIndex].data[index];
         if (this.props.onPointClick)
-            this.props.onPointClick(item.key);
+            this.props.onPointClick(item.event_id);
         // if (this.chart == null) 
         //     return;
 
@@ -87,13 +97,13 @@ class AnomalyFunc extends React.Component
         const {r, g, b} = rgb;
         return {
             label,
-            fill: false,
-            backgroundColor: `rgba(${r}, ${g}, ${b}, 0.5)`,
+            fill: true,
+            //backgroundColor: `rgba(${r}, ${g}, ${b}, 0.8)`,
             pointBorderColor: `rgba(${r}, ${g}, ${b}, 1)`,
-            pointBackgroundColor: '#fff',
+            pointBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.3)`, //'#fff',
             pointBorderWidth: 1,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.8)`,
+            pointHoverRadius: 10,
+            pointHoverBackgroundColor: `rgba(${r}, ${g}, ${b}, 0.3)`,
             pointHoverBorderColor: `rgba(${r}, ${g}, ${b}, 1)`,
             pointHoverBorderWidth: 2,
             pointRadius: 5,
@@ -101,23 +111,53 @@ class AnomalyFunc extends React.Component
         }        
     }
 
-    getValue = (d, key) => {
+    getValue = (d, i, key, ids) => {
         if (key === 'entry' || key === 'exit')
             return d[key] / 1000;
+        else if (key === 'function_id')
+            return ids[d['fid']];
+        else if (key === 'event_id')
+            return i;
         return d[key];        
     }
 
-    getAxis = (key) => {
+    getAxis = (key, ids) => {
+        // prepare correct axis range for zooming
+        let tmin = 0;
+        let tmax = 1;
+        this.props.data.forEach((d, i) => {
+            if (key === 'function_id') { // fid uses index as its axis
+                tmin = Math.min(ids[d['fid']], tmin);
+                tmax = Math.max(ids[d['fid']], tmax);
+            }
+            else if (key === 'event_id') { //event_id uses its index as axis
+                tmin = Math.min(i, tmin);
+                tmax = Math.max(i, tmax);
+            } else {
+                tmin = Math.min(d[key], tmin);
+                tmax = Math.max(d[key], tmax);
+            }
+        });
+        if (key === 'entry' || key === 'exit') {
+            tmin = tmin / 1000;
+            tmax = tmax / 1000;
+        }
+        // console.log("min: " + tmin + "max: " + tmax);
         return {
             type: 'linear',
             ticks: {       
                 display: true,
+                precision: 0, // axis tick must round up
                 userCallback: tick => {
                     if (key === 'entry' || key === 'exit')
                         return moment(tick).format('ss.SSS');
-                    return tick;
-                    //return moment(tick).format('h:mm:ss.SSS a');
-                },                     
+                    return Math.floor(tick); // make sure to round up
+                    // return moment(tick).format('h:mm:ss.SSS a');
+                },
+                maxRotation: 0, // prevent tick text rotation
+                minRotation: 0, // prevent tick text rotation
+                min: tmin,
+                max: tmax                 
             },
             scaleLabel: {
                 display: true,
@@ -131,17 +171,27 @@ class AnomalyFunc extends React.Component
     }    
 
     getDataInfo = d => {
-        const info = `pid: ${d.pid}\nrid: ${d.rid}\ntid: ${d.tid}\nfid: ${d.fid}`;
-        const time = `inclusive: ${d.runtime}\nexclusive: ${d.exclusive}`;
-        const other = `# children: ${d.n_children}\n# messages: ${d.n_messages}\nlabel: ${d.label}`; 
-        return `${info}\n${time}\n${other}`;
+        const entry = moment(d.entry/1000).format('h:mm:ss.SSS a');
+        const exit = moment(d.exit/1000).format('h:mm:ss.SSS a');
+        const func_mean = d.func_stats.mean/1000;
+        const func_stddev = d.func_stats.stddev/1000;
+
+        const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} function_id: ${d.fid} event_id: ${d.event_id}\n`;
+        const time = `entry: ${entry}\nexit: ${exit}\nruntime_total: ${d.runtime_total/1000}ms\nruntime_exclusive: ${d.runtime_exclusive/1000}ms\n`;
+        const funcstats = `Normal function info:\nmean runtime: ${func_mean.toPrecision(3)}ms\nstddev: ${func_stddev.toPrecision(3)}ms\nfunctions encountered: ${d.func_stats.count}\n`;
+        let other = ``;
+        
+        if (d.is_gpu_event)
+            other = `\nGPU info:\ncontext: ${d.gpu_location.context} device: ${d.gpu_location.device} stream: ${d.gpu_location.stream} thread: ${d.gpu_location.thread}`;
+        
+        return `${info}${time}\n${funcstats}${other}`;
     }    
 
     render() {
-        const { height, colors, x: xKey, y: yKey } = this.props;
+        const { height, colors, ids, x: xKey, y: yKey } = this.props;
 
         const datasets = {};
-        this.props.data.forEach(d => {
+        this.props.data.forEach((d, i) => {
             const fid = d.fid;
             if (!datasets.hasOwnProperty(fid))
                 datasets[fid] = {
@@ -149,8 +199,8 @@ class AnomalyFunc extends React.Component
                     data: []
                 };
             datasets[fid].data.push({
-                x: this.getValue(d, xKey),
-                y: this.getValue(d, yKey),
+                x: this.getValue(d, i, xKey, ids),
+                y: this.getValue(d, i, yKey, ids),
                 ...d
             });
         });
@@ -165,15 +215,15 @@ class AnomalyFunc extends React.Component
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [this.getAxis(xKey)],
-                        yAxes: [this.getAxis(yKey)]
+                        xAxes: [this.getAxis(xKey, ids)],
+                        yAxes: [this.getAxis(yKey, ids)]
                     },
                     tooltips: {
                         callbacks: {
                             label: (tooltipItem, data) => {
                                 const {datasetIndex, index} = tooltipItem;
                                 const d = data.datasets[datasetIndex].data[index];
-                                return this.getDisplayName(d.name);
+                                return this.getDisplayName(d.func);
                             },
                             afterBody: (tooltipItem, data) => {
                                 const {datasetIndex, index} = tooltipItem[0];
@@ -183,24 +233,20 @@ class AnomalyFunc extends React.Component
                         }
                     },
                     legend: {
-                        display: true,
-                        position: 'right'
+                        display: false,
+                        position: 'bottom',
+                        fullWidth: false
                     },
                     pan: {
                         enabled: true,
                         mode: "xy",
-                        speed: 0.01,
-                        // threshold: 10
+                        speed: 1
                       },
                     zoom: {
                         enabled: true,
                         drag: false,
                         mode: "xy",
-                        speed: 0.01
-                        // limits: {
-                        //   max: 10,
-                        //   min: 0.5
-                        // }
+                        speed: 0.05
                     }                    
                 }}
             />
