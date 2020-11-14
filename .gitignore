@@ -124,3 +124,6 @@ node_modules/
 # data
 data/*
 
+# MacOS
+.DS_Store
+
