@@ -4,7 +4,7 @@ import { getRandomColor } from '../utils';
 const INIT_STATE = {
     // anomaly statistics
     stats: {
-        statKind: 'stddev',
+        statKind: 'mean',
         nQueries: 5
     },
     // stats_colors: {},
@@ -17,6 +17,7 @@ const INIT_STATE = {
     // execution data 
     // - descending order on entry time
     func_colors: {},
+    func_ids: {},
     execdata_config: {
         app: -1,
         rank: -1,
@@ -25,7 +26,6 @@ const INIT_STATE = {
         max_timestamp: -1
     },
     execdata: [],
-    commdata: [],
     node_key: null
 };
 
@@ -41,18 +41,36 @@ const set_stats = (state, newStats) => {
 };
 
 const set_execdata = (state, newData) => {
-    const { func_colors:colors } = state;
+    const { func_colors:colors, func_ids:ids} = state;
     const { config, data } = newData;
-    const { exec, comm } = data;
+    const { exec } = data;
     exec.forEach(d => {
         if (!colors.hasOwnProperty(d.fid)) {
             colors[d.fid] = getRandomColor();
         }
+        if (!ids.hasOwnProperty(d.fid)) {
+            ids[d.fid] = d.fid;
+        }
+        d.call_stack.forEach(p => {
+            if (!colors.hasOwnProperty(p.fid)) {
+                colors[p.fid] = getRandomColor();
+            }
+        });
+        d.event_window.exec_window.forEach(p => {
+            if (!colors.hasOwnProperty(p.fid)) {
+                colors[p.fid] = getRandomColor();
+            }
+        });
     });
+    let count = 0;
+    for (var key of Object.keys(ids)) {
+        ids[key] = count++;
+    }
     return {...state, 
-        execdata: exec, commdata: comm, 
+        execdata: exec, 
         execdata_config: config, 
-        func_colors: colors};
+        func_colors: colors,
+        func_ids: ids};
 }
 
 const set_rank = (state, rank) => {

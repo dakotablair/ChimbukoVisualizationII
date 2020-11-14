@@ -57,15 +57,15 @@ class TreeNode extends React.Component
         const {r, g, b} = rgb;
         
         const rect_stroke = highlight
-            ? {stroke: 'red', strokeWidth: 2, strokeOpacity: 1}
+            ? {stroke: 'red', strokeWidth: 1, strokeOpacity: 1}
             : {};
-        const bg = (d.label === 1) ? "black": "red";
+        const bg = (d.hasOwnProperty('is_anomaly') ? ((d.is_anomaly === true) ? "red": "black"): "black");
         const text_color = bg;
 
         // todo: smartly determine tooltip position... how??
         // - depends on mouse cursor position.
-        let tooltip_w = 150;
-        let tooltip_h = 150;
+        let tooltip_w = Math.max(parseFuncName(d.func).length*7, 156);  // assume 7 is character width
+        let tooltip_h = 90;
         let tooltip_offset_y = 0;
         let tooltip_offset_x = 0;
         if (y + tooltip_h + 10 > yScale.range()[1] - height/2) {
@@ -75,7 +75,7 @@ class TreeNode extends React.Component
             //tooltip_w = -150;
             tooltip_offset_x = -tooltip_w;
         }
-
+        //console.log(parseFuncName(d.func).length, tooltip_w, tooltip_h, tooltip_offset_x, tooltip_offset_y);
         const comm = [];
         d.comm.forEach( (_comm, i) => {
             const {rid, src, tar, timestamp} = _comm;
@@ -111,27 +111,19 @@ class TreeNode extends React.Component
                     {...font}
                     fill={text_color}
                 >
-                    { (showLabel)
-                        ? parseFuncName(d.name)
-                        : ""
-                    }
+                    {showLabel}
                 </text>
                 <Tooltip triggerRef={this.rect}>
                     <rect x={tooltip_offset_x + 5} y={5 + tooltip_offset_y} width={tooltip_w} height={tooltip_h} rx={0.5} ry={0.5} fill={bg} opacity={0.8}></rect>
                     <text x={tooltip_offset_x + 10} y={10 + tooltip_offset_y} fontSize={12} fontFamily="Verdana" dy={0} fill='white'>
-                        <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.name)}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Rank: ${d.rid}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Thread: ${d.tid}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Runtime: ${d.runtime} usec`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Exclusive: ${d.exclusive} usec`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Children: ${d.n_children}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`# Messages: ${d.n_messages}`}</tspan>
-                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`Label: ${d.label}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy=".6em">{parseFuncName(d.func)}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`event_id: ${d.event_id}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`entry: ${moment(d.entry/1000).format('h:mm:ss.SSS a') }`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`exit: ${moment(d.exit/1000).format('h:mm:ss.SSS a')}`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`runtime: ${(d.exit-d.entry)/1000} ms`}</tspan>
+                        <tspan x={tooltip_offset_x + 10} dy="1.2em">{`anomaly: ${d.is_anomaly}`}</tspan>
                     </text>
                 </Tooltip>
-                
                 {comm}
             </g>           
         );
@@ -153,13 +145,18 @@ class CallStackTreeNode extends React.Component
         const nodes = [];
         Object.keys(this.props.nodes).forEach(key => {
             const node = this.props.nodes[key];
-            const x = xScale(node.entry),
+            const x = Math.max(xScale(node.entry), 0), // at least starts at 0
                   y = yScale(node.level),
-                  w = xScale(node.exit) - x;
+                  w = Math.max(xScale(node.exit) - x, 1); // at least with width 5
                   //nodeHeight = Math.abs(yScale(node.level + 1) - y);
             const len = Math.min(xScale(node.exit), maxLength)- Math.max(x, 0);
-            const showName = xScale(node.exit) > 30 && len >= 50;  
-            const highlight = (selected && selected === node.key) ? true: false;     
+            const func_name = parseFuncName(node.func);
+            let showName = ""; // xScale(node.exit) > 30 && len >= 50; 
+            if (len >= func_name.length*7) // assume one character is 7 pixels
+                showName = func_name;
+            else if (len >= 9) // at least can show one character
+                showName = func_name.slice(0, Math.floor((len-2)/7)) + "..";
+            const highlight = (selected && selected === node.event_id) ? true: false;     
             nodes.push(
                 <TreeNode
                     key={`node-${key}`}

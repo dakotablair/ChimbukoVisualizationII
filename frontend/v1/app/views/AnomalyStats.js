@@ -33,37 +33,45 @@ class AnomalyStats extends React.Component
         let { colors, data:dataState } = this.state;
 
         if (dataState.length === 0) {
-            newData.forEach(category => {
-                const getRandomColor = () => {
-                    return {
-                        r: Math.floor(Math.random() * 255),
-                        g: Math.floor(Math.random() * 255),
-                        b: Math.floor(Math.random() * 255)
-                    }
-                }          
+            newData.forEach((category, i) => {
+                const color = [{r: 0, g: 204, b: 255}, {r: 255, g: 150, b: 150}];
                 dataState.push({
-                    'color': getRandomColor(),
+                    'color': color[i],
                     'name': category.name,
                     'stat': []
                 });      
             });
         }
 
+        if (newData.length == 2)
+            console.log(newData[1]);
+
         newData.forEach( (category, index) => {
-            const keys = new Set([]);
-            let stat = [...dataState[index].stat, ...category.stat];
-            stat.sort((a, b) => b.created_at - a.created_at);
-            stat = stat.filter((d, i) => {
-                    if (keys.has(d.key)) 
-                        return false;
-                    keys.add(d.key);
-                    return true;
-                });
-            stat.sort((a, b) => b[statKind] - a[statKind]);
-            if (nQueries < stat.length)
-                stat = stat.slice(0, nQueries);
-            dataState[index].stat = stat;
+            if (index == 0) {
+                const keys = new Set([]);
+                let stat = [...dataState[index].stat, ...category.stat];
+                stat.sort((a, b) => b.created_at - a.created_at);
+                stat = stat.filter((d, i) => {
+                        if (keys.has(d.key)) 
+                            return false;
+                        keys.add(d.key);
+                        return true;
+                    }); // when merged, only keep latest
+                stat.sort((a, b) => b[statKind] - a[statKind]);
+                if (nQueries < stat.length)
+                    stat = stat.slice(0, nQueries);
+                dataState[index].stat = stat;
+            }
+            else {
+                let stat = category.stat;
+                stat.sort((a, b) => b.stats.mean - a.stats.mean); // only consider mean for now
+                if (nQueries < stat.length)
+                    stat = stat.slice(0, nQueries);
+                dataState[index].stat = stat;
+            }
         });
+
+        // console.log(dataState);
 
         this.setState({...this.state, data: dataState, colors});
     }
@@ -87,26 +95,46 @@ class AnomalyStats extends React.Component
         const ranks = [];
         const barData = [];
         let maxLen = 0;
-        data.forEach(category => {
+        data.forEach((category, index) => {
             const rgb = category.color;
-            barData.push({
-                label: category.name,
-                data: category.stat.map(d => d[statKind]),
-                backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                borderWidth: 1,
-                hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-            });
-            ranks.push(category.stat.map(d => d.rank));
+            if (index == 0) {
+                barData.push({
+                    label: category.name,
+                    data: category.stat.map(d => d[statKind]),
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                    borderWidth: 1,
+                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                });
+                ranks.push(category.stat.map(d => d.rank));
+            }
+            else {
+                if (category.stat.length != 0) {
+                    barData.push({
+                        label: category.name,
+                        data: category.stat.map(d => d.stats[statKind]),
+                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                        borderWidth: 1,
+                        hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                        hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                    });
+                    ranks.push(category.stat.map(d => d.counter));
+                }
+            }
+
             if (category.stat.length > maxLen)
                 maxLen = category.stat.length;
         });
 
         const _data = {
-            labels: Array(maxLen).fill(0).map((_, i) => i),
+            labels: maxLen==0?[]:ranks[0], // Array(maxLen).fill(0).map((_, i) => i),
             datasets: barData
         };
+        // console.log("ready to show AnomalyStats:");
+        // console.log(ranks);
+        // console.log(_data);
 
         return (
             <Bar 
@@ -121,10 +149,23 @@ class AnomalyStats extends React.Component
                             title: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
-                                const rank = ranks[datasetIndex][index];
-                                return `Rank-${rank}`;
+                                const content = ranks[datasetIndex][index];
+                                if (datasetIndex == 0) {    
+                                    return `Rank-${content}`;
+                                }
+                                else {
+                                    return content;
+                                }
                             }
                         }
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: statKind
+                            }
+                        }]
                     }         
                 }}
             />

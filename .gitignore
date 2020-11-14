@@ -71,6 +71,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+tests/*.ipynb
 
 # pyenv
 .python-version
@@ -118,3 +119,11 @@ node_modules/
 
 # large files
 *.tar.gz
+*.unqlite
+
+# data
+data/*
+
+# MacOS
+.DS_Store
+
