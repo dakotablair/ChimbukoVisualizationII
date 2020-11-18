@@ -560,7 +560,7 @@ def get_anomalydata():
         ).all()
 
     data.reverse()
-    time.sleep(10)  # wait for db query to complete
+    # time.sleep(10)  # wait for db query to complete
     return jsonify([dd.to_dict() for dd in data])
 
 
