@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-module load gcc/8.1.1
-module load python/3.7.0-anaconda3-5.3.0
+. /ccs/home/wxu/spack/share/spack/setup-env.sh
+spack env activate chimbuko_pysonata
+. /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
 
-source activate chimbuko_viz
+echo "create db..."
+python3 manager.py createdb
 
 # run Redis
 ./webserver/run-redis.sh &
@@ -10,7 +12,7 @@ sleep 1
 
 # run Celery
 # python3 manager.py celery --loglevel=info &
-python3 manager.py celery &
+python3 manager.py celery --concurrency=1 &
 sleep 1
 
 # run test or webserver
@@ -22,7 +24,6 @@ echo "checkpoint"
 # wait until test is completed or webserver is shutdown
 # wait $ws_pid
 
-# kill celery and redis
 echo "Finalize visualization server ... "
 
 echo "shutdown celery workers ..."
