@@ -22,20 +22,20 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY',
                                 '51f52814-0071-11e6-a2477-000ec6c2372c')
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'tests/test/main.sqlite'))
+        'DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'data/test/main.sqlite'))
     SQLALCHEMY_BINDS = {
         'anomaly_stats_query': os.environ.get(
             'DATABASE_URL',
-            'sqlite:///' + os.path.join(basedir, 'tests/test/anomaly_query.sqlite')),
+            'sqlite:///' + os.path.join(basedir, 'data/test/anomaly_query.sqlite')),
         'anomaly_stats': os.environ.get(
             'ANOMALY_STATS_URL',
-            'sqlite:///' + os.path.join(basedir, 'tests/test/anomaly_stats.sqlite')),
+            'sqlite:///' + os.path.join(basedir, 'data/test/anomaly_stats.sqlite')),
         'anomaly_data': os.environ.get(
             'ANOMALY_DATA_URL',
-            'sqlite:///' + os.path.join(basedir, 'tests/test/anomaly_data.sqlite')),
+            'sqlite:///' + os.path.join(basedir, 'data/test/anomaly_data.sqlite')),
         'func_stats': os.environ.get(
             'FUNC_STATS_URL',
-            'sqlite:///' + os.path.join(basedir, 'tests/test/func_stats.sqlite')
+            'sqlite:///' + os.path.join(basedir, 'data/test/func_stats.sqlite')
         )
     }
     # SQLALCHEMY_BINDS.update(get_execdata_binds())
@@ -61,7 +61,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """For test, I need to first launch redis and celery."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'tests/test/db.sqlite')
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data/test/db.sqlite')
     CELERY_CONFIG = {'CELERY_TASK_ALWAYS_EAGER': True}
     SOCKETIO_MESSAGE_QUEUE = None
 
