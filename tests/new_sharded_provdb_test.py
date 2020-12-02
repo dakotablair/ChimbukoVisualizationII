@@ -34,25 +34,24 @@ if __name__ == '__main__':
         raise "Enter the path!"
 
     path = sys.argv[1]
-    with Engine('ofi+tcp', mode=pymargo.server, use_progress_thread=True) \
-         as engine:
-        provider = SonataProvider(engine, 0)
-        addr = str(engine.addr())
-        print(addr)
-        admin = SonataAdmin(engine)
-        unqlite_files = glob.glob(path + '/*.unqlite')
-        # extract number as index
-        ids = [int(f.split('.')[-2]) for f in unqlite_files]
-        # sort as numeric values
-        inds = sorted(range(len(ids)), key=lambda k: ids[k])
-        files = [unqlite_files[i] for i in inds]  # files in correct order
-        for i, f in enumerate(files):
-            pdb_name = 'provdb.' + str(i)
-            admin.attach_database(addr, 0, pdb_name, 'unqlite',
-                                  "{ \"path\" : \"%s\" }" % f)
+    engine = Engine('ofi+tcp', mode=pymargo.server, use_progress_thread=True)
+    provider = SonataProvider(engine, 0)
+    addr = str(engine.addr())
+    print(addr)
+    admin = SonataAdmin(engine)
+    unqlite_files = glob.glob(path + '/*.unqlite')
+    # extract number as index
+    ids = [int(f.split('.')[-2]) for f in unqlite_files]
+    # sort as numeric values
+    inds = sorted(range(len(ids)), key=lambda k: ids[k])
+    files = [unqlite_files[i] for i in inds]  # files in correct order
+    for i, f in enumerate(files):
+        pdb_name = 'provdb.' + str(i)
+        admin.attach_database(addr, 0, pdb_name, 'unqlite',
+                              "{ \"path\" : \"%s\" }" % f)
 
-        test(addr, len(files))
-        print(".....after test")
-        del provider
-        print(".....after del provider")
-        engine.finalize()
+    test(addr, len(files))
+    print(".....after test")
+    del provider
+    print(".....after del provider")
+    engine.finalize()
