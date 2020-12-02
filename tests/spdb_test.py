@@ -13,17 +13,15 @@ from pysonata.admin import SonataAdmin
 
 
 def test(address, nshard):
-    engine = Engine(address.split(':')[0], pymargo.client)
-    client = SonataClient(engine)
+    with Engine(address.split(':')[0], pymargo.client) as engine:
+        client = SonataClient(engine)
 
-    for i in range(nshard):
-        pdb_name = 'provdb.' + str(i)
-        pdb = client.open(address, 0, pdb_name)
-        col = pdb.open('anomalies')
-        print("Shard {} has the size of {}.".format(i, col.size))
-
-    engine.finalize()
-    del engine
+        for i in range(nshard):
+            pdb_name = 'provdb.' + str(i)
+            pdb = client.open(address, 0, pdb_name)
+            col = pdb.open('anomalies')
+            print("Shard {} has the size of {}.".format(i, col.size))
+        engine.finalize()
 
 if __name__ == '__main__':
     argc = len(sys.argv)
@@ -50,5 +48,5 @@ if __name__ == '__main__':
         test(addr, len(files))
         print(".....after test")
         del provider
-        pring(".....after del provider")
+        print(".....after del provider")
         engine.finalize()
