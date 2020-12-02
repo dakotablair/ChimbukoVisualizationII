@@ -25,7 +25,7 @@ webserver/run-redis.sh &
 sleep 10
 
 echo "run celery ..."
-python3 manager.py celery --loglevel=info &
+python3 manager.py celery --loglevel=info --concurrency=5 &
 sleep 10
 
 echo "run webserver ..."
