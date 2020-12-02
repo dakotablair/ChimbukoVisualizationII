@@ -28,14 +28,14 @@ class ProvDB():
         else:  # Other Chimbuko module created the engine
             self.pdb_engine = Engine(pdb_addr.split(':')[0], pymargo.client)
             self.pdb_address = pdb_addr
-            self.pdb_client = SonataClient(engine)
+            self.pdb_client = SonataClient(self.pdb_engine)
 
         self.pdb_collections = []
         self.pdb_names = []
         for i in range(pdb_sharded_num):
             pdb_name = 'provdb.' + str(i)
             self.pdb_names.append(pdb_name)
-            pdb = client.open(address, 0, pdb_name)
+            pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
             col = pdb.open('anomalies')
             self.pdb_collections.append(col)
 
