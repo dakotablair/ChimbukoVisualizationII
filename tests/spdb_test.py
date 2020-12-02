@@ -22,6 +22,8 @@ def test(address, nshard):
         col = pdb.open('anomalies')
         print("Shard {} has the size of {}.".format(i, col.size))
 
+    engine.finalize()
+
 
 if __name__ == '__main__':
     argc = len(sys.argv)
