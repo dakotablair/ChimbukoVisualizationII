@@ -42,7 +42,7 @@ if __name__ == '__main__':
         files = [unqlite_files[i] for i in inds]  # files in correct order
         for i, f in enumerate(files):
             pdb_name = 'provdb.' + str(i)
-            admin.attach_database(address, 0, pdb_name, 'unqlite',
+            admin.attach_database(addr, 0, pdb_name, 'unqlite',
                                   "{ \"path\" : \"%s\" }" % f)
 
         test(addr, len(files))
