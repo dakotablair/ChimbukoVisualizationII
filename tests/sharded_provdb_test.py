@@ -11,6 +11,7 @@ from pysonata.provider import SonataProvider
 from pysonata.client import SonataClient
 from pysonata.admin import SonataAdmin
 
+
 def test(engine, path):
     address = str(engine.addr())
     admin = SonataAdmin(engine)
@@ -38,7 +39,7 @@ def test(engine, path):
         record = [json.loads(x) for x in col.all]
         all_records += record
         print(i, 'pdb has', col.size)
-    
+
     iostep_dict = {}
     pids = []
     rids = []
@@ -57,25 +58,26 @@ def test(engine, path):
     print("There are {} categories in total:".format(len(iostep_dict)))
     stat = [(x, len(iostep_dict[x])) for x in iostep_dict]
     stat.sort(key=lambda d: d[0])
-    #print(*stat, sep='\n')
+    # print(*stat, sep='\n')
 
     print("test length:", len(iostep_dict[(0,54,3)]))
 
-    #pids, rids, iosteps = [0], [0,1], [0,1,2,3,4,5,6,7,8]
-    #for pid in pids:
-    #    for rid in rids:
-    #        for iostep in iosteps:
-    #            t0 = time.clock()
-    #            jx9_filter = "function($record) { return $record.pid == %d &&" \
-    #                    "$record.rid == %d && $record.io_step == %d; }" % (pid, rid, iostep)
-    #            filtered_records = [ json.loads(x) for x in pdb_collection.filter(jx9_filter) ]
-    #            t1 = time.clock() - t0
-    #            print("{}, {}, {}: {:.2f} seconds with {}\texecutions of memory" \
-    #                    "size {:.2f}KB".format(pid, rid, iostep, t1, len(filtered_records), \
-    #                    sys.getsizeof(filtered_records)*1./1024))
+    # pids, rids, iosteps = [0], [0,1], [0,1,2,3,4,5,6,7,8]
+    # for pid in pids:
+    #     for rid in rids:
+    #         for iostep in iosteps:
+    #             t0 = time.clock()
+    #             jx9_filter = "function($record) { return $record.pid == %d &&" \
+    #                     "$record.rid == %d && $record.io_step == %d; }" % (pid, rid, iostep)
+    #             filtered_records = [ json.loads(x) for x in pdb_collection.filter(jx9_filter) ]
+    #             t1 = time.clock() - t0
+    #             print("{}, {}, {}: {:.2f} seconds with {}\texecutions of memory" \
+    #                     "size {:.2f}KB".format(pid, rid, iostep, t1, len(filtered_records), \
+    #                     sys.getsizeof(filtered_records)*1./1024))
 
     for i, f in enumerate(files):
         admin.detach_database(address, 0, pdb_names[i])
+
 
 if __name__ == '__main__':
     argc = len(sys.argv)
