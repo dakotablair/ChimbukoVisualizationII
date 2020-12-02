@@ -18,6 +18,7 @@ export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_data.sqli
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/func_stats.sqlite"
 export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/provdb/"
 export SHARDED_NUM=20
+# export PROVDB_ADDR="ofi+tcp;ofi_rxm://172.17.0.2:32903"
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
 echo "run redis ..."
