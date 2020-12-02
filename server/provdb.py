@@ -30,12 +30,14 @@ class ProvDB():
             self.pdb_address = pdb_addr
             self.pdb_client = SonataClient(self.pdb_engine)
 
+        self.pdb_databases = []
         self.pdb_collections = []
         self.pdb_names = []
         for i in range(pdb_sharded_num):
             pdb_name = 'provdb.' + str(i)
             self.pdb_names.append(pdb_name)
             pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
+            self.pdb_databases.append(pdb)
             col = pdb.open('anomalies')
             self.pdb_collections.append(col)
 
@@ -43,6 +45,12 @@ class ProvDB():
             self.pdb_address))
 
     def __del__(self):
+        if self.pdb_databases:
+            for database in self.pdb_databases:
+                del database
+                database = None
+            del self.pdb_databases
+            self.pdb_databases = []
         if self.pdb_collections:
             for col in self.pdb_collections:
                 del col
