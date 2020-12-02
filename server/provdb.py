@@ -36,13 +36,13 @@ class ProvDB():
         for i in range(pdb_sharded_num):
             pdb_name = 'provdb.' + str(i)
             self.pdb_names.append(pdb_name)
-            pdb = self.pdb_client.open(self.pdb_address, 0, pdb_name)
-            self.pdb_databases.append(pdb)
-            col = pdb.open('anomalies')
+            database = self.pdb_client.open(self.pdb_address, 0, pdb_name)
+            self.pdb_databases.append(database)
+            col = database.open('anomalies')
             self.pdb_collections.append(col)
 
-        print("=-=-=-=-=Initiated ProvDB instance {}=-=-=-=-=".format(
-            self.pdb_address))
+        # print("=-=-=-=-=Initiated ProvDB instance {}=-=-=-=-=".format(
+        #     self.pdb_address))
 
     def __del__(self):
         if self.pdb_databases:
@@ -82,4 +82,4 @@ class ProvDB():
             gc.collect()
             del self.pdb_engine
             self.pdb_engine = None
-        print("=-=-=-=-=Finished Provdb instance deletion=-=-=-=-=\n")
+        # print("=-=-=-=-=Finished Provdb instance deletion=-=-=-=-=\n")
