@@ -23,7 +23,7 @@ def test(address, nshard):
         print("Shard {} has the size of {}.".format(i, col.size))
 
     engine.finalize()
-
+    del engine
 
 if __name__ == '__main__':
     argc = len(sys.argv)
