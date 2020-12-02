@@ -82,4 +82,4 @@ class ProvDB():
             gc.collect()
             del self.pdb_engine
             self.pdb_engine = None
-        print("=-=-=-=-=Finished Provdb instance deletion=-=-=-=-=")
+        print("=-=-=-=-=Finished Provdb instance deletion=-=-=-=-=\n")
