@@ -34,7 +34,8 @@ if __name__ == '__main__':
         raise "Enter the path!"
 
     path = sys.argv[1]
-    with Engine('ofi+tcp;ofi_rxm', pymargo.server) as engine:
+    with Engine('ofi+tcp', mode=pymargo.server, use_progress_thread=True) \
+         as engine:
         provider = SonataProvider(engine, 0)
         addr = str(engine.addr())
         print(addr)
