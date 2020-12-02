@@ -46,6 +46,7 @@ if __name__ == '__main__':
                                   "{ \"path\" : \"%s\" }" % f)
 
         test(addr, len(files))
-
+        print(".....after test")
         del provider
+        pring(".....after del provider")
         engine.finalize()
