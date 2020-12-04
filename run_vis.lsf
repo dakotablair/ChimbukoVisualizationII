@@ -2,7 +2,7 @@
 # BEGIN LSF Directives
 #BSUB -P CSC299
 #BSUB -W 5
-#BSUB -nnodes 2
+#BSUB -nnodes 1
 #BSUB -J pysonata-chimvis
 #BSUB -o pysonata-chimvis.o.%J
 #BSUB -e pysonata-chimvis.e.%J
@@ -20,7 +20,7 @@ CODAR=/ccs/proj/csc299/wxu
 
 # CHIMBUKO (visualization)
 export CHIMBUKO_VIS_ROOT=$CODAR/ChimbukoVisualizationII
-export CHIMBUKO_VIS_DATA=$CODAR/data
+export CHIMBUKO_VIS_DATA=$CHIMBUKO_VIS_ROOT/data
 
 echo ""
 echo "==========================================="
@@ -29,9 +29,9 @@ echo "==========================================="
 BATCH_DIR=`pwd`
 
 cd $MEMBERWORK/csc299
-rm -rf pysonata-chimvis
-mkdir -p pysonata-chimvis
-cd pysonata-chimvis
+rm -rf chimvis2
+mkdir -p chimvis2
+cd chimvis2
 mkdir logs
 mkdir db
 mkdir stats
@@ -62,20 +62,11 @@ echo ""
 echo "==========================================="
 echo "Copy binaries & data to ${WORK_DIR}"
 echo "==========================================="
-cp $NWCHEM_DAT/4pgs-1M-amber-manual-lipid-ion-dat.top .
-cp $NWCHEM_DAT/4pgs-1M-amber-manual-lipid-ion-dat.db .
-cp $NWCHEM_DAT/4pgs-1M-amber-manual-lipid-ion-dat_md.rst .
-cp $NWCHEM_DAT/4pgs-1M-prepare-equil-md.nw .
-cp $CHIMBUKO_AD_ROOT/scripts/summit/sos_filter.txt .
-
 cp -r $CHIMBUKO_VIS_DATA/$DATA_NAME/provdb/* provdb
 cp -r $CHIMBUKO_VIS_DATA/$DATA_NAME/stats/* stats
 cp -r $CHIMBUKO_VIS_ROOT/redis-stable/redis.conf .
 cp -r $CHIMBUKO_VIS_ROOT .
 mv ChimbukoVisualizationII viz
-
-
-
 
 sed -i "263s|dir .|dir ${WORK_DIR}|" redis.conf
 sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
@@ -83,17 +74,15 @@ sed -i "136s|daemonize no|daemonize yes|" redis.conf
 sed -i "158s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
 sed -i "171s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
 
-#sed -i "s|data 100|data 20|" 4pgs-1M-prepare-equil-md.nw
-
 if true; then
   echo ""
   echo "==========================================="
   echo "Launch Chimbuko visualization server"
   echo "==========================================="
   cd $WORK_DIR/viz
-  jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/run_webserver.sh "${WORK_DIR}/logs" \
+  jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/run_webserver_summit.sh "${WORK_DIR}/logs" \
   	  "--loglevel=info" \
-          5001 ${WORK_DIR}/redis.conf &
+          5002 ${WORK_DIR}/redis.conf &
 
   while [ ! -f webserver.host ];
   do
@@ -109,50 +98,7 @@ if true; then
   echo "WS_PORT: $WS_PORT"
 fi
 
-cd ${WORK_DIR}
-if true; then
-  echo ""
-  echo "==========================================="
-  echo "Launch Chimbuko parameter server"
-  echo "==========================================="
-  jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/run_pserver.sh 4 "${WORK_DIR}/parameters.txt" \
-     $APP_NMPIS "http://${WS_HOST}:${WS_PORT}/api/anomalydata" &
-
-  while [ ! -f ps.host ];
-  do
-     sleep 1
-  done
-  PS_HOST=$(<ps.host)
-  while [ ! -f ps.port ];
-  do
-    sleep 1
-  done
-  PS_PORT=$(<ps.port)
-  echo "PS_HOST: ${PS_HOST}"
-  echo "PS_PORT: ${PS_PORT}"
-  PS_TCP="tcp://${PS_HOST}:${PS_PORT}"
-  echo "PS_TCP: ${PS_TCP}"
-  while [ ! -f ps.pid ];
-  do
-     sleep 1
-  done
-  ps_pid=$(<ps.pid)
-  echo "PS_PID: ${ps_pid}"
-fi
-
-echo ""
-echo "=========================================="
-echo "Launch Application with anomaly detectors"
-echo "=========================================="
-if true; then
-  jsrun -n 20 -a 1 -c 1 -g 0 -r 20 -b none bin/driver $BP_ENGINE $WORK_DIR/BP $BP_PREFIX \
-     "${EXECUTION_PATH}" $PS_TCP ${AD_SIGMA} ${AD_WINSZ} ${AD_INTERVAL} &
-  sleep 1
-fi
-
-jsrun -n 20 -a 1 -c 1 -g 0 -r 20 -b none ./nwchem 4pgs-1M-prepare-equil-md.nw 
-
-wait $ps_pid
+sleep 180
 
 if true; then
 echo ""
@@ -163,38 +109,6 @@ cd $WORK_DIR/viz
 jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/shutdown_webserver.sh ${WS_HOST} ${WS_PORT}
 fi
 
-cd $WORK_DIR
-echo "BP size: `du -sh BP`"
-echo "DB size: `du -sh db`"
-echo "execution: `du -sh executions`"
-
-rm -f *.top *.db *.rst nwchem
-rm -rf bin lib viz
+rm -rf viz
 
 echo "Bye~~!!"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
