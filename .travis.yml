@@ -7,4 +7,4 @@ before_install:
   - docker build -f docker/dockerfile -t chimbuko/vis .
 install:
   - pip install --upgrade pip
-script: docker run -p 8080:5002 -it chimbuko/vis --cap-add=SYS_PTRACE --security-opt seccomp=unconfined
+script: docker run -it chimbuko/vis
