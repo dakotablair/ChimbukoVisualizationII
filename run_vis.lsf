@@ -12,7 +12,7 @@
 spack env activate chimbuko_pysonata
 . /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
 
-pip list
+#pip list
 
 #set -x
 

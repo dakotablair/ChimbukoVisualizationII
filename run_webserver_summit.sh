@@ -20,11 +20,7 @@ else
    PORT=5002
 fi
 
-if [ "$4" != ""]; then
-    redis=$4
-else
-    redis="`pwd`/redis-stable/redis.conf"
-fi
+redis=$4
 
 HOST=`hostname`
 
