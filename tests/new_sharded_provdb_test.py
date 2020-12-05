@@ -30,16 +30,17 @@ def test(address, nshard):
 
 if __name__ == '__main__':
     argc = len(sys.argv)
+    path = None
     if (argc < 2):
-        raise "Enter the path!"
-
-    path = sys.argv[1]
+        path = ""
+    else:
+        path = sys.argv[1] + "/"
     engine = Engine('ofi+tcp', mode=pymargo.server, use_progress_thread=False)
     provider = SonataProvider(engine, 0)
     addr = str(engine.addr())
     print(addr)
     admin = SonataAdmin(engine)
-    unqlite_files = glob.glob(path + '/*.unqlite')
+    unqlite_files = glob.glob(path + '*.unqlite')
     # extract number as index
     ids = [int(f.split('.')[-2]) for f in unqlite_files]
     # sort as numeric values

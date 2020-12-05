@@ -119,7 +119,7 @@ node_modules/
 
 # large files
 *.tar.gz
-*.unqlite
+provdb.*.unqlite
 *.json
 
 # MacOS
