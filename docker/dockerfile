@@ -12,7 +12,3 @@ RUN cd tests && \
     tar xvzf test.tar.gz
 
 WORKDIR /ChimbukoVisualizationII
-
-RUN source /spack/spack/share/spack/setup-env.sh && \
-    spack load py-mochi-sonata && \
-    export C_FORCE_ROOT=1
