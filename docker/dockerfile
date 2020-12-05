@@ -16,5 +16,3 @@ WORKDIR /ChimbukoVisualizationII
 RUN source /spack/spack/share/spack/setup-env.sh && \
     spack load py-mochi-sonata && \
     export C_FORCE_ROOT=1
-
-CMD ["python3", "/ChimbukoVisualizationII/tests/client_sharded_provdb_test.py"]
