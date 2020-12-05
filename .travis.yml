@@ -7,4 +7,4 @@ before_install:
   - docker build -f docker/dockerfile -t chimbuko/vis .
 install:
   - pip install --upgrade pip
-script: docker run -it chimbuko/vis bash -c "python3 tests/new_sharded_provdb_test.py"
+script: docker run -it chimbuko/vis
