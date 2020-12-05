@@ -21,6 +21,9 @@ export SHARDED_NUM=20
 # export PROVDB_ADDR="ofi+tcp;ofi_rxm://172.17.0.2:32903"
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
+echo "create db ..."
+python manager.py createdb
+
 echo "run redis ..."
 webserver/run-redis.sh &
 sleep 10

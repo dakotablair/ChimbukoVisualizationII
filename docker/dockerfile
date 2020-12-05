@@ -5,3 +5,5 @@ RUN git clone https://github.com/CODARcode/ChimbukoVisualizationII.git && \
     curl -O http://download.redis.io/redis-stable.tar.gz && \
     tar xvzf redis-stable.tar.gz &&  rm redis-stable.tar.gz && \
     cd redis-stable && make
+
+WORKDIR /ChimbukoVisualizationII
