@@ -118,8 +118,8 @@ redis-stable
 node_modules/
 
 # large files
-*.tar.gz
-provdb.*.unqlite
+data/*.tar.gz
+*.unqlite
 *.json
 
 # MacOS
