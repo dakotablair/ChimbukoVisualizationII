@@ -29,8 +29,8 @@ echo "CELERY ARGS: ${CELERY_ARGS}"
 echo "HOST: ${HOST}, PORT: ${PORT}"
 echo "Redis: ${redis}"
 
-echo "pip list"
-pip list
+#echo "pip list"
+#pip list
 
 
 export CELERY_BROKER_URL="redis://${HOST}:6379"

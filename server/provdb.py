@@ -10,8 +10,7 @@ import gc
 class ProvDB():
     def __init__(self, pdb_path='', pdb_sharded_num=0, pdb_addr=''):
         if pdb_addr == '':  # Standalone mode, need to create engine provider
-            self.pdb_engine = Engine('ofi+tcp', mode=pymargo.server,
-                                     use_progress_thread=False)
+            self.pdb_engine = Engine('ofi+tcp', mode=pymargo.server)
             self.pdb_provider = SonataProvider(self.pdb_engine, 0)
             self.pdb_address = str(self.pdb_engine.addr())
             self.pdb_admin = SonataAdmin(self.pdb_engine)

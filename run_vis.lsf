@@ -47,6 +47,7 @@ echo "User inputs"
 echo "=========================================="
 export DATA_NAME="96rank_sharded_vizdump"
 export SHARDED_NUM=20
+export PROVDB_ADDR=""
 
 echo ""
 echo "==========================================="
