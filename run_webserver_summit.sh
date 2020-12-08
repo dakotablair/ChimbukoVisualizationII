@@ -45,12 +45,12 @@ sleep 5
 
 echo "run celery ..."
 python3 manager.py celery ${CELERY_ARGS} \
-	>"${LOG_DIR}/celery.log" 2>&1 &
+	2>&1 | tee "${LOG_DIR}/celery.log" &
 sleep 10
 
 echo "run webserver ..."
 python3 run_server.py $HOST $PORT \
-	>"${LOG_DIR}/webserver.log" 2>&1 &
+	2>&1 | tee "${LOG_DIR}/webserver.log" &
 sleep 2
 
 echo "redis ping-pong ..."
