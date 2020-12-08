@@ -49,7 +49,7 @@ python3 manager.py celery ${CELERY_ARGS} \
 sleep 10
 
 echo "run webserver ..."
-python3 run_server.py $HOST $PORT & 
+python3 run_server.py $HOST $PORT \
 	>"${LOG_DIR}/webserver.log" 2>&1 &
 sleep 2
 
