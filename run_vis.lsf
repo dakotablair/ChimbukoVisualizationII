@@ -90,7 +90,7 @@ if true; then
   echo "==========================================="
   cd $WORK_DIR/viz
   jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/run_webserver_summit.sh "${WORK_DIR}/logs" \
-  	  "--loglevel=info --concurrency=5" \
+  	  "--loglevel=info --concurrency=1" \
           5002 ${WORK_DIR}/redis.conf &
 
   while [ ! -f webserver.host ];
@@ -115,7 +115,7 @@ echo "==========================================="
 echo "Shutdown Chimbuko visualization server"
 echo "==========================================="
 cd $WORK_DIR/viz
-jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/shutdown_webserver.sh ${WS_HOST} ${WS_PORT}
+jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/shutdown_webserver_summit.sh ${WS_HOST} ${WS_PORT}
 fi
 
 rm -rf viz

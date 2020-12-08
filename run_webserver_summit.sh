@@ -40,7 +40,8 @@ echo "create db ..."
 python3 manager.py createdb
 
 echo "run redis ..."
-redis-stable/src/redis-server ${redis}
+#redis-stable/src/redis-server ${redis}
+redis-stable/src/redis-server
 sleep 5
 
 echo "run celery ..."
@@ -50,7 +51,7 @@ sleep 10
 
 echo "run webserver ..."
 python3 run_server.py $HOST $PORT & 
-#	>"${LOG_DIR}/webserver.log" 2>&1 &
+	>"${LOG_DIR}/webserver.log" 2>&1 &
 sleep 2
 
 echo "redis ping-pong ..."

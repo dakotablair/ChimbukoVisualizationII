@@ -8,7 +8,7 @@ echo "HOST: ${HOST}, PORT: ${PORT}"
 echo "redis ping-pong"
 redis-stable/src/redis-cli -h $HOST -p 6379 ping
 
-sleep 300
+sleep 10
 
 echo "celery task inspect"
 curl -X GET "http://${HOST}:${PORT}/tasks/inspect"
