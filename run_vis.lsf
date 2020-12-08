@@ -13,6 +13,7 @@ module load python/3.7.0
 
 . /ccs/home/wxu/spack/share/spack/setup-env.sh
 spack env activate chimbuko_pysonata
+spack load -r py-mochi-sonata
 . /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
 
 #pip list
@@ -72,11 +73,12 @@ cp -r $CHIMBUKO_VIS_ROOT/redis-stable/redis.conf .
 cp -r $CHIMBUKO_VIS_ROOT .
 mv ChimbukoVisualizationII viz
 
-sed -i "263s|dir .|dir ${WORK_DIR}|" redis.conf
+sed -i "366s|dir .|dir ${WORK_DIR}|" redis.conf
 sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
-sed -i "136s|daemonize no|daemonize yes|" redis.conf
-sed -i "158s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
-sed -i "171s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
+sed -i "225s|daemonize no|daemonize yes|" redis.conf
+sed -i "248s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
+sed -i "261s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
+sed -i -e "$avm.overcommit_memory = 1" redis.conf
 
 if true; then
   echo ""
