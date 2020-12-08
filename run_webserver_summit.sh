@@ -11,7 +11,7 @@ fi
 if [ "$2" != "" ]; then
    CELERY_ARGS=$2
 else
-   CELERY_ARGS="--loglevel=info --concurrency=5"
+   CELERY_ARGS="--loglevel=info --pool=gevent --concurrency=5"
 fi
 
 if [ "$3" != "" ]; then
