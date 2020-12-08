@@ -40,8 +40,7 @@ echo "create db ..."
 python3 manager.py createdb
 
 echo "run redis ..."
-#redis-stable/src/redis-server ${redis}
-redis-stable/src/redis-server
+redis-stable/src/redis-server ${redis}
 sleep 5
 
 echo "run celery ..."
