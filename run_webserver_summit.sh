@@ -32,7 +32,7 @@ echo "Redis: ${redis}"
 #echo "pip list"
 #pip list
 
-echo "`pwd`"
+echo "Current Path: `pwd`"
 
 export CELERY_BROKER_URL="redis://${HOST}:6379"
 
@@ -40,8 +40,7 @@ echo "create db ..."
 python3 manager.py createdb
 
 echo "run redis ..."
-redis-stable/src/redis-server ${redis} 
-echo "done redis..."
+redis-stable/src/redis-server ${redis}
 sleep 5
 
 echo "run celery ..."

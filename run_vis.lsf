@@ -31,8 +31,10 @@ echo "==========================================="
 echo "Set working directory"
 echo "==========================================="
 BATCH_DIR=`pwd`
+echo "BATCH_DIR: $BATCH_DIR"
 
-cd $MEMBERWORK/csc299
+WORK=/gpfs/alpine/csc299/proj-shared/wxu
+cd $WORK
 rm -rf chimvis2
 mkdir -p chimvis2
 cd chimvis2
@@ -41,6 +43,7 @@ mkdir db
 mkdir stats
 mkdir provdb
 WORK_DIR=`pwd`
+echo "WORK_DIR: $WORK_DIR"
 
 echo ""
 echo "=========================================="
@@ -78,7 +81,7 @@ sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
 sed -i "225s|daemonize no|daemonize yes|" redis.conf
 sed -i "248s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
 sed -i "261s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
-sed -i "265s|syslog-enabled no|syslog-enabled yes" redis.conf
+sed -i "265s|syslog-enabled no|syslog-enabled yes|" redis.conf
 
 if true; then
   echo ""
