@@ -32,23 +32,25 @@ echo "Redis: ${redis}"
 #echo "pip list"
 #pip list
 
+echo "`pwd`"
 
 export CELERY_BROKER_URL="redis://${HOST}:6379"
 
 echo "create db ..."
-python manager.py createdb
+python3 manager.py createdb
 
 echo "run redis ..."
 redis-stable/src/redis-server ${redis} 
+echo "done redis..."
 sleep 5
 
 echo "run celery ..."
-python manager.py celery ${CELERY_ARGS} \
+python3 manager.py celery ${CELERY_ARGS} \
 	>"${LOG_DIR}/celery.log" 2>&1 &
 sleep 10
 
 echo "run webserver ..."
-python run_server.py $HOST $PORT & 
+python3 run_server.py $HOST $PORT & 
 #	>"${LOG_DIR}/webserver.log" 2>&1 &
 sleep 2
 

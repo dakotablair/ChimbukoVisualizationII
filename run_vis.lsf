@@ -73,13 +73,12 @@ cp -r $CHIMBUKO_VIS_ROOT/redis-stable/redis.conf .
 cp -r $CHIMBUKO_VIS_ROOT .
 mv ChimbukoVisualizationII viz
 
-sed -i "366s|dir .|dir ${WORK_DIR}|" redis.conf
+sed -i "366s|dir ./|dir ${WORK_DIR}/|" redis.conf
 sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
 sed -i "225s|daemonize no|daemonize yes|" redis.conf
 sed -i "248s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
 sed -i "261s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
-# redis overcommit_memory=0 issue
-sysctl vm.overcommit_memory=1
+sed -i "265s|syslog-enabled no|syslog-enabled yes" redis.conf
 
 if true; then
   echo ""
@@ -88,7 +87,7 @@ if true; then
   echo "==========================================="
   cd $WORK_DIR/viz
   jsrun -n 1 -a 1 -c 1 -g 0 -r 1 ${BATCH_DIR}/run_webserver_summit.sh "${WORK_DIR}/logs" \
-  	  "--loglevel=info" \
+  	  "--loglevel=info --concurrency=5" \
           5002 ${WORK_DIR}/redis.conf &
 
   while [ ! -f webserver.host ];
