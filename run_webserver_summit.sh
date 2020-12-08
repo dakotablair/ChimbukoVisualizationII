@@ -43,10 +43,10 @@ echo "run redis ..."
 redis-stable/src/redis-server ${redis}
 sleep 5
 
-echo "run celery ..."
-python3 manager.py celery ${CELERY_ARGS} \
-	2>&1 | tee "${LOG_DIR}/celery.log" &
-sleep 10
+#echo "run celery ..."
+#python3 manager.py celery ${CELERY_ARGS} \
+#	2>&1 | tee "${LOG_DIR}/celery.log" &
+#sleep 10
 
 echo "run webserver ..."
 python3 run_server.py $HOST $PORT \

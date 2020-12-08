@@ -383,7 +383,7 @@ def new_anomalystats():
 
 
 @api.route('/run_simulation', methods=['GET'])
-@make_async
+# @make_async
 def run_simulation():
     import time
     import glob
