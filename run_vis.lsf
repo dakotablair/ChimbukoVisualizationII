@@ -78,7 +78,7 @@ sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
 sed -i "225s|daemonize no|daemonize yes|" redis.conf
 sed -i "248s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
 sed -i "261s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
-sed -i -e "$avm.overcommit_memory = 1" redis.conf
+sed -i -e "$a\vm.overcommit_memory = 1" redis.conf
 
 if true; then
   echo ""
