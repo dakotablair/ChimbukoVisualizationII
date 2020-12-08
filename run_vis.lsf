@@ -76,12 +76,12 @@ cp -r $CHIMBUKO_VIS_ROOT/redis-stable/redis.conf .
 cp -r $CHIMBUKO_VIS_ROOT .
 mv ChimbukoVisualizationII viz
 
-sed -i "366s|dir ./|dir ${WORK_DIR}/|" redis.conf
-sed -i "69s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
-sed -i "225s|daemonize no|daemonize yes|" redis.conf
-sed -i "248s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
-sed -i "261s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
-sed -i "265s|syslog-enabled no|syslog-enabled yes|" redis.conf
+sed -i "365s|dir ./|dir ${WORK_DIR}/|" redis.conf
+sed -i "68s|bind 127.0.0.1|bind 0.0.0.0|" redis.conf
+sed -i "224s|daemonize no|daemonize yes|" redis.conf
+sed -i "247s|pidfile /var/run/redis_6379.pid|pidfile ${WORK_DIR}/redis.pid|" redis.conf
+sed -i "260s|logfile "\"\""|logfile ${WORK_DIR}/logs/redis.log|" redis.conf
+sed -i "264s|syslog-enabled no|syslog-enabled yes|" redis.conf
 
 if true; then
   echo ""
