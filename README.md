@@ -2,7 +2,7 @@
 
 Scalable visualization module for Chimbuko
 
-[![Build Status](https://travis-ci.org/celiafish/ChimbukoVisualizationII.svg?branch=master)](https://travis-ci.org/celiafish/ChimbukoVisualizationII)
+[![Build Status](https://travis-ci.org/CODARcode/ChimbukoVisualizationII.svg?branch=master)](https://travis-ci.org/CODARcode/ChimbukoVisualizationII)
 
 ## Overview 
 
