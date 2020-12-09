@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-#source /spack/spack/share/spack/setup-env.sh
-#spack load py-mochi-sonata
-#export C_FORCE_ROOT=1
+# module load gcc/9.1.0
+# module load python/3.7.0
+
+# . /ccs/home/wxu/spack/share/spack/setup-env.sh
+# spack env activate pysonata_env
+# spack load -r py-mochi-sonata
+# . /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
 
 ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
@@ -34,7 +38,6 @@ sleep 10
 
 echo "run webserver ..."
 python3 manager.py runserver --host 0.0.0.0 --port 5002 --debug
-#uwsgi --gevent 100 --http 127.0.0.1:5002 --wsgi-file server/wsgi.py
 
 
 
