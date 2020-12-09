@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.7"
+services:
+  - docker
+before_install:
+  - docker build -f docker/dockerfile -t chimbuko/vis .
+install:
+  - pip install --upgrade pip
+script: docker run -it chimbuko/vis -c "source /spack/spack/share/spack/setup-env.sh && spack load py-mochi-sonata && python3 /ChimbukoVisualizationII/tests/client_sharded_provdb_test.py"
