@@ -118,7 +118,7 @@ redis-stable
 node_modules/
 
 # large files
-*.tar.gz
+data/*.tar.gz
 *.unqlite
 *.json
 

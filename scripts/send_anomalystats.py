@@ -47,10 +47,10 @@ def generate_random_normal(n_ranks):
 if __name__ == '__main__':
     import sys
 
-    n_ranks = 1000  # total number of MPI processors
-    max_steps = 10000  # large number for long test
+    n_ranks = 2  # total number of MPI processors
+    max_steps = 50  # large number for long test
     interval = 1  # sec
-    url = 'http://127.0.0.1:5002/api/anomalydata'  # vis server
+    url = 'http://0.0.0.0:5002/api/anomalydata'  # vis server
 
     if len(sys.argv) > 1:
         n_ranks = int(sys.argv[1])

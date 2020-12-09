@@ -11,7 +11,7 @@ fi
 if [ "$2" != "" ]; then
    CELERY_ARGS=$2
 else
-   CELERY_ARGS="--loglevel=info --concurrency=5"
+   CELERY_ARGS="--loglevel=info --pool=gevent --concurrency=5"
 fi
 
 if [ "$3" != "" ]; then
@@ -20,11 +20,7 @@ else
    PORT=5002
 fi
 
-if [ "$4" != ""]; then
-    redis=$4
-else
-    redis="`pwd`/redis-stable/redis.conf"
-fi
+redis=$4
 
 HOST=`hostname`
 
@@ -33,27 +29,28 @@ echo "CELERY ARGS: ${CELERY_ARGS}"
 echo "HOST: ${HOST}, PORT: ${PORT}"
 echo "Redis: ${redis}"
 
-echo "pip list"
-pip list
+#echo "pip list"
+#pip list
 
+echo "Current Path: `pwd`"
 
 export CELERY_BROKER_URL="redis://${HOST}:6379"
 
 echo "create db ..."
-python manager.py createdb
+python3 manager.py createdb
 
 echo "run redis ..."
-redis-stable/src/redis-server ${redis} 
+redis-stable/src/redis-server ${redis}
 sleep 5
 
 echo "run celery ..."
-python manager.py celery ${CELERY_ARGS} \
-	>"${LOG_DIR}/celery.log" 2>&1 &
+python3 manager.py celery ${CELERY_ARGS} \
+	2>&1 | tee "${LOG_DIR}/celery.log" &
 sleep 10
 
 echo "run webserver ..."
-python run_server.py $HOST $PORT & 
-#	>"${LOG_DIR}/webserver.log" 2>&1 &
+python3 run_server.py $HOST $PORT \
+	2>&1 | tee "${LOG_DIR}/webserver.log" &
 sleep 2
 
 echo "redis ping-pong ..."

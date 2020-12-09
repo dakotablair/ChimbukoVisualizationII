@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-. /ccs/home/wxu/spack/share/spack/setup-env.sh
-spack env activate chimbuko_pysonata
-. /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
+# module load gcc/9.1.0
+# module load python/3.7.0
+
+# . /ccs/home/wxu/spack/share/spack/setup-env.sh
+# spack env activate pysonata_env
+# spack load -r py-mochi-sonata
+# . /ccs/proj/csc299/wxu/summit/opt/venvs/chimbuko_pysonata_vis_venv/bin/activate
 
 echo "create db..."
 python3 manager.py createdb
