@@ -6,7 +6,7 @@ Scalable visualization module for Chimbuko
 
 ## Overview 
 
-![Overview](./web/static/images/overview.png)
+![Overview](./data/images/interface.png)
 
 ### In-situ Visualization Components
 * `Top & Bottom Dynamic MPI Ranks`: visualizes the most and the least fluctuating MPI ranks simultaneously based on several statistical values, such as min, max, mean, std, skewness, kurtosis, and cumulative delta.
