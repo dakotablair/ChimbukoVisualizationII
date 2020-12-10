@@ -21,7 +21,11 @@ For a selected time interval, this visualization is designed to retrieve data fr
 
 ## Installation
 
-This package needs to pre-install [py-sonata](https://xgitlab.cels.anl.gov/sds/py-sonata) as the distributed database that requires [spack](https://spack.io/) and [sonata](https://xgitlab.cels.anl.gov/sds/sonata). The visualization module itself depends on a series of packages that are specified in `requirements.txt`. We provide instructions for different platforms: linux, docker, and OLCF Summit.
+This framework is a web-based application. For the back end, it was developed with `Python3.x` and `Flask`. In order to provide a scalable web service supporting asynchronous processing, `uwsgi`, `Celery`, `Redis` and `Socket IO` were adopted. For the front end, it was developed with `Javascript`, `React` and `D3.js`. These dependencies are specified in `requirements.txt` and can be conveniently installed through `pip3`. 
+
+In order to connect to the Provenance database of Chimbuko where all the actual function execution data are stored, [`py-sonata`](https://xgitlab.cels.anl.gov/sds/py-sonata) needs to be installed as well. It requires both [spack](https://spack.io/) and [sonata](https://xgitlab.cels.anl.gov/sds/sonata). 
+
+We summarize the necessary steps and provide installation instructions for different platforms: linux, docker, and OLCF Summit.
 
 ### Linux
 * Install spack
