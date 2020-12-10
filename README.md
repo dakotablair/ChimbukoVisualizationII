@@ -194,7 +194,7 @@ $ ./webserver/shutdown_webserver.sh
 ```
 
 ### Summit compute node
-If you want to do job submission and run the program on the compute node, we have provided example script for you to try conveniently. After installing, go to the main directory `ChimbukoVisualizationII`. Open script `run_vis.lsf` and make sure in lines 14, 17, 23 and 36, all the paths are set up correctly. Then simply run the following command, the webserver will be up for 5 minutes and shut up automatically.
+If you want to do job submission and run the program on the compute node, we have provided an example script for you to try conveniently. After installing, go to the main directory `ChimbukoVisualizationII`. Open script `run_vis.lsf` and make sure in lines 14, 17, 23 and 36, all the paths are set up correctly. Then simply run the following command, the webserver will be up for 5 minutes and shut up automatically.
 ```bash
 $ bsub run_vis.lsf
 ```
