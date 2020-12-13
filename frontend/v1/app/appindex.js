@@ -136,7 +136,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleHistoryRequest = rank => {
-        // console.log('onBarClick: ' + rank);
+        console.log('onBarClick: ' + rank); //xw
         if (isNaN(rank))
             return;
 

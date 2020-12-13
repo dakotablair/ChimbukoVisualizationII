@@ -107,7 +107,7 @@ class AnomalyStats extends React.Component
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => d.rank));
+                ranks.push(category.stat.map(d => d.stat_id)); // xw
             }
             else {
                 if (category.stat.length != 0) {
@@ -151,7 +151,7 @@ class AnomalyStats extends React.Component
                                 const index = tooltipItem[0].index;
                                 const content = ranks[datasetIndex][index];
                                 if (datasetIndex == 0) {    
-                                    return `Rank-${content}`;
+                                    return `App:Rank-${content}`;
                                 }
                                 else {
                                     return content;
