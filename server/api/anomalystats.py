@@ -283,8 +283,9 @@ def new_anomalydata():
     gpu_counters = ['GPU Occupancy (Warps)',
                     'Local Memory (bytes per thread)',
                     'Shared Static Memory (bytes)',
-                    'Shared Dynamic Memory (bytes)',
-                    'OpenACC Gangs']
+                    'OpenACC Gangs',
+                    'Bytes copied from Device to Host',
+                    'Bytes copied from Host to Device']
     if counter_stats:
         for d in counter_stats:
             if d['counter'] in gpu_counters or \
@@ -406,6 +407,7 @@ def run_simulation():
     # delete_all_db()
 
     try:
+        at_beginning = True
         for filename in files:
             # print("File {} out of {} files.".format(filename, len(files)))
             data = None
@@ -415,8 +417,11 @@ def run_simulation():
                 counter_stats = loaded.get('counter_stats', None)
 
             if data is None:
-                # time.sleep(0.2)
+                if not at_beginning:
+                    time.sleep(1)
                 continue
+            else:
+                at_beginning = False
 
             ts = data.get('created_at', None)
             if ts is None:
@@ -427,14 +432,18 @@ def run_simulation():
             cpu_counters = ['cpu: User %',
                             'cpu: Idle %',
                             'cpu: System %',
-                            'Message size for gather',
-                            'Message size for all-reduce',
-                            'Message size for broadcast']
+                            'cpu: I/O Wait']
+                            # 'Message size for gather',
+                            # 'Message size for all-reduce',
+                            # 'Message size for broadcast']
             gpu_counters = ['GPU Occupancy (Warps)',
-                            'Local Memory (bytes per thread)',
-                            'Shared Static Memory (bytes)',
-                            'Shared Dynamic Memory (bytes)',
-                            'OpenACC Gangs']
+                            'Block Size',
+                            'OpenACC Workers']
+                            # 'Local Memory (bytes per thread)',
+                            # 'Shared Static Memory (bytes)',
+                            # 'OpenACC Gangs',
+                            # 'Bytes copied from Device to Host',
+                            # 'Bytes copied from Host to Device']
             if counter_stats:
                 for d in counter_stats:
                     if d['counter'] in gpu_counters or \
