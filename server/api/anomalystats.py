@@ -418,7 +418,7 @@ def run_simulation():
 
             if data is None:
                 if not at_beginning:
-                    time.sleep(1)
+                    time.sleep(0.2)
                 continue
             else:
                 at_beginning = False
