@@ -35,7 +35,7 @@ if __name__ == '__main__':
         path = ""
     else:
         path = sys.argv[1] + "/"
-    with Engine('na+sm', mode=pymargo.server, use_progress_thread=False) \
+    with Engine('verbs://mlx5_0', mode=pymargo.server, use_progress_thread=False) \
          as engine:
         provider = SonataProvider(engine, 0)
         addr = str(engine.addr())
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         print(".....after test")
         del provider
         print(".....after del provider")
-        # engine.finalize()
-        # print(".....after engine finalize")
+        engine.finalize()
+        print(".....after engine finalize")
 
     sys.exit(0)
