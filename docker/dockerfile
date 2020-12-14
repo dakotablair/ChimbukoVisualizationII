@@ -1,6 +1,6 @@
-FROM chimbuko/mochi:ubuntu18.04
+FROM chimbuko/mochi:latest
 
-RUN git clone -b develop https://github.com/celiafish/ChimbukoVisualizationII.git && \
+RUN git clone -b master https://github.com/celiafish/ChimbukoVisualizationII.git && \
     cd ChimbukoVisualizationII && \
     curl -O http://download.redis.io/redis-stable.tar.gz && \
     tar xvzf redis-stable.tar.gz &&  rm redis-stable.tar.gz && \
