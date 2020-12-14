@@ -56,5 +56,6 @@ if __name__ == '__main__':
     del provider
     print(".....after del provider")
     engine.finalize()
+    print(".....after engine finalize")
 
     sys.exit(0)
