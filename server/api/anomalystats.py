@@ -283,9 +283,8 @@ def new_anomalydata():
     gpu_counters = ['GPU Occupancy (Warps)',
                     'Local Memory (bytes per thread)',
                     'Shared Static Memory (bytes)',
-                    'OpenACC Gangs',
-                    'Bytes copied from Device to Host',
-                    'Bytes copied from Host to Device']
+                    'Shared Dynamic Memory (bytes)',
+                    'OpenACC Gangs']
     if counter_stats:
         for d in counter_stats:
             if d['counter'] in gpu_counters or \
@@ -434,9 +433,8 @@ def run_simulation():
             gpu_counters = ['GPU Occupancy (Warps)',
                             'Local Memory (bytes per thread)',
                             'Shared Static Memory (bytes)',
-                            'OpenACC Gangs',
-                            'Bytes copied from Device to Host',
-                            'Bytes copied from Host to Device']
+                            'Shared Dynamic Memory (bytes)',
+                            'OpenACC Gangs']
             if counter_stats:
                 for d in counter_stats:
                     if d['counter'] in gpu_counters or \
