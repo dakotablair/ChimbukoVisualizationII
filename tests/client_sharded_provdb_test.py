@@ -35,7 +35,7 @@ if __name__ == '__main__':
         path = ""
     else:
         path = sys.argv[1] + "/"
-    with Engine('ofi+tcp', mode=pymargo.server, use_progress_thread=False) \
+    with Engine('na+sm', mode=pymargo.server, use_progress_thread=False) \
          as engine:
         provider = SonataProvider(engine, 0)
         addr = str(engine.addr())
