@@ -276,10 +276,16 @@ def new_anomalydata():
     anomaly_counters = []
     cpu_counters = ['cpu: User %',
                     'cpu: Idle %',
-                    'cpu: System %']
+                    'cpu: System %',
+                    'Message size for gather',
+                    'Message size for all-reduce',
+                    'Message size for broadcast']
     gpu_counters = ['GPU Occupancy (Warps)',
                     'Local Memory (bytes per thread)',
-                    'Shared Static Memory (bytes)']
+                    'Shared Static Memory (bytes)',
+                    'OpenACC Gangs',
+                    'Bytes copied from Device to Host',
+                    'Bytes copied from Host to Device']
     if counter_stats:
         for d in counter_stats:
             if d['counter'] in gpu_counters or \
@@ -410,7 +416,7 @@ def run_simulation():
                 counter_stats = loaded.get('counter_stats', None)
 
             if data is None:
-                time.sleep(0.2)
+                # time.sleep(0.2)
                 continue
 
             ts = data.get('created_at', None)
@@ -421,10 +427,16 @@ def run_simulation():
             anomaly_counters = []
             cpu_counters = ['cpu: User %',
                             'cpu: Idle %',
-                            'cpu: System %']
+                            'cpu: System %',
+                            'Message size for gather',
+                            'Message size for all-reduce',
+                            'Message size for broadcast']
             gpu_counters = ['GPU Occupancy (Warps)',
                             'Local Memory (bytes per thread)',
-                            'Shared Static Memory (bytes)']
+                            'Shared Static Memory (bytes)',
+                            'OpenACC Gangs',
+                            'Bytes copied from Device to Host',
+                            'Bytes copied from Host to Device']
             if counter_stats:
                 for d in counter_stats:
                     if d['counter'] in gpu_counters or \
