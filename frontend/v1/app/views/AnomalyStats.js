@@ -107,7 +107,7 @@ class AnomalyStats extends React.Component
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => d.stat_id)); // xw
+                ranks.push(category.stat.map(d => d.key)); // xw
             }
             else {
                 if (category.stat.length != 0) {
