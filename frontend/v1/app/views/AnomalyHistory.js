@@ -66,7 +66,7 @@ class AnomalyHistory extends React.Component
         Object.keys(this.chartData).forEach(rank => {
             rank = +rank;
             if (ranks.indexOf(rank) >=0 && this.chartData[rank].length > 0)
-                console.log(...this.chartData[rank][0])
+                //console.log(...this.chartData[rank][0])
             if (ranks.indexOf(rank) >= 0 && this.chartData[rank].length > 0 && this.chartData[rank][0].min_timestamp > 0) {
                 minTime = Math.min(minTime, this.chartData[rank][0].min_timestamp);
             }
