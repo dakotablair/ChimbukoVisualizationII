@@ -119,6 +119,7 @@ node_modules/
 
 # large files
 data/*.tar.gz
+data/backup/
 *.unqlite
 *.json
 
