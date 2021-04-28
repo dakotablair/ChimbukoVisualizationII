@@ -9,10 +9,10 @@
 
 ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
-cd "$ROOT_DIR"#cd command must use doublequote to take space in filename
+cd "$ROOT_DIR" #cd command must use doublequote to take space in filename
 
 # for test data
-DATA_NAME="96rank_sharded_vizdump"
+DATA_NAME="96rank_100step"
 
 # server config
 export SERVER_CONFIG="production"
@@ -21,12 +21,12 @@ export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_stats.sq
 export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_data.sqlite"
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/func_stats.sqlite"
 export PROVENANCE_DB="${WORK_DIR}/${DATA_NAME}/provdb/"
-export SHARDED_NUM=20
+export SHARDED_NUM=1
 # export PROVDB_ADDR="ofi+tcp;ofi_rxm://172.17.0.2:32903"
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
 echo "create db ..."
-python manager.py createdb
+python3 manager.py createdb
 
 echo "run redis ..."
 webserver/run-redis.sh &
