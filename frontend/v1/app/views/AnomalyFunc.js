@@ -173,8 +173,8 @@ class AnomalyFunc extends React.Component
     getDataInfo = d => {
         const entry = moment(d.entry/1000).format('h:mm:ss.SSS a');
         const exit = moment(d.exit/1000).format('h:mm:ss.SSS a');
-        const func_mean = d.func_stats.mean/1000;
-        const func_stddev = d.func_stats.stddev/1000;
+        const func_mean = 123; //d.func_stats.mean/1000;
+        const func_stddev = 123; //d.func_stats.stddev/1000;
 
         const info = `pid: ${d.pid} rid: ${d.rid} tid: ${d.tid} function_id: ${d.fid} event_id: ${d.event_id}\n`;
         const time = `entry: ${entry}\nexit: ${exit}\nruntime_total: ${d.runtime_total/1000}ms\nruntime_exclusive: ${d.runtime_exclusive/1000}ms\n`;
