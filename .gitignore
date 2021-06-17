@@ -122,6 +122,8 @@ data/*.tar.gz
 data/backup/
 *.unqlite
 *.json
+*.txt
+*.xlsx
 
 # MacOS
 .DS_Store
