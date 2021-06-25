@@ -155,7 +155,7 @@ def visAnomalyData(fname, attr):
                    z=df[attr].to_numpy(dtype=int),
                    x=df['step'],
                    y=df['rank'],
-                   hoverongaps=False
+                   hoverongaps=False,
                    ))
     fig.update_layout(title='data: {}, attr: {}'.format(
                         pre.split('/')[-1], attr))
@@ -288,7 +288,7 @@ def calcMockUp(files):
 if __name__ == '__main__':
     argc = len(sys.argv)
     if (argc < 2):
-        pre = os.path.join(os.getcwd(), '../../data/hbos_results')
+        pre = os.path.join(os.getcwd(), '../../data/48rank_100step')
     else:
         pre = sys.argv[1]
 
