@@ -9,7 +9,7 @@
 
 ROOT_DIR=$(pwd)
 WORK_DIR="${ROOT_DIR}/data"
-cd "$ROOT_DIR"#cd command must use doublequote to take space in filename
+cd "$ROOT_DIR" #cd command must use doublequote to take space in filename
 
 # for test data
 DATA_NAME="96rank_sharded_vizdump"
@@ -26,7 +26,7 @@ export SHARDED_NUM=20
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
 echo "create db ..."
-python manager.py createdb
+python3 manager.py createdb
 
 echo "run redis ..."
 webserver/run-redis.sh &
