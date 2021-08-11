@@ -58,7 +58,7 @@ const styles = theme => ({
     },
     col: {
         display: 'flex',
-        height: '100%'
+        margin: '2px'
     },
     margin: {
         margin: theme.spacing(1)
