@@ -56,6 +56,10 @@ const styles = theme => ({
         display: 'flex',
         width: '100%'
     },
+    col: {
+        display: 'flex',
+        height: '100%'
+    },
     margin: {
         margin: theme.spacing(1)
     },
@@ -348,7 +352,7 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.viewroot}>
+                            <div className={classes.row}>
                                 <div className={classes.row}>
                                     <AnomalyHistory
                                         height={200}
@@ -360,7 +364,7 @@ class ChimbukoApp extends React.Component {
                                         pause={this.state.pause}
                                     />                            
                                 </div>
-                                <div className={classes.row} style={{width: 100}}>
+                                <div className={classes.col} style={{width: 200}}>
                                     <TextField
                                         id="hist-pid"
                                         label="pid"
