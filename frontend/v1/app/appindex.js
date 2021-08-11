@@ -348,16 +348,56 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.row}>
-                                <AnomalyHistory
-                                    height={200}
-                                    ranks={watched_ranks}
-                                    colors={rank_colors}
-                                    socketio={this.socketio}
-                                    onLegendClick={this.handleHistoryRemove}
-                                    onBarClick={this.handleExecutionRequest}
-                                    pause={this.state.pause}
-                                />                            
+                            <div className={classes.viewroot}>
+                                <div className={classes.row}>
+                                    <AnomalyHistory
+                                        height={200}
+                                        ranks={watched_ranks}
+                                        colors={rank_colors}
+                                        socketio={this.socketio}
+                                        onLegendClick={this.handleHistoryRemove}
+                                        onBarClick={this.handleExecutionRequest}
+                                        pause={this.state.pause}
+                                    />                            
+                                </div>
+                                <div className={classes.row} style={{width: 100}}>
+                                    <TextField
+                                        id="hist-pid"
+                                        label="pid"
+                                        value={execdata_config.app || 0}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                    >
+                                    </TextField>
+                                    <TextField
+                                        id="hist-rid"
+                                        label="rid"
+                                        value={execdata_config.app || 0}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                    >
+                                    </TextField>
+                                    <TextField
+                                        id="hist-ioid"
+                                        label="ioid"
+                                        value={execdata_config.app || 0}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                    >
+                                    </TextField>
+                                    <TextField
+                                        id="hist-fid"
+                                        label="fid"
+                                        value={execdata_config.app || 0}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                    >
+                                    </TextField>
+                                </div>
                             </div>
                         </div>
                     </Grid>
