@@ -12,7 +12,7 @@ WORK_DIR="${ROOT_DIR}/data"
 cd "$ROOT_DIR" #cd command must use doublequote to take space in filename
 
 # for test data
-DATA_NAME="96rank_100step"
+DATA_NAME="48rank_100step"
 
 # server config
 export SERVER_CONFIG="production"
