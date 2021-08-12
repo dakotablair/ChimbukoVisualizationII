@@ -376,7 +376,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-pid"
                                     label="pid"
                                     value={execdata_config.app || -1}
-                                    onChange={this.chart.resetZoom()}
+                                    onChange={this.handleSwitch('pause')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -387,7 +387,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-rid"
                                     label="rid"
                                     value={execdata_config.rank || -1}
-                                    onChange={this.chart.resetZoom()}
+                                    onChange={this.handleSwitch('pause')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -398,7 +398,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-ioid"
                                     label="ioid"
                                     value={execdata_config.step || -1}
-                                    onChange={this.chart.resetZoom()}
+                                    onChange={this.handleSwitch('pause')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -409,7 +409,7 @@ class ChimbukoApp extends React.Component {
                                         id="hist-fid"
                                         label="fid"
                                         value={-1}
-                                        onChange={this.chart.resetZoom()}
+                                        onChange={this.handleSwitch('pause')}
                                         type="number"
                                         className={clsx(classes.margin, classes.textField)}
                                         margin="dense"
@@ -419,7 +419,7 @@ class ChimbukoApp extends React.Component {
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
-                                    onClick={this.chart.resetZoom()}
+                                    onClick={this.handleSwitch('pause')}
                                 >
                                     Query
                                 </Button>
