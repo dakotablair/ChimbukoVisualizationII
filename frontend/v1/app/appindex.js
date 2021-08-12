@@ -323,7 +323,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={7}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -364,7 +364,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={1}>
                         <div className={classes.viewroot}>
                             {/*<div className={classes.row} style={{height: 261}}>
                                     <SelectedFrame 
