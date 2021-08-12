@@ -191,7 +191,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleSwitch = name => ev => {
-        this.setState({...this.state, [name]: event.target.checked});
+        this.setState({...this.state, [name]: ev.target.checked});
     }    
 
     handleFuncAxisChange = key => ev => {
@@ -323,7 +323,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={5}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -352,67 +352,80 @@ class ChimbukoApp extends React.Component {
                                 </Button>                         
                             </div>
                             <div className={classes.row}>
-                                <div className={classes.row}>
-                                    <AnomalyHistory
-                                        height={200}
-                                        ranks={watched_ranks}
-                                        colors={rank_colors}
-                                        socketio={this.socketio}
-                                        onLegendClick={this.handleHistoryRemove}
-                                        onBarClick={this.handleExecutionRequest}
-                                        pause={this.state.pause}
-                                    />                            
-                                </div>
-                                <div className={classes.col} style={{width: 200}}>
-                                    <TextField
-                                        id="hist-pid"
-                                        label="pid"
-                                        value={execdata_config.app || 0}
-                                        type="number"
-                                        className={clsx(classes.margin, classes.textField)}
-                                        margin="dense"
-                                    >
-                                    </TextField>
-                                    <TextField
-                                        id="hist-rid"
-                                        label="rid"
-                                        value={execdata_config.app || 0}
-                                        type="number"
-                                        className={clsx(classes.margin, classes.textField)}
-                                        margin="dense"
-                                    >
-                                    </TextField>
-                                    <TextField
-                                        id="hist-ioid"
-                                        label="ioid"
-                                        value={execdata_config.app || 0}
-                                        type="number"
-                                        className={clsx(classes.margin, classes.textField)}
-                                        margin="dense"
-                                    >
-                                    </TextField>
-                                    <TextField
-                                        id="hist-fid"
-                                        label="fid"
-                                        value={execdata_config.app || 0}
-                                        type="number"
-                                        className={clsx(classes.margin, classes.textField)}
-                                        margin="dense"
-                                    >
-                                    </TextField>
-                                </div>
+                                <AnomalyHistory
+                                    height={200}
+                                    ranks={watched_ranks}
+                                    colors={rank_colors}
+                                    socketio={this.socketio}
+                                    onLegendClick={this.handleHistoryRemove}
+                                    onBarClick={this.handleExecutionRequest}
+                                    pause={this.state.pause}
+                                />                            
                             </div>
                         </div>
                     </Grid>
-                    {/* <Grid item xs={3}>
+                    <Grid item xs={3}>
                         <div className={classes.viewroot}>
-                            <div className={classes.row} style={{height: 261}}>
+                            {/*<div className={classes.row} style={{height: 261}}>
                                     <SelectedFrame 
                                         frames={[]}
                                     />
+                                </div>*/}
+                            <div className={classes.col} style={{width: 200}}>
+                                <TextField
+                                    id="hist-pid"
+                                    label="pid"
+                                    value={execdata_config.app || -1}
+                                    onChange={this.chart.resetZoom()}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-rid"
+                                    label="rid"
+                                    value={execdata_config.rank || -1}
+                                    onChange={this.chart.resetZoom()}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-ioid"
+                                    label="ioid"
+                                    value={execdata_config.step || -1}
+                                    onChange={this.chart.resetZoom()}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                    <TextField
+                                        id="hist-fid"
+                                        label="fid"
+                                        value={-1}
+                                        onChange={this.chart.resetZoom()}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                        inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <Button 
+                                    variant="contained" 
+                                    className={classes.button} 
+                                    onClick={this.chart.resetZoom()}
+                                >
+                                    Query
+                                </Button>
                             </div>
                         </div>
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>

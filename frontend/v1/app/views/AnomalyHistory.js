@@ -227,7 +227,7 @@ class AnomalyHistory extends React.Component
     }
 
     handleSwitch = name => ev => {
-        this.setState({...this.state, [name]: event.target.checked});
+        this.setState({...this.state, [name]: ev.target.checked});
     }
 
     handleBarClick = ev => {
