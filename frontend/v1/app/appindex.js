@@ -323,7 +323,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={8}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -364,13 +364,8 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={1}>
+                   {/*} <Grid item xs={1}>
                         <div className={classes.viewroot}>
-                            {/*<div className={classes.row} style={{height: 261}}>
-                                    <SelectedFrame 
-                                        frames={[]}
-                                    />
-                                </div>*/}
                             <div className={classes.viewroot} style={{width: 200}}>
                                 <TextField
                                     id="hist-pid"
@@ -426,6 +421,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
+                    */}
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
