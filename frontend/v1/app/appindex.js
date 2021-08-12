@@ -371,7 +371,7 @@ class ChimbukoApp extends React.Component {
                                         frames={[]}
                                     />
                                 </div>*/}
-                            <div className={classes.col} style={{width: 200}}>
+                            <div className={classes.viewroot} style={{width: 200}}>
                                 <TextField
                                     id="hist-pid"
                                     label="pid"
