@@ -368,6 +368,17 @@ class ChimbukoApp extends React.Component {
                         <div className={classes.viewroot}>
                             <div className={classes.viewroot} style={{width: 200}}>
                                 <TextField
+                                        id="stat-queries"
+                                        label="# Queries"
+                                        value={nQueries || 5}
+                                        onChange={this.handleStatChange('nQueries')}
+                                        type="number"
+                                        className={clsx(classes.margin, classes.textField)}
+                                        margin="dense"
+                                        inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                {/*<TextField
                                     id="hist-pid"
                                     label="pid"
                                     value={execdata_config.app || -1}
@@ -411,6 +422,7 @@ class ChimbukoApp extends React.Component {
                                         inputProps={{min: 0, max:100, step: 1}}
                                 >
                                 </TextField>
+                                */}
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
