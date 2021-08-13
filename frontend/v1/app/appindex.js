@@ -371,7 +371,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-pid"
                                     label="pid"
                                     value={execdata_config.app || -1}
-                                    onChange={this.handleSwitch('pause')}
+                                    onChange={this.handleStatChange('nQueries')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -382,7 +382,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-rid"
                                     label="rid"
                                     value={execdata_config.rank || -1}
-                                    onChange={this.handleSwitch('pause')}
+                                    onChange={this.handleStatChange('nQueries')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -393,7 +393,7 @@ class ChimbukoApp extends React.Component {
                                     id="hist-ioid"
                                     label="ioid"
                                     value={execdata_config.step || -1}
-                                    onChange={this.handleSwitch('pause')}
+                                    onChange={this.handleStatChange('nQueries')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -404,7 +404,7 @@ class ChimbukoApp extends React.Component {
                                         id="hist-fid"
                                         label="fid"
                                         value={-1}
-                                        onChange={this.handleSwitch('pause')}
+                                        onChange={this.handleStatChange('nQueries')}
                                         type="number"
                                         className={clsx(classes.margin, classes.textField)}
                                         margin="dense"
