@@ -178,6 +178,12 @@ class ChimbukoApp extends React.Component {
         }
     }
 
+    handleExecutionQuery = key => ev => {
+        console.log(key);
+        console.log(this.props);
+        console.log(ev);
+    }
+
     handleExecutionRequest = (item) => {
         const { execdata_config:config } = this.props;
         
@@ -381,8 +387,8 @@ class ChimbukoApp extends React.Component {
                                 <TextField
                                     id="hist-pid"
                                     label="pid"
-                                    value={execdata_config.app || 0}
-                                    onChange={this.handleStatChange('nQueries')}
+                                    value={0}
+                                    onChange={this.handleExecutionQuery('pid')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
