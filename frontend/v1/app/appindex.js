@@ -123,14 +123,16 @@ class ChimbukoApp extends React.Component {
         const { watched_ranks } = this.props;
 
         console.log('before: ');
-        console.log(this.props.set_stats);
+        console.log(this.props.stats);
         if (this.props.stats[key] !== ev.target.value) {
-            if (this.props.set_stats)
+            if (this.props.set_stats) {
                 this.props.set_stats({
                     ...this.props.stats, 
                     [key]: ev.target.value
                 });
-
+                console.log('changed: ');
+                console.log(ev.target.value);
+            }
             if (this.socketio)
                 this.socketio.emit('query_stats', {
                     ...this.props.stats, 
@@ -138,7 +140,7 @@ class ChimbukoApp extends React.Component {
                     ranks: watched_ranks
                 });
             console.log('after: ');
-            console.log(this.props.set_stats);
+            console.log(this.props.stats);
         }
     }
 
