@@ -381,7 +381,7 @@ class ChimbukoApp extends React.Component {
                                 <TextField
                                     id="hist-pid"
                                     label="pid"
-                                    value={execdata_config.app || -1}
+                                    value={execdata_config.app || 0}
                                     onChange={this.handleStatChange('nQueries')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
