@@ -122,6 +122,7 @@ class ChimbukoApp extends React.Component {
     handleStatChange = key => ev => {
         const { watched_ranks } = this.props;
 
+        console.log('before: ' + this.props.stats);
         if (this.props.stats[key] !== ev.target.value) {
             if (this.props.set_stats)
                 this.props.set_stats({
@@ -135,6 +136,7 @@ class ChimbukoApp extends React.Component {
                     [key]: ev.target.value,
                     ranks: watched_ranks
                 });
+            console.log('after: ' + this.props.stats);
         }
     }
 
