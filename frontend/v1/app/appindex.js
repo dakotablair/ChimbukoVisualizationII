@@ -190,6 +190,20 @@ class ChimbukoApp extends React.Component {
         console.log(this.props.provdb_queries);
     }
 
+    handleExecutionQueryRequest = ev => {
+        const { execdata_config:config } = this.props;
+        const { provdb_queries:prov_config} = this.props;
+
+        const item = {'app': prov_config.app,
+            'rank': prov_config.rank,
+            'step': prov_config.step,
+            //'fid': xxx,
+        };
+        if (this.props.get_execution) {
+            this.props.get_execution(item);
+        }
+    }
+
     handleExecutionRequest = (item) => {
         const { execdata_config:config } = this.props;
         
@@ -427,7 +441,7 @@ class ChimbukoApp extends React.Component {
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
-                                    onClick={this.handleSwitch('pause')}
+                                    onClick={this.handleExecutionQueryRequest}
                                 >
                                     Query
                                 </Button>
