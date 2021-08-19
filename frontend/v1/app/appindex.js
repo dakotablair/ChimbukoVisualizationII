@@ -5,6 +5,7 @@ import axis from 'axios';
 import {
     set_value,
     set_stats,
+    set_provdb_query,
     set_watched_rank,
     unset_watched_rank,
     get_execution
@@ -122,25 +123,19 @@ class ChimbukoApp extends React.Component {
     handleStatChange = key => ev => {
         const { watched_ranks } = this.props;
 
-        console.log('before: ');
-        console.log(this.props.stats);
         if (this.props.stats[key] !== ev.target.value) {
-            if (this.props.set_stats) {
+            if (this.props.set_stats)
                 this.props.set_stats({
                     ...this.props.stats, 
                     [key]: ev.target.value
                 });
-                console.log('changed: ');
-                console.log(ev.target.value);
-            }
+
             if (this.socketio)
                 this.socketio.emit('query_stats', {
                     ...this.props.stats, 
                     [key]: ev.target.value,
                     ranks: watched_ranks
                 });
-            console.log('after: ');
-            console.log(this.props.stats);
         }
     }
 
@@ -185,9 +180,14 @@ class ChimbukoApp extends React.Component {
     }
 
     handleExecutionQuery = key => ev => {
-        console.log(key);
-        console.log(this.props);
-        console.log(ev);
+        if (this.props.provdb_queries[key] !== ev.target.value) {
+            if (this.props.set_provdb_query)
+                this.props.set_provdb_query({
+                    ...this.props.provdb_queries, 
+                    [key]: ev.target.value
+                });
+        }
+        console.log(this.props.provdb_queries);
     }
 
     handleExecutionRequest = (item) => {
@@ -203,6 +203,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleSwitch = name => ev => {
+        // pause was defined as state variable, can be set directly
         this.setState({...this.state, [name]: ev.target.checked});
     }    
 
@@ -543,6 +544,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         set_value,
         set_stats,
+        set_provdb_query,
         set_watched_rank,
         unset_watched_rank,
         get_execution
