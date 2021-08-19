@@ -19,8 +19,7 @@ const INIT_STATE = {
         app: -1,
         rank: -1,
         step: -1,
-        min_timestamp: -1,
-        max_timestamp: -1
+        func: -1
     },
 
     // execution data 

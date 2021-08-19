@@ -381,19 +381,8 @@ class ChimbukoApp extends React.Component {
                         <div className={classes.viewroot}>
                             <div className={classes.viewroot} style={{width: 200}}>
                                 <TextField
-                                    id="stat-queries"
-                                    label="# Queries"
-                                    value={nQueries || 5}
-                                    onChange={this.handleStatChange('nQueries')}
-                                    type="number"
-                                    className={clsx(classes.margin, classes.textField)}
-                                    margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
-                                >
-                                </TextField>
-                                <TextField
-                                    id="hist-pid"
-                                    label="pid"
+                                    id="hist-app"
+                                    label="app id"
                                     value={provdb_queries.app || 0}
                                     onChange={this.handleExecutionQuery('app')}
                                     type="number"
@@ -402,11 +391,11 @@ class ChimbukoApp extends React.Component {
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
                                 </TextField>
-                                {/*<TextField
-                                    id="hist-rid"
-                                    label="rid"
-                                    value={execdata_config.rank || -1}
-                                    onChange={this.handleStatChange('nQueries')}
+                                <TextField
+                                    id="hist-rank"
+                                    label="rank id"
+                                    value={provdb_queries.rank || 0}
+                                    onChange={this.handleExecutionQuery('rank')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -414,28 +403,27 @@ class ChimbukoApp extends React.Component {
                                 >
                                 </TextField>
                                 <TextField
-                                    id="hist-ioid"
-                                    label="ioid"
-                                    value={execdata_config.step || -1}
-                                    onChange={this.handleStatChange('nQueries')}
+                                    id="hist-step"
+                                    label="step id"
+                                    value={provdb_queries.step || 0}
+                                    onChange={this.handleExecutionQuery('step')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
                                 </TextField>
-                                    <TextField
-                                        id="hist-fid"
-                                        label="fid"
-                                        value={-1}
-                                        onChange={this.handleStatChange('nQueries')}
-                                        type="number"
-                                        className={clsx(classes.margin, classes.textField)}
-                                        margin="dense"
-                                        inputProps={{min: 0, max:100, step: 1}}
+                                <TextField
+                                    id="hist-func"
+                                    label="function id"
+                                    value={provdb_queries.func || 0}
+                                    onChange={this.handleExecutionQuery('func')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
                                 >
                                 </TextField>
-                                */}
                                 <Button 
                                     variant="contained" 
                                     className={classes.button} 
