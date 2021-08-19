@@ -15,7 +15,13 @@ const INIT_STATE = {
     watched_ranks: [],
     rank_colors: {},
     history: {},
-    provdb_queries: {},
+    provdb_queries: {
+        app: -1,
+        rank: -1,
+        step: -1,
+        min_timestamp: -1,
+        max_timestamp: -1
+    },
 
     // execution data 
     // - descending order on entry time

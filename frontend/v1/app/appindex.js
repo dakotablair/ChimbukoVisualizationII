@@ -244,7 +244,7 @@ class ChimbukoApp extends React.Component {
     }
 
     render() {
-        const { classes, stats, watched_ranks, rank_colors } = this.props;
+        const { classes, stats, provdb_queries, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors, func_ids } = this.props;
         const { /*forest, */tree, selected_node } = this.props;
 
@@ -394,8 +394,8 @@ class ChimbukoApp extends React.Component {
                                 <TextField
                                     id="hist-pid"
                                     label="pid"
-                                    value={0}
-                                    onChange={this.handleExecutionQuery('pid')}
+                                    value={provdb_queries.app || 0}
+                                    onChange={this.handleExecutionQuery('app')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -529,6 +529,7 @@ class ChimbukoApp extends React.Component {
 function mapStateToProps(state) {
     return {
         stats: state.data.stats,
+        provdb_queries: state.data.provdb_queries,
         watched_ranks: state.data.watched_ranks,
         rank_colors: state.data.rank_colors,
         execdata: state.data.execdata,
