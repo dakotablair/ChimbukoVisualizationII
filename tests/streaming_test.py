@@ -92,7 +92,7 @@ def visAnomalyStats(fname, attr):
                      categoryarray=x_axis)
     fig.show()
 
-    y_axis = [_ for _ in range(df['rank'].min(), df['rank'].max()+1)]
+    # y_axis = [_ for _ in range(df['rank'].min(), df['rank'].max()+1)]
     fig = go.Figure(data=go.Heatmap(
                    z=df[attr].to_numpy(dtype=float),
                    x=df['stream_id'],
@@ -150,7 +150,7 @@ def visAnomalyData(fname, attr):
     df = pd.read_excel("{}_data.xlsx".format(fname), index_col=0)
 
     attr = 'n_anomalies'
-    x_axis = [_ for _ in range(df['step'].max())]
+    # x_axis = [_ for _ in range(df['step'].max())]
     fig = go.Figure(data=go.Heatmap(
                    z=df[attr].to_numpy(dtype=int),
                    x=df['step'],
@@ -159,8 +159,68 @@ def visAnomalyData(fname, attr):
                    ))
     fig.update_layout(title='data: {}, attr: {}'.format(
                         pre.split('/')[-1], attr))
-    fig.update_xaxes(type='category', categoryorder='array',
-                     categoryarray=x_axis)
+    # fig.update_xaxes(type='category', categoryorder='array',
+    #                  categoryarray=x_axis)
+    fig.show()
+
+
+def countScoreStats(files, fname):
+    f1 = "{}_score.xlsx".format(fname)
+
+    if os.path.exists(f1):
+        return
+
+    metric = 'mean'
+    df = pd.DataFrame(columns=['stream_id', 'fid', 'fname', 'app', 'rank',
+                               'new_score', 'new_severity', 'new_count',
+                               'all_score', 'all_severity', 'all_count'])
+    for i, filename in enumerate(files):
+        print("File {} out of {} files.".format(filename, max(ids)))
+        with open(filename) as f:
+            loaded = json.load(f)
+            anomaly_metrics = loaded.get('anomaly_metrics', None)
+
+            if anomaly_metrics is None:
+                continue
+
+            stream_id = int(filename.split('_')[-1][:-5])
+            for item in anomaly_metrics:
+                d = {'stream_id': int(stream_id),
+                     'fid': item['fid'],
+                     'fname': item['fname'],
+                     'app': int(item['app']),
+                     'rank': int(item['rank']),
+                     'new_count': float(item['new_data']['count'][metric]),
+                     'new_score': float(item['new_data']['score'][metric]),
+                     'new_severity': float(item['new_data']['severity'][metric]),
+                     'all_count': float(item['all_data']['count'][metric]),
+                     'all_score': float(item['all_data']['score'][metric]),
+                     'all_severity': float(item['all_data']['severity'][metric]),
+                     }
+                df = df.append(d, ignore_index=True)
+
+    df.to_excel(f1)
+
+
+def visScoreStats(fname):
+    df = pd.read_excel("{}_score.xlsx".format(fname), index_col=0)
+
+    metric = 'severity'
+    fig = px.scatter(df, x='fid', y='rank',
+                     color=df['all_' + metric].to_numpy(dtype=float),
+                     range_color=[df['all_' + metric].min(), df['all_' + metric].max()],
+                     size=df['new_' + metric].to_numpy(dtype=float),
+                     animation_frame='stream_id',
+                    #  animation_group='rank',
+                    #  color_continuous_scale='balance',
+                     hover_name='fname',
+                     )
+    fig.show()
+
+    fig = px.parallel_coordinates(df, dimensions=["stream_id", "rank", "fid", "new_count", "new_score", "new_severity",
+                                                  "all_count", "all_score", "all_severity"],
+                                  color="fid", range_color=[df['fid'].min(), df['fid'].max()],
+                                  )
     fig.show()
 
 
@@ -289,9 +349,12 @@ if __name__ == '__main__':
     argc = len(sys.argv)
     if (argc < 2):
         pre = os.path.join(os.getcwd(), '../../data/48rank_100step')
+        # pre = os.path.join(os.getcwd(), '../data/anomalyscore_example3')
+        # pre = os.path.join(os.getcwd(), '../data/21nodes_120task_online_11_2_21/SSTD')
     else:
         pre = sys.argv[1]
 
+    # for anomaly_stats
     ###### 1. Prepare files ######
     path = pre + '/stats/'
     json_files = glob.glob(path + '*.json')
@@ -310,6 +373,21 @@ if __name__ == '__main__':
     countAnomalyData(files, fname)
     visAnomalyData(fname, 'n_anomalies')
 
-    # calcTSNE(files, int(pre.split('/')[-1][:2]))
-    
-    calcMockUp(files)
+    # # calcTSNE(files, int(pre.split('/')[-1][:2]))
+
+    # calcMockUp(files)
+
+    # ########
+    # # for anomaly_metrics
+    # path = pre + '/'
+    # json_files = glob.glob(path + '*.json')
+    # # extract number as index
+    # ids = [int(f.split('_')[-1][:-5]) for f in json_files]
+    # # sort as numeric values
+    # inds = sorted(range(len(ids)), key=lambda k: ids[k])
+    # files = [json_files[i] for i in inds]  # files in correct order
+    # fname = pre.split('/')[-1]
+    # countScoreStats(files, fname)
+    # visScoreStats(fname)
+    # ########
+
