@@ -14,6 +14,13 @@ export function set_stats(newStats) {
     };
 }
 
+export function set_provdb_query(newQueries) {
+    return {
+        type: "SET_PROVDB_QUERY",
+        payload: newQueries
+    };
+}
+
 export function set_watched_rank(rank) {
     return {
         type: "SET_WATCHED_RANK",

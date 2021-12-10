@@ -5,6 +5,7 @@ import axis from 'axios';
 import {
     set_value,
     set_stats,
+    set_provdb_query,
     set_watched_rank,
     unset_watched_rank,
     get_execution
@@ -55,6 +56,9 @@ const styles = theme => ({
     row: {
         display: 'flex',
         width: '100%'
+    },
+    col: {
+        margin: '2px'
     },
     margin: {
         margin: theme.spacing(1)
@@ -175,6 +179,31 @@ class ChimbukoApp extends React.Component {
         }
     }
 
+    handleExecutionQuery = key => ev => {
+        if (this.props.provdb_queries[key] !== ev.target.value) {
+            if (this.props.set_provdb_query)
+                this.props.set_provdb_query({
+                    ...this.props.provdb_queries, 
+                    [key]: ev.target.value
+                });
+        }
+        console.log(this.props.provdb_queries);
+    }
+
+    handleExecutionQueryRequest = ev => {
+        const { execdata_config:config } = this.props;
+        const { provdb_queries:prov_config} = this.props;
+
+        const item = {'app': prov_config.app,
+            'rank': prov_config.rank,
+            'step': prov_config.step,
+            //'fid': xxx,
+        };
+        if (this.props.get_execution) {
+            this.props.get_execution(item);
+        }
+    }
+
     handleExecutionRequest = (item) => {
         const { execdata_config:config } = this.props;
         
@@ -188,7 +217,8 @@ class ChimbukoApp extends React.Component {
     }
 
     handleSwitch = name => ev => {
-        this.setState({...this.state, [name]: event.target.checked});
+        // pause was defined as state variable, can be set directly
+        this.setState({...this.state, [name]: ev.target.checked});
     }    
 
     handleFuncAxisChange = key => ev => {
@@ -228,7 +258,7 @@ class ChimbukoApp extends React.Component {
     }
 
     render() {
-        const { classes, stats, watched_ranks, rank_colors } = this.props;
+        const { classes, stats, provdb_queries, watched_ranks, rank_colors } = this.props;
         const { execdata, execdata_config, func_colors, func_ids } = this.props;
         const { /*forest, */tree, selected_node } = this.props;
 
@@ -320,7 +350,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={7}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -361,15 +391,63 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    {/* <Grid item xs={3}>
+                    <Grid item xs={1}>
                         <div className={classes.viewroot}>
-                            <div className={classes.row} style={{height: 261}}>
-                                    <SelectedFrame 
-                                        frames={[]}
-                                    />
+                            <div className={classes.viewroot} style={{width: 200}}>
+                                <TextField
+                                    id="hist-app"
+                                    label="app id"
+                                    value={provdb_queries.app || 0}
+                                    onChange={this.handleExecutionQuery('app')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-rank"
+                                    label="rank id"
+                                    value={provdb_queries.rank || 0}
+                                    onChange={this.handleExecutionQuery('rank')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-step"
+                                    label="step id"
+                                    value={provdb_queries.step || 0}
+                                    onChange={this.handleExecutionQuery('step')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-func"
+                                    label="function id"
+                                    value={provdb_queries.func || 0}
+                                    onChange={this.handleExecutionQuery('func')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100, step: 1}}
+                                >
+                                </TextField>
+                                <Button 
+                                    variant="contained" 
+                                    className={classes.button} 
+                                    onClick={this.handleExecutionQueryRequest}
+                                >
+                                    Query
+                                </Button>
                             </div>
                         </div>
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={4}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
@@ -453,6 +531,7 @@ class ChimbukoApp extends React.Component {
 function mapStateToProps(state) {
     return {
         stats: state.data.stats,
+        provdb_queries: state.data.provdb_queries,
         watched_ranks: state.data.watched_ranks,
         rank_colors: state.data.rank_colors,
         execdata: state.data.execdata,
@@ -468,6 +547,7 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         set_value,
         set_stats,
+        set_provdb_query,
         set_watched_rank,
         unset_watched_rank,
         get_execution

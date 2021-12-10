@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
 import { getRandomColor } from '../utils';
 
+//all variables or functions are under this.props
+
 const INIT_STATE = {
     // anomaly statistics
     stats: {
@@ -13,6 +15,12 @@ const INIT_STATE = {
     watched_ranks: [],
     rank_colors: {},
     history: {},
+    provdb_queries: {
+        app: -1,
+        rank: -1,
+        step: -1,
+        func: -1
+    },
 
     // execution data 
     // - descending order on entry time
@@ -38,6 +46,10 @@ const set_value = (state, payload) => {
 
 const set_stats = (state, newStats) => {
     return {...state, stats: newStats};
+};
+
+const set_provdb_query = (state, newQueries) => {
+    return {...state, provdb_queries: newQueries};
 };
 
 const set_execdata = (state, newData) => {
@@ -106,6 +118,9 @@ function dataReducers(state = INIT_STATE, action)
 
         case "SET_STATS":
             return set_stats(state, payload);
+        
+        case "SET_PROVDB_QUERY":
+            return set_provdb_query(state, payload);
 
         case "SET_WATCHED_RANK":
             return set_rank(state, payload);

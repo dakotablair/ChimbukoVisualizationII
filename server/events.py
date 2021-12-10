@@ -29,6 +29,7 @@ def push_data(data, event='updated_data',  namespace='/events'):
 def load_execution_provdb(pid, rid, step):
     """Load execution data from provdb as unqlite file"""
 
+    print("load_execution_provdb:", pid, rid, step)
     filtered_records = []
     # collection = pdb.open('anomalies')  # default collection
     jx9_filter = "function($record) { return " \
