@@ -33,18 +33,19 @@ def test(engine, filename):
             print("start to query rank {}".format(rid))
             t0 = time.clock()
             jx9_filter = "function($record) { return $record.pid == %d &&" \
-                         "$record.rid == %d; }" % (pid, rid)
+                         "$record.rid == %d && $record.io_step == %d; }" % (pid, rid, 247)
             records = [json.loads(x) for x in collection.filter(jx9_filter)]
             t1 = time.clock() - t0
-            print("done query rank {} and got {} records in {:.2f} seconds".format(rid, len(records), t1))
-            print("transform to dataframe...")
-            for id, record in enumerate(records):
-                if id % 100 == 0:
-                    print("record {} of {}".format(id, len(records)))
-                new_record = {k: record.get(k, None) for k in columns}
-                df = df.append(new_record, ignore_index=True)
-            df.to_excel("rank_{}.xlsx".format(rid))
-            print("done")
+            print(records)
+            #print("done query rank {} and got {} records in {:.2f} seconds".format(rid, len(records), t1))
+            #print("transform to dataframe...")
+            #for id, record in enumerate(records):
+            #    if id % 100 == 0:
+            #        print("record {} of {}".format(id, len(records)))
+            #    new_record = {k: record.get(k, None) for k in columns}
+            #    df = df.append(new_record, ignore_index=True)
+            #df.to_excel("rank_{}.xlsx".format(rid))
+            #print("done")
 
     #index = 8
     #print("Let's see first 10 executions in iostep {}:".format(index))
