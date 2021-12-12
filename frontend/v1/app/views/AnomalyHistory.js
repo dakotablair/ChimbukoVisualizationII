@@ -81,7 +81,10 @@ class AnomalyHistory extends React.Component
             };
             Object.keys(this.chartData).forEach(rank => {
                 rank = +rank;
-                const first = this.chartData[rank][0].min_timestamp;
+                let first = -1;
+                if (this.chartData[rank][0]) {
+                    first = this.chartData[rank][0].min_timestamp;
+                }
                 if (ranks.indexOf(rank) >= 0 && first > 0) {
                     const n_empty = Math.floor((first - minTime) / 1000000);
                     //console.log('rank: ', rank, ' n_empty: ', n_empty, ' first: ', first)
@@ -224,7 +227,7 @@ class AnomalyHistory extends React.Component
     }
 
     handleSwitch = name => ev => {
-        this.setState({...this.state, [name]: event.target.checked});
+        this.setState({...this.state, [name]: ev.target.checked});
     }
 
     handleBarClick = ev => {

@@ -176,7 +176,7 @@ class AnomalyStats extends React.Component
 AnomalyStats.defaultProps = {
     height: 100,
     stats: {},
-    onBarClick: (_) => {},
+    onBarClick: (_) => {}, // as given in appindex
     nQueries: 5,
     statKind: 'stddev'
 };
