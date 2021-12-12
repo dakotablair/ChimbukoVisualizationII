@@ -17,10 +17,10 @@ class ProvDB():
         if pdb_addr == '' and pdb_addr_path == '':  # Standalone mode, need to create engine provider
             #Argument of number of server instances is ignored here
             self.pdb_engine = [ Engine('ofi+tcp', mode=pymargo.server) ]
-            self.pdb_provider = [ SonataProvider(self.pdb_engine, 0) ]
-            self.pdb_address = [ str(self.pdb_engine.addr()) ]
-            self.pdb_admin = [ SonataAdmin(self.pdb_engine) ]
-            self.pdb_client = [ SonataClient(self.pdb_engine) ]
+            self.pdb_provider = [ SonataProvider(self.pdb_engine[0], 0) ]
+            self.pdb_address = [ str(self.pdb_engine[0].addr()) ]
+            self.pdb_admin = [ SonataAdmin(self.pdb_engine[0]) ]
+            self.pdb_client = [ SonataClient(self.pdb_engine[0]) ]
 
             provider = 0 #All databases attached to the same provider
             if pdb_path and int(pdb_sharded_num) > 0:
