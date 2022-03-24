@@ -170,7 +170,7 @@ def countScoreStats(files, fname):
     if os.path.exists(f1):
         return
 
-    metric = 'mean'
+    metric = 'accumulate'
     df = pd.DataFrame(columns=['stream_id', 'fid', 'fname', 'app', 'rank',
                                'new_score', 'new_severity', 'new_count',
                                'all_score', 'all_severity', 'all_count'])
@@ -205,23 +205,45 @@ def countScoreStats(files, fname):
 def visScoreStats(fname):
     df = pd.read_excel("{}_score.xlsx".format(fname), index_col=0)
 
+    # normalize selected columns for each stream
+    ndf = df[['new_count', 'new_score', 'new_severity', 'all_count', 'all_score', 'all_severity', 'stream_id']].groupby('stream_id').transform(lambda x: (x - x.min()) / (x.max() - x.min() + 0.000001))
+    ndf = ndf.rename(columns={'all_severity': 'norm_all_severity', 'all_score': 'norm_all_score', 'all_count': 'norm_all_count'})
+    df = pd.concat([df[['stream_id', 'fid', 'fname', 'app', 'rank', 'all_severity', 'all_count', 'all_score']], ndf], axis=1)
+
+    # choose top 1000 metric-value rows for each stream
+    df = df.sort_values(['stream_id', 'all_severity'], ascending=[True, False]).groupby('stream_id').head(1000)
+    _temp = df.groupby('stream_id').fid.count()
+    _out = [i for num in _temp.values for i in range(num)]
+    df['fid_index'] = _out
+
+    # visualization
     metric = 'severity'
     fig = px.scatter(df, x='fid', y='rank',
-                     color=df['all_' + metric].to_numpy(dtype=float),
-                     range_color=[df['all_' + metric].min(), df['all_' + metric].max()],
-                     size=df['new_' + metric].to_numpy(dtype=float),
+                     range_x=[df['fid'].min() - 10, df['fid'].max() + 10],
+                     range_y=[df['rank'].min() - 10, df['rank'].max() + 10],
+                     color=df['norm_all_' + metric].to_numpy(dtype=float),
+                     range_color=[df['norm_all_' + metric].min(), df['norm_all_' + metric].max()],
                      animation_frame='stream_id',
                     #  animation_group='rank',
                     #  color_continuous_scale='balance',
-                     hover_name='fname',
+                     hover_name='fname', hover_data=['fid', 'rank', 'all_severity', 'all_score', 'all_count'],
+                     title='Metric: ' + metric,
                      )
     fig.show()
 
-    fig = px.parallel_coordinates(df, dimensions=["stream_id", "rank", "fid", "new_count", "new_score", "new_severity",
-                                                  "all_count", "all_score", "all_severity"],
-                                  color="fid", range_color=[df['fid'].min(), df['fid'].max()],
-                                  )
+    # df['fid'] = df['fid'].astype(str)
+    fig = px.scatter(df, x='fid_index', y='norm_all_severity', color='fid', 
+                     animation_frame='stream_id',
+                     hover_name='fname', hover_data=['fid', 'rank', 'all_severity', 'all_score', 'all_count'],
+                     title='Metric: ' + metric,
+                     )
     fig.show()
+
+    # fig = px.parallel_coordinates(df, dimensions=["stream_id", "rank", "fid", "new_count", "new_score", "new_severity",
+    #                                               "all_count", "all_score", "all_severity"],
+    #                               color="fid", range_color=[df['fid'].min(), df['fid'].max()],
+    #                               )
+    # fig.show()
 
 
 def calcTSNE(files, n_rank):
@@ -348,14 +370,37 @@ def calcMockUp(files):
 if __name__ == '__main__':
     argc = len(sys.argv)
     if (argc < 2):
-        pre = os.path.join(os.getcwd(), '../../data/48rank_100step')
+        # pre = os.path.join(os.getcwd(), '../../data/48rank_100step')
         # pre = os.path.join(os.getcwd(), '../data/anomalyscore_example3')
-        # pre = os.path.join(os.getcwd(), '../data/21nodes_120task_online_11_2_21/SSTD')
+        pre = os.path.join(os.getcwd(), '../data/21nodes_120task_online_11_2_21/SSTD')
     else:
         pre = sys.argv[1]
 
-    # for anomaly_stats
-    ###### 1. Prepare files ######
+    # # for anomaly_stats
+    # ###### 1. Prepare files ######
+    # path = pre + '/stats/'
+    # json_files = glob.glob(path + '*.json')
+    # # extract number as index
+    # ids = [int(f.split('_')[-1][:-5]) for f in json_files]
+    # # sort as numeric values
+    # inds = sorted(range(len(ids)), key=lambda k: ids[k])
+    # files = [json_files[i] for i in inds]  # files in correct order
+    # fname = pre.split('/')[-1]
+
+    # ###### 2. Count stats info per stream ######
+    # countAnomalyStats(files, fname)
+    # visAnomalyStats(fname, 'mean')
+
+    # ###### 3. Count data info per stream and step ######
+    # countAnomalyData(files, fname)
+    # visAnomalyData(fname, 'n_anomalies')
+
+    # # calcTSNE(files, int(pre.split('/')[-1][:2]))
+
+    # calcMockUp(files)
+
+    ########
+    # for anomaly_metrics
     path = pre + '/stats/'
     json_files = glob.glob(path + '*.json')
     # extract number as index
@@ -364,30 +409,7 @@ if __name__ == '__main__':
     inds = sorted(range(len(ids)), key=lambda k: ids[k])
     files = [json_files[i] for i in inds]  # files in correct order
     fname = pre.split('/')[-1]
-
-    ###### 2. Count stats info per stream ######
-    countAnomalyStats(files, fname)
-    visAnomalyStats(fname, 'mean')
-
-    ###### 3. Count data info per stream and step ######
-    countAnomalyData(files, fname)
-    visAnomalyData(fname, 'n_anomalies')
-
-    # # calcTSNE(files, int(pre.split('/')[-1][:2]))
-
-    # calcMockUp(files)
-
-    # ########
-    # # for anomaly_metrics
-    # path = pre + '/'
-    # json_files = glob.glob(path + '*.json')
-    # # extract number as index
-    # ids = [int(f.split('_')[-1][:-5]) for f in json_files]
-    # # sort as numeric values
-    # inds = sorted(range(len(ids)), key=lambda k: ids[k])
-    # files = [json_files[i] for i in inds]  # files in correct order
-    # fname = pre.split('/')[-1]
-    # countScoreStats(files, fname)
-    # visScoreStats(fname)
-    # ########
+    countScoreStats(files, fname)
+    visScoreStats(fname)
+    ########
 
