@@ -214,6 +214,7 @@ class ChimbukoApp extends React.Component {
         if (!is_same && this.props.get_execution) {
             this.props.get_execution(item);
         }
+        // console.log('test');
     }
 
     handleSwitch = name => ev => {
