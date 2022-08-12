@@ -7,6 +7,13 @@ from sqlalchemy.orm import backref
 import pickle
 
 
+class DataModel():
+    def __init__(self):
+        self.filter_run_stats = 'accumulate' # RunStats fields
+        self.filter_metrics = 'severity' # metrics fields
+        self.filter_num = 5 # number of top functions to show, user filter expression in the future
+
+
 class AnomalyStatQuery(db.Model):
     __bind_key__ = 'anomaly_stats_query'
     __tablename__ = 'anomalystatquery'

@@ -1,7 +1,7 @@
 import os
 from flask import request, jsonify, abort, current_app
 
-from .. import db
+from .. import db, dm
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
 from . import api
 from ..tasks import make_async
@@ -142,6 +142,39 @@ def delete_old_func():
     # )
 
 
+def push_anomaly_metrics(anomaly_metrics: list):
+
+    # use back end global data to obtain filtering conditions
+    runStats, num, metric = dm.filter_run_stats, dm.filter_num, \
+                            dm.filter_metrics
+
+    top_new_data = sorted(anomaly_metrics,
+                          key=lambda d: d.new_data[metric][runStats],
+                          reverse=True)
+    top_all_data = sorted(anomaly_metrics,
+                          key=lambda d: d.all_data[metric][runStats],
+                          reverse=True)
+
+    if len(top_new_data) > num:
+        top_new_data = top_new_data[:num]
+
+    if len(top_all_data) > num:
+        top_all_data = top_all_data[:num]
+
+    # ---------------------------------------------------
+    # processing data for the front-end
+    # --------------------------------------------------
+    if len(top_new_data) or len(top_all_data):
+        # broadcast the statistics to all clients
+        push_data({
+            'RunStats': runStats,
+            'nQueries': num,
+            'Metric': metric,
+            'data': [top_new_data, top_all_data] # could be empty
+        }, 'update_metrics')
+    ############## need to define new action 'update_metrics' in front end
+
+
 def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
 
     # query arguments
@@ -200,8 +233,8 @@ def new_anomalydata():
         'anomaly_stats': (dict), (optional) // anomaly stats, see details below
         'counter_stats': [
             {
-                'app': (string) // program index,
-                'counter': (string) // counter description,
+                'app': (string), // program index
+                'counter': (string), // counter description
                 'stats': { // global aggregated statistics
                     "count": (integer),
                     "accumulate": (float),
@@ -265,7 +298,7 @@ def new_anomalydata():
     if 'anomaly_stats' not in data:
         return jsonify({}), 201
 
-    anomaly_stats = data['anomaly_stats']
+    anomaly_stats = data.get('anomaly_stats', [])
     counter_stats = data.get('counter_stats', [])
 
     ts = anomaly_stats.get('created_at', None)
@@ -350,11 +383,71 @@ def new_anomalydata():
     # todo: make information output with Location
     return jsonify({}), 201
 
+@api.route('/anomalymetrics', methods=['POST'])
+@make_async
+def new_anomalydata():
+    """
+    Register anomaly data
+
+    - structure
+    {
+        'anomaly_metrics': [ // anomaly metrics of severity, score and count
+            {
+                'app': (integer), // program index
+                'rank': (integer), // rank index
+                'fid': (integer), // function index
+                'fname': (string), // function name
+                'new_data': { // update from latest io_steps
+                    'first_io_step': (integer),
+                    'last_io_step': (integer),
+                    'max_timestamp': (integer),
+                    'min_timestamp': (integer),
+                    'severity': (RunStats),
+                    'score': (RunStats),
+                    'count': (RunStats)
+                },
+                'all_data': { // update from the first io_step
+                    'first_io_step': (integer),
+                    'last_io_step': (integer),
+                    'max_timestamp': (integer),
+                    'min_timestamp': (integer),
+                    'severity': (RunStats),
+                    'score': (RunStats),
+                    'count': (RunStats)
+                }
+            }
+        ] // list over (app, rank, fid)
+    }
+    // no longer use anomaly_stats
+    // not consider counter_stats for now
+    """
+    # print('new_anomalymetrics')
+    data = request.get_json() or {}
+
+    # for the case empty anomaly data were sent
+    if 'anomaly_metrics' not in data:
+        return jsonify({}), 201
+
+    anomaly_metrics = data['anomaly_metrics']
+
+    # no long use internal db
+
+    try:
+        if len(anomaly_metrics):
+            push_anomaly_metrics(anomaly_metrics)
+
+    except Exception as e:
+        print(e)
+
+    return jsonify({}), 201
+
 
 @api.route('/anomalystats', methods=['GET'])
 def new_anomalystats():
     """Push model to query and broadcast current query condition
     data to the front end client
+
+    related to the Refresh button
     """
     # get query condition from database
     query = AnomalyStatQuery.query. \
