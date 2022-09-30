@@ -1,5 +1,6 @@
 import os
 from flask import request, jsonify, abort, current_app
+from matplotlib.pyplot import hist
 
 from .. import db, dm
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
@@ -15,6 +16,7 @@ from sqlalchemy import func, and_
 
 import json
 import time
+import math
 
 
 def process_on_anomaly(data: list, ts):
@@ -148,6 +150,7 @@ def push_anomaly_metrics(anomaly_metrics: list):
     runStats, num, metric = dm.filter_run_stats, dm.filter_num, \
                             dm.filter_metrics
 
+    # Option 1: no aggregation, pick top fids
     top_new_data = sorted(anomaly_metrics,
                           key=lambda d: d.new_data[metric][runStats],
                           reverse=True)
@@ -161,6 +164,44 @@ def push_anomaly_metrics(anomaly_metrics: list):
     if len(top_all_data) > num:
         top_all_data = top_all_data[:num]
 
+    # Option 2: aggregate by fid
+    # Task 1: pick top fids happening at more ranks
+    # Task 2: generate small-bin histogram of distribution
+    top_fids, hist_fids, bins = {}, [], 10
+    for d in anomaly_metrics:
+        item = (d.app, d.fid)
+        if item in top_fids:
+            top_fids[item].append(d)
+        else:
+            top_fids[item] = [d]
+
+    top_fids = sorted(top_fids, key=lambda k, v: len(v), reverse=True)
+    hist_fids, N, i = [0] * bins, math.ceil(len(top_fids) / bins), 0
+    for k, v in top_fids.items():
+        hist_fids[i // N] += len(v)
+        i += 1
+    if len(top_fids) > num:
+        top_fids = top_fids[:num]
+
+    # Option 3: aggregate by rank
+    # Task 1: pick top ranks with more fids
+    # Task 2: generate small-bin histogram of distribution
+    top_ranks, hist_ranks, bins = {}, [], 10
+    for d in anomaly_metrics:
+        item = (d.app, d.rank)
+        if item in top_ranks:
+            top_ranks[item].append(d)
+        else:
+            top_ranks[item] = [d]
+
+    top_ranks = sorted(top_ranks, key=lambda k, v: len(v), reverse=True)[:num]
+    hist_ranks, N, i = [0] * bins, math.ceil(len(top_ranks) / bins), 0
+    for k, v in top_ranks.items():
+        hist_ranks[i // N] += len(v)
+        i += 1
+    if len(top_ranks) > num:
+        top_ranks = top_ranks[:num]
+
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
@@ -170,7 +211,7 @@ def push_anomaly_metrics(anomaly_metrics: list):
             'RunStats': runStats,
             'nQueries': num,
             'Metric': metric,
-            'data': [top_new_data, top_all_data] # could be empty
+            'data': [top_new_data, top_all_data]  # could be empty
         }, 'update_metrics')
     ############## need to define new action 'update_metrics' in front end
 
