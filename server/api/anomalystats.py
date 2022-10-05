@@ -152,10 +152,10 @@ def push_anomaly_metrics(anomaly_metrics: list):
 
     # Option 1: no aggregation, pick top fids
     top_new_data = sorted(anomaly_metrics,
-                          key=lambda d: d.new_data[metric][runStats],
+                          key=lambda d: d['new_data'][metric][runStats],
                           reverse=True)
     top_all_data = sorted(anomaly_metrics,
-                          key=lambda d: d.all_data[metric][runStats],
+                          key=lambda d: d['all_data'][metric][runStats],
                           reverse=True)
 
     if len(top_new_data) > num:
@@ -167,38 +167,36 @@ def push_anomaly_metrics(anomaly_metrics: list):
     # Option 2: aggregate by fid
     # Task 1: pick top fids happening at more ranks
     # Task 2: generate small-bin histogram of distribution
-    top_fids, hist_fids, bins = {}, [], 10
+    top_fids, hist_fids = {}, []
     for d in anomaly_metrics:
-        item = (d.app, d.fid)
+        item = (d['app'], d['fid'])
         if item in top_fids:
-            top_fids[item].append(d)
+            top_fids[item] += 1
         else:
-            top_fids[item] = [d]
+            top_fids[item] = 1
 
-    top_fids = sorted(top_fids, key=lambda k, v: len(v), reverse=True)
-    hist_fids, N, i = [0] * bins, math.ceil(len(top_fids) / bins), 0
-    for k, v in top_fids.items():
-        hist_fids[i // N] += len(v)
-        i += 1
+    top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
+    hist_fids = [[item[0][0], item[0][1], item[1]] for item in top_fids]
     if len(top_fids) > num:
         top_fids = top_fids[:num]
 
     # Option 3: aggregate by rank
     # Task 1: pick top ranks with more fids
     # Task 2: generate small-bin histogram of distribution
-    top_ranks, hist_ranks, bins = {}, [], 10
+    top_ranks, hist_ranks = {}, []
     for d in anomaly_metrics:
-        item = (d.app, d.rank)
+        item = (d['app'], d['rank'])
         if item in top_ranks:
-            top_ranks[item].append(d)
+            top_ranks[item] += 1
         else:
-            top_ranks[item] = [d]
+            top_ranks[item] = 1
 
-    top_ranks = sorted(top_ranks, key=lambda k, v: len(v), reverse=True)[:num]
-    hist_ranks, N, i = [0] * bins, math.ceil(len(top_ranks) / bins), 0
-    for k, v in top_ranks.items():
-        hist_ranks[i // N] += len(v)
-        i += 1
+    ordered_ranks = sorted(top_ranks.items(), key=lambda item: item[0][1])
+    hist_ordered_ranks = [[item[0][0], item[0][1], item[1]]
+                          for item in ordered_ranks]
+    top_ranks = sorted(top_ranks.items(), key=lambda item: item[1],
+                       reverse=True)
+    hist_ranks = [[item[0][0], item[0][1], item[1]] for item in top_ranks]
     if len(top_ranks) > num:
         top_ranks = top_ranks[:num]
 
