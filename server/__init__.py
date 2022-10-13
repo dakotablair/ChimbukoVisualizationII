@@ -15,7 +15,7 @@ pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', ''),
              pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 0)),
              pdb_addr=os.environ.get('PROVDB_ADDR', ''),
              pdb_ninstance=int(os.environ.get('PROVDB_NINSTANCE', 1)),
-             pdb_addr_path=os.environ.get('PROVDB_ADDR_PATH','')
+             pdb_addr_path=os.environ.get('PROVDB_ADDR_PATH', '')
              )
 celery = Celery(__name__,
                 broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),

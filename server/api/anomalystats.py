@@ -421,9 +421,10 @@ def new_anomalydata():
     # todo: make information output with Location
     return jsonify({}), 201
 
+
 @api.route('/anomalymetrics', methods=['POST'])
 @make_async
-def new_anomalydata():
+def new_anomalymetrics():
     """
     Register anomaly data
 
