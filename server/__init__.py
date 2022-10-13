@@ -5,7 +5,7 @@ from flask_socketio import SocketIO
 from celery import Celery
 from .provdb import ProvDB
 from config import config
-from models import DataModel
+from .models import DataModel
 
 
 dm = DataModel()
