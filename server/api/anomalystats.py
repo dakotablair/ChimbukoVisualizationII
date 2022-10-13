@@ -1,6 +1,5 @@
 import os
 from flask import request, jsonify, abort, current_app
-from matplotlib.pyplot import hist
 
 from .. import db, dm
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
