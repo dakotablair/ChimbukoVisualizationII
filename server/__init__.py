@@ -8,9 +8,9 @@ from config import config
 from .models import DataModel
 
 
-dm = DataModel()
 # Flask extensions
 db = SQLAlchemy()
+dm = DataModel()
 socketio = SocketIO()
 pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', ''),
              pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 0)),
