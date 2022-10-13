@@ -5,11 +5,12 @@ from flask_socketio import SocketIO
 from celery import Celery
 from .provdb import ProvDB
 from config import config
-
+from .datamodel import DataModel
 
 # Flask extensions
 db = SQLAlchemy()
 socketio = SocketIO()
+dm = DataModel()
 pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', ''),
              pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 0)),
              pdb_addr=os.environ.get('PROVDB_ADDR', ''),
@@ -30,8 +31,6 @@ from .tasks import run_flask_request  # noqa
 # Import Socket.IO events so that they are registered with Flask-SocketIO
 from . import events  # noqa
 
-# global data structure
-dm = DataModel()
 
 def create_app(config_name=None, main=True):
     if config_name is None:
