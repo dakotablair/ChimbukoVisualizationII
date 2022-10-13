@@ -124,6 +124,8 @@ data/backup/
 *.json
 *.txt
 *.xlsx
+*.address.*
+*.map
 
 # MacOS
 .DS_Store
