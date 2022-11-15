@@ -219,11 +219,13 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     for d in top_ranks:
         ranks.append({'app': d[0][0],
                       'ind': d[0][1],
+                      'key': str(d[0][0]) + ':' + str(d[0][1]),
                       'count': d[1],
                       'create_at': ts})
     for d in top_fids:
         fids.append({'app': d[0][0],
                      'ind': d[0][1],
+                     'key': str(d[0][0]) + ':' + str(d[0][1]),
                      'count': d[1],
                      'create_at': ts})
 

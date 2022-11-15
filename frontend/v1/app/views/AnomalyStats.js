@@ -22,8 +22,7 @@ class AnomalyStats extends React.Component
     register_io = () => {
         if (this.socketio) {
             this.socketio.on('update_stats', data => {
-                console.log(data);
-                //this.updateChartData(data);
+                this.updateChartData(data);
             });            
         }
     }
@@ -48,6 +47,9 @@ class AnomalyStats extends React.Component
         //    console.log(newData[1]);
 
         newData.forEach( (category, index) => {
+            /*
+            ////// for anomaly_stats data //////
+            ////// need to filter with ts //////
             if (index == 0) {
                 const keys = new Set([]);
                 let stat = [...dataState[index].stat, ...category.stat];
@@ -70,6 +72,13 @@ class AnomalyStats extends React.Component
                     stat = stat.slice(0, nQueries);
                 dataState[index].stat = stat;
             }
+            */
+            ////// for anomaly_metrics //////
+            ////// each update only shows its own //////
+            let stat = category.stat;
+            if (nQueries < stat.length)
+                stat = stat.slice(0, nQueries);
+            dataState[index].stat = stat;
         });
 
         // console.log(dataState);
@@ -81,6 +90,7 @@ class AnomalyStats extends React.Component
         if (elem.length == 0)
             return;
 
+        //------To Do---------------------------
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
         const rank = this.state.data[datasetIndex].stat[index].rank;
@@ -101,28 +111,26 @@ class AnomalyStats extends React.Component
             if (index == 0) {
                 barData.push({
                     label: category.name,
-                    data: category.stat.map(d => d[statKind]),
+                    data: category.stat.map(d => d.count), // d => d[statKind]
                     backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
                     borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
                     borderWidth: 1,
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => d.key)); // xw
+                ranks.push(category.stat.map(d => d.key));
             }
             else {
-                if (category.stat.length != 0) {
-                    barData.push({
-                        label: category.name,
-                        data: category.stat.map(d => d.stats[statKind]),
-                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                        borderWidth: 1,
-                        hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                        hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-                    });
-                    ranks.push(category.stat.map(d => d.counter));
-                }
+                barData.push({
+                    label: category.name,
+                    data: category.stat.map(d => d.count), // d => d.stats[statKind]
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                    borderWidth: 1,
+                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                });
+                ranks.push(category.stat.map(d => d.key));
             }
 
             if (category.stat.length > maxLen)
@@ -130,7 +138,7 @@ class AnomalyStats extends React.Component
         });
 
         const _data = {
-            labels: maxLen==0?[]:ranks[0], // Array(maxLen).fill(0).map((_, i) => i),
+            labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => i), //ranks[0], 
             datasets: barData
         };
         // console.log("ready to show AnomalyStats:");
@@ -155,7 +163,7 @@ class AnomalyStats extends React.Component
                                     return `App:Rank-${content}`;
                                 }
                                 else {
-                                    return content;
+                                    return `App:Function-${content}`;
                                 }
                             }
                         }
