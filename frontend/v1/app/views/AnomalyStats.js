@@ -23,6 +23,7 @@ class AnomalyStats extends React.Component
         if (this.socketio) {
             this.socketio.on('update_stats', data => {
                 this.updateChartData(data);
+                console.log(data);
             });            
         }
     }

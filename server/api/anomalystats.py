@@ -143,11 +143,15 @@ def delete_old_func():
     # )
 
 
-def push_anomaly_metrics(anomaly_metrics: list):
+def push_anomaly_metrics(q, anomaly_metrics: list, ts):
+
+    # query arguments
+    nQueries = q.nQueries
+    statKind = q.statKind
 
     # use back end global data to obtain filtering conditions
-    runStats, num, metric = dm.filter_run_stats, dm.filter_num, \
-                            dm.filter_metrics
+    runStats, num, metric, bins = statKind, nQueries, \
+        dm.filter_metrics, dm.hist_bins
 
     # Option 1: no aggregation, pick top fids
     top_new_data = sorted(anomaly_metrics,
@@ -176,6 +180,8 @@ def push_anomaly_metrics(anomaly_metrics: list):
 
     top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
     hist_fids = [[item[0][0], item[0][1], item[1]] for item in top_fids]
+    M = min(bins, len(hist_fids))
+    reduced_hist_fids = [hist_fids[i * len(hist_fids) // M] for i in range(M)]
     if len(top_fids) > num:
         top_fids = top_fids[:num]
 
@@ -193,24 +199,49 @@ def push_anomaly_metrics(anomaly_metrics: list):
     ordered_ranks = sorted(top_ranks.items(), key=lambda item: item[0][1])
     hist_ordered_ranks = [[item[0][0], item[0][1], item[1]]
                           for item in ordered_ranks]
+    M = min(bins, len(hist_ordered_ranks))
+    reduced_hist_ordered_ranks = [hist_ordered_ranks[i *
+                                  len(hist_ordered_ranks) // M]
+                                  for i in range(M)]
     top_ranks = sorted(top_ranks.items(), key=lambda item: item[1],
                        reverse=True)
     hist_ranks = [[item[0][0], item[0][1], item[1]] for item in top_ranks]
+    M = min(bins, len(hist_ranks))
+    reduced_hist_ranks = [hist_ranks[i * len(hist_ranks) // M]
+                          for i in range(M)]
     if len(top_ranks) > num:
         top_ranks = top_ranks[:num]
 
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
-    if len(top_new_data) or len(top_all_data):
+    ranks, fids = [], []
+    for d in top_ranks:
+        ranks.append({'app': d[0][0],
+                      'ind': d[0][1],
+                      'count': d[1],
+                      'create_at': ts})
+    for d in top_fids:
+        fids.append({'app': d[0][0],
+                     'ind': d[0][1],
+                     'count': d[1],
+                     'create_at': ts})
+
+    if len(fids) or len(ranks):
+        top_dataset = {
+            'name': 'Top Ranks',
+            'stat': ranks
+        }
+        bottom_dataset = {
+            'name': 'Top Functions',
+            'stat': fids
+        }
         # broadcast the statistics to all clients
         push_data({
-            'RunStats': runStats,
-            'nQueries': num,
-            'Metric': metric,
-            'data': [top_new_data, top_all_data]  # could be empty
-        }, 'update_metrics')
-    ############## need to define new action 'update_metrics' in front end
+            'nQueries': nQueries,
+            'statKind': statKind,
+            'data': [top_dataset, bottom_dataset]
+        }, 'update_stats')
 
 
 def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
@@ -467,13 +498,31 @@ def new_anomalymetrics():
     if 'anomaly_metrics' not in data:
         return jsonify({}), 201
 
+    anomaly_stats = data.get('anomaly_stats', [])
+    ts = anomaly_stats.get('created_at', None)
+    if ts is None:
+        abort(400)
+
     anomaly_metrics = data['anomaly_metrics']
 
     # no long use internal db
 
     try:
+        # get query condition from database
+        q = AnomalyStatQuery.query. \
+            order_by(AnomalyStatQuery.created_at.desc()).first()
+
+        if q is None:
+            q = AnomalyStatQuery.create({
+                'nQueries': 5,
+                'statKind': 'stddev',
+                'ranks': []
+            })
+            db.session.add(q)
+            db.session.commit()
+        
         if len(anomaly_metrics):
-            push_anomaly_metrics(anomaly_metrics)
+            push_anomaly_metrics(q, anomaly_metrics, ts)
 
     except Exception as e:
         print(e)
@@ -520,9 +569,9 @@ def new_anomalystats():
     return jsonify({}), 200
 
 
-@api.route('/run_simulation', methods=['GET'])
+@api.route('/run_simulation_old', methods=['GET'])
 @make_async
-def run_simulation():
+def run_simulation_old():
     import time
     import glob
 
@@ -624,6 +673,70 @@ def run_simulation():
 
             if len(anomaly_data):
                 push_anomaly_data(q, anomaly_data)
+
+            time.sleep(1)
+    except Exception as e:
+        print('Exception on run simulation: ', e)
+        error = 'exception while running simulation'
+        pass
+
+    push_data({'result': error}, 'run_simulation')
+
+    return jsonify({}), 200
+
+
+@api.route('/run_simulation', methods=['GET'])
+@make_async
+def run_simulation():
+    import time
+    import glob
+
+    error = 'OK'
+    path = os.environ.get('SIMULATION_JSON', 'json/')
+    json_files = glob.glob(path + '*.json')
+    # extract number as index
+    ids = [int(f.split('_')[-1][:-5]) for f in json_files]
+    # sort as numeric values
+    inds = sorted(range(len(ids)), key=lambda k: ids[k])
+    files = [json_files[i] for i in inds]  # files in correct order
+
+    try:
+        at_beginning = True
+        for filename in files:
+            # print("File {} out of {} files.".format(filename, len(files)))
+            data, ts = None, None
+            with open(filename) as f:
+                loaded = json.load(f)
+                data = loaded.get('anomaly_metrics', None)
+                stats = loaded.get('anomaly_stats', None)
+                if stats:
+                    ts = stats.get('created_at', None)
+
+            if data is None:
+                if not at_beginning:
+                    time.sleep(0.2)
+                continue
+            else:
+                at_beginning = False
+
+            if ts is None:
+                abort(400)
+
+            # get query condition from database
+            q = AnomalyStatQuery.query. \
+                order_by(AnomalyStatQuery.created_at.desc()).first()
+
+            if q is None:
+                q = AnomalyStatQuery.create({
+                    'nQueries': 5,
+                    'statKind': 'stddev',
+                    'ranks': []
+                })
+                db.session.add(q)
+                db.session.commit()
+        
+            if len(data):
+                push_anomaly_metrics(q, data, ts)
 
             time.sleep(1)
     except Exception as e:
