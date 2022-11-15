@@ -22,8 +22,8 @@ class AnomalyStats extends React.Component
     register_io = () => {
         if (this.socketio) {
             this.socketio.on('update_stats', data => {
-                this.updateChartData(data);
                 console.log(data);
+                //this.updateChartData(data);
             });            
         }
     }
