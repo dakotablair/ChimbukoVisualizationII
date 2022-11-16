@@ -74,8 +74,16 @@ class AnomalyStats extends React.Component
             }
             */
             ////// for anomaly_metrics //////
-            ////// each update only shows its own //////
-            let stat = category.stat;
+            ////// partial order: (count, ts) //////
+            let stat = [...dataState[index].stat, ...category.stat];
+            stat.sort((a, b) => {
+                if (a.count == b.count) {
+                    return a.created_at > b.created_at ? -1 : 1;
+                }
+                else {
+                    return a.count > b.count ? -1 : 1;
+                }
+            })
             if (nQueries < stat.length)
                 stat = stat.slice(0, nQueries);
             dataState[index].stat = stat;
@@ -172,7 +180,7 @@ class AnomalyStats extends React.Component
                         yAxes: [{
                             scaleLabel: {
                                 display: true,
-                                labelString: statKind
+                                labelString: `count` //statKind
                             }
                         }]
                     }         
