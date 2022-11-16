@@ -138,7 +138,7 @@ class AnomalyStats extends React.Component
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => d.name.slice(0,10)));
+                ranks.push(category.stat.map(d => `${d.key}:${d.name}`));
             }
 
             if (category.stat.length > maxLen)
@@ -146,7 +146,7 @@ class AnomalyStats extends React.Component
         });
 
         const _data = {
-            labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => `${ranks[0][i]}\n${ranks[1][i]}`), //ranks[0], 
+            labels: maxLen==0?[]:ranks[0], //Array(maxLen).fill(0).map((_, i) => i),  
             datasets: barData
         };
         // console.log("ready to show AnomalyStats:");
