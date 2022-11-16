@@ -84,6 +84,13 @@ class AnomalyStats extends React.Component
                     return a.count > b.count ? -1 : 1;
                 }
             })
+            const keys = new Set([]);
+            stat = stat.filter((d, i) => {
+                if (keys.has(d.key))
+                    return false;
+                keys.add(d.key);
+                return true;
+            }); // when merged, only keep latest
             if (nQueries < stat.length)
                 stat = stat.slice(0, nQueries);
             dataState[index].stat = stat;
