@@ -171,7 +171,11 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     # Task 1: pick top fids happening at more ranks
     # Task 2: generate small-bin histogram of distribution
     top_fids, hist_fids = {}, []
+    first_step, last_step = float('inf'), -1  # the step range of the whole
     for d in anomaly_metrics:
+        s, t = d['new_data']['first_io_step'], d['new_data']['last_io_step']
+        first_step = min(first_step, s)
+        last_step = max(last_step, t)
         item = (d['app'], d['fid'], d['fname'].split()[0])
         if item in top_fids:
             top_fids[item] += 1
@@ -179,7 +183,8 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             top_fids[item] = 1
 
     top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
-    hist_fids = [[item[0][0], item[0][1], item[0][2], item[1]] for item in top_fids]
+    hist_fids = [[item[0][0], item[0][1], item[0][2], item[1]]
+                 for item in top_fids]
     M = min(bins, len(hist_fids))
     reduced_hist_fids = [hist_fids[i * len(hist_fids) // M] for i in range(M)]
     if len(top_fids) > num:
@@ -220,12 +225,16 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
         ranks.append({'app': d[0][0],
                       'ind': d[0][1],
                       'key': str(d[0][0]) + ':' + str(d[0][1]),
+                      'first_io_step': first_step,
+                      'last_io_step': last_step,
                       'count': d[1],
                       'create_at': ts})
     for d in top_fids:
         fids.append({'app': d[0][0],
                      'ind': d[0][1],
                      'key': str(d[0][0]) + ':' + str(d[0][1]),
+                     'first_io_step': first_step,
+                     'last_io_step': last_step,
                      'name': d[0][2],
                      'count': d[1],
                      'create_at': ts})
