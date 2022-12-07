@@ -187,7 +187,8 @@ class ChimbukoApp extends React.Component {
                     [key]: ev.target.value
                 });
         }
-        console.log(this.props.provdb_queries);
+        // console.log('set query key: ' + key);
+        // console.log(this.props.provdb_queries);
     }
 
     handleExecutionQueryRequest = ev => {
@@ -201,6 +202,7 @@ class ChimbukoApp extends React.Component {
             //'fid': xxx,
         };
         console.log(item);
+        
         if (this.props.get_execution) {
             this.props.get_execution(item);
         }
@@ -416,7 +418,7 @@ class ChimbukoApp extends React.Component {
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
@@ -427,7 +429,7 @@ class ChimbukoApp extends React.Component {
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
@@ -438,7 +440,7 @@ class ChimbukoApp extends React.Component {
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <Button 
