@@ -196,7 +196,8 @@ class ChimbukoApp extends React.Component {
 
         const item = {'app': prov_config.app,
             'rank': prov_config.rank,
-            'step': prov_config.step,
+            'step1': prov_config.step,
+            'step2': prov_config.step,
             //'fid': xxx,
         };
         if (this.props.get_execution) {
@@ -276,8 +277,8 @@ class ChimbukoApp extends React.Component {
         const { statKind, nQueries } = stats;
 
         const getSelectedName = () => {
-            const {app, rank, step} = execdata_config;
-            return `${app}:${rank}:${step}`;
+            const {app, rank, step1, step2} = execdata_config;
+            return `${app}:${rank}:${step1}:${step2}`;
         } 
 
         return (

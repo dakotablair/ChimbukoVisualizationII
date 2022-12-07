@@ -29,7 +29,8 @@ const INIT_STATE = {
     execdata_config: {
         app: -1,
         rank: -1,
-        step: -1,
+        step1: -1,
+        step2: -1,
         min_timestamp: -1,
         max_timestamp: -1
     },
