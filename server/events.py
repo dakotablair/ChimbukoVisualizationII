@@ -72,7 +72,6 @@ def get_execution_pdb():
     """
     pid = request.args.get('pid', None)
     rid = request.args.get('rid', None)
-    step = request.args.get('step', None)
     step1 = request.args.get('step1', None)
     step2 = request.args.get('step2', None)
     min_ts = request.args.get('min_ts', None)
@@ -81,7 +80,7 @@ def get_execution_pdb():
     if all(v is None for v in [pid, rid, step1, step2]):
         abort(400)
 
-    print("queried:", pid, rid, step, step1, step2, min_ts, max_ts)
+    print("queried:", pid, rid, step1, step2, min_ts, max_ts)
 
     # parse options
     order = request.args.get('order', 'asc')

@@ -37,8 +37,8 @@ export function unset_watched_rank(rank) {
 
 export function get_execution(item) {
     return dispatch => {
-        const {app, rank, step, min_timestamp, max_timestamp} = item;
-        const arg1 = `pid=${app}&rid=${rank}&step=${step}`;
+        const {app, rank, step1, step2, min_timestamp, max_timestamp} = item;
+        const arg1 = `pid=${app}&rid=${rank}&step1=${step1}&step2=${step2}`;
         const arg2 = `min_ts=${min_timestamp}&max_ts=${max_timestamp}`;
         const arg3 = `order=desc`;
         const url = `/events/query_executions_pdb?${arg1}&${arg2}&${arg3}`;
