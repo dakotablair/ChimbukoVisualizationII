@@ -102,6 +102,8 @@ class AnomalyStats extends React.Component
     }
                 
     handleBarClick = elem => {
+        console.log('Internal BarClick: ' + elem);
+
         if (elem.length == 0)
             return;
 

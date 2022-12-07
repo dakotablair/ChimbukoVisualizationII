@@ -139,8 +139,27 @@ class ChimbukoApp extends React.Component {
         }
     }
 
+    handleStatsExecutionRequest = (item) => {
+        ////TBD////
+        // const { execdata_config:config } = this.props;
+        // const { provdb_queries:prov_config} = this.props;
+
+        // const item = {'app': prov_config.app,
+        //     'rank': prov_config.rank,
+        //     'step1': prov_config.step,
+        //     'step2': prov_config.step,
+        //     //'fid': xxx,
+        // };
+        // console.log(item);
+        
+        // if (this.props.get_execution) {
+        //     this.props.get_execution(item);
+        // }
+    }
+
     handleHistoryRequest = rank => {
-        // console.log('onBarClick: ' + rank);
+        console.log('onBarClick: ' + rank);
+
         if (isNaN(rank))
             return;
 
