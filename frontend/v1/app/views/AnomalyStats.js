@@ -102,7 +102,8 @@ class AnomalyStats extends React.Component
     }
                 
     handleBarClick = elem => {
-        console.log('Internal BarClick: ' + elem);
+        console.log('Internal BarClick: ');
+        console.log(elem);
 
         if (elem.length == 0)
             return;
@@ -121,6 +122,7 @@ class AnomalyStats extends React.Component
         const { data } = this.state;
 
         const ranks = [];
+        const ioSteps = []; 
         const barData = [];
         let maxLen = 0;
         data.forEach((category, index) => {
@@ -136,6 +138,7 @@ class AnomalyStats extends React.Component
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
                 ranks.push(category.stat.map(d => d.key));
+                ioSteps.push(category.stat.map(d => `${d.first_io_step}-${d.last_io_step}`));
             }
             else {
                 barData.push({
@@ -148,6 +151,7 @@ class AnomalyStats extends React.Component
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
                 ranks.push(category.stat.map(d => `${d.key}:${d.name}`));
+                ioSteps.push(category.stat.map(d => `${d.first_io_step}-${d.last_io_step}`));
             }
 
             if (category.stat.length > maxLen)
@@ -175,12 +179,13 @@ class AnomalyStats extends React.Component
                             title: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
-                                const content = ranks[datasetIndex][index];
+                                const content1 = ranks[datasetIndex][index];
+                                const content2 = ioSteps[datasetIndex][index];
                                 if (datasetIndex == 0) {    
-                                    return `App:Rank-${content}`;
+                                    return `App:Rank-${content1}; Step:${content2}`;
                                 }
                                 else {
-                                    return `App:Fid:Name-${content}`;
+                                    return `App:Fid:Name-${content1}; Step:${content2}`;
                                 }
                             }
                         }
