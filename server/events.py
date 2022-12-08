@@ -38,7 +38,7 @@ def load_execution_provdb(conditions):
     filtered_records = []
     pid, rid, step1, step2, fid, severity, score = conditions[0], \
         conditions[1], conditions[2], conditions[3], conditions[4], \
-        conditions[5]
+        conditions[5], conditions[6]
     # collection = pdb.open('anomalies')  # default collection
     jx9_filter = None
     if rid:  # query by rank
