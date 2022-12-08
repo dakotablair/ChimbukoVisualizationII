@@ -31,7 +31,7 @@ const INIT_STATE = {
         rank: -1,
         step1: -1,
         step2: -1,
-        func: -1,
+        fid: -1,
         min_timestamp: -1,
         max_timestamp: -1
     },

@@ -295,15 +295,15 @@ class ChimbukoApp extends React.Component {
         const { statKind, nQueries } = stats;
 
         const getSelectedName = () => {
-            const {app, rank, step1, step2, func} = execdata_config;
-            if (parseInt(func) == -1) {
+            const {app, rank, step1, step2, fid} = execdata_config;
+            if (parseInt(fid) == -1) {
                 return `a${app}r${rank}s${step1}t${step2}`;
             }
             else {
                 if (parseInt(rank) == -1)
-                    return `a${app}f${func}s${step1}t${step2}`;
+                    return `a${app}f${fid}s${step1}t${step2}`;
                 else
-                    return `a${app}r${rank}f${func}s${step1}t${step2}`;
+                    return `a${app}r${rank}f${fid}s${step1}t${step2}`;
             }
         }
 
