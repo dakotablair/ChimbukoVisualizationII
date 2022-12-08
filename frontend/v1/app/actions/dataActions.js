@@ -37,9 +37,9 @@ export function unset_watched_rank(rank) {
 
 export function get_execution(item) {
     return dispatch => {
-        const {app, rank, step1, step2, fid} = item;
+        const {app, rank, step1, step2, fid, severity, score} = item;
         const arg1 = `pid=${app}&rid=${rank}&step1=${step1}&step2=${step2}`;
-        const arg2 = `fid=${fid}`;
+        const arg2 = `fid=${fid}&severity=${severity}&score=${score}`;
         const arg3 = `order=desc`;
         const url = `/events/query_executions_pdb?${arg1}&${arg2}&${arg3}`;
         axios.get(url)

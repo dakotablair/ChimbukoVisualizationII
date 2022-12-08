@@ -146,7 +146,9 @@ class ChimbukoApp extends React.Component {
             'rank': stat.hasOwnProperty('name') ? '-1' : stat.ind,
             'step1': stat.first_io_step,
             'step2': stat.last_io_step,
-            'fid': stat.hasOwnProperty('name') ? stat.ind : '-1'
+            'fid': stat.hasOwnProperty('name') ? stat.ind : '-1',
+            // 'severity': '-1',  // TBD
+            // 'score': '-1',  //TBD
         };
 
         console.log(item);
@@ -212,9 +214,11 @@ class ChimbukoApp extends React.Component {
 
         const item = {'app': prov_config.app,
             'rank': prov_config.rank,
-            'step1': prov_config.step,
-            'step2': prov_config.step,
+            'step1': prov_config.step1,
+            'step2': prov_config.step2,
             'fid': prov_config.func,
+            'severity': prov_config.severity,
+            'score': prov_config.score,
         };
         console.log(item);
         
@@ -224,6 +228,7 @@ class ChimbukoApp extends React.Component {
     }
 
     handleExecutionRequest = (item) => {
+        // for AnomalyHistory only, to be removed
         const { execdata_config:config } = this.props;
         
         const is_same = Object.keys(config).map(key => {
@@ -287,7 +292,7 @@ class ChimbukoApp extends React.Component {
             "count", "accumulate"
         ];
         const funcFeat = [
-            "function_id", "event_id",
+            "function_id", "event_id", "rid",
             "entry", "exit", "runtime_total", "runtime_exclusive",
             "io_step", "outlier_score", "outlier_severity", "is_gpu_event"
         ];
@@ -378,7 +383,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={6}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -419,9 +424,9 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={1}>
+                    <Grid item xs={2}>
                         <div className={classes.viewroot}>
-                            <div className={classes.viewroot} style={{width: 200}}>
+                            <div className={classes.viewroot} style={{width: 100}}>
                                 <TextField
                                     id="hist-app"
                                     label="app id"
@@ -445,10 +450,21 @@ class ChimbukoApp extends React.Component {
                                 >
                                 </TextField>
                                 <TextField
-                                    id="hist-step"
-                                    label="step id"
-                                    value={provdb_queries.step || 0}
-                                    onChange={this.handleExecutionQuery('step')}
+                                    id="hist-step1"
+                                    label="first_io_step id"
+                                    value={provdb_queries.step1 || 0}
+                                    onChange={this.handleExecutionQuery('step1')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:1000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-step2"
+                                    label="last_io_step id"
+                                    value={provdb_queries.step2 || 0}
+                                    onChange={this.handleExecutionQuery('step2')}
                                     type="number"
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
@@ -464,6 +480,28 @@ class ChimbukoApp extends React.Component {
                                     className={clsx(classes.margin, classes.textField)}
                                     margin="dense"
                                     inputProps={{min: 0, max:1000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-severity"
+                                    label="severity (in ms)"
+                                    value={provdb_queries.severity || 0}
+                                    onChange={this.handleExecutionQuery('severity')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-score"
+                                    label="score"
+                                    value={provdb_queries.score || 0}
+                                    onChange={this.handleExecutionQuery('score')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:10000, step: 1}}
                                 >
                                 </TextField>
                                 <Button 
