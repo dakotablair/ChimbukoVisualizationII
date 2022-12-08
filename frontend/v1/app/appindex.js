@@ -58,13 +58,17 @@ const styles = theme => ({
         width: '100%'
     },
     col: {
-        margin: '2px'
+        display: 'flex',
+        flexWrap: 'wrap',
     },
     margin: {
         margin: theme.spacing(1)
     },
-    textField: {
+    textField_wide: {
         flexBasis: 200
+    },
+    textField_narrow: {
+        flexBasis: 100
     },
     chip: {
         padding: theme.spacing(3, 2),
@@ -342,7 +346,7 @@ class ChimbukoApp extends React.Component {
                                     value={statKind || "mean"}
                                     onChange={this.handleStatChange('statKind')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {
@@ -426,14 +430,14 @@ class ChimbukoApp extends React.Component {
                     </Grid>
                     <Grid item xs={2}>
                         <div className={classes.viewroot}>
-                            <div className={classes.row} /*style="width: 100px;"*/>
+                            <div className={classes.viewroot} /*style="width: 100px;"*/>
                                 <TextField
                                     id="hist-app"
                                     label="app id"
                                     value={provdb_queries.app || 0}
                                     onChange={this.handleExecutionQuery('app')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
@@ -444,29 +448,29 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.rank || 0}
                                     onChange={this.handleExecutionQuery('rank')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
                                     id="hist-step1"
-                                    label="first_io_step id"
+                                    label="first_io_step"
                                     value={provdb_queries.step1 || 0}
                                     onChange={this.handleExecutionQuery('step1')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
                                     id="hist-step2"
-                                    label="last_io_step id"
+                                    label="last_io_step"
                                     value={provdb_queries.step2 || 0}
                                     onChange={this.handleExecutionQuery('step2')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:1000, step: 1}}
                                 >
@@ -477,7 +481,7 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.func || 0}
                                     onChange={this.handleExecutionQuery('func')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:1000, step: 1}}
                                 >
@@ -488,7 +492,7 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.severity || 0}
                                     onChange={this.handleExecutionQuery('severity')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100000, step: 1}}
                                 >
@@ -499,7 +503,7 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.score || 0}
                                     onChange={this.handleExecutionQuery('score')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:10000, step: 1}}
                                 >
