@@ -139,27 +139,24 @@ class ChimbukoApp extends React.Component {
         }
     }
 
-    handleStatsExecutionRequest = (item) => {
-        ////TBD////
-        // const { execdata_config:config } = this.props;
-        // const { provdb_queries:prov_config} = this.props;
+    handleStatsExecutionRequest = (stat) => {
+        console.log(stat);
 
-        // const item = {'app': prov_config.app,
-        //     'rank': prov_config.rank,
-        //     'step1': prov_config.step,
-        //     'step2': prov_config.step,
-        //     //'fid': xxx,
-        // };
-        // console.log(item);
+        const item = {'app': stat.app,
+            'rank': stat.hasAttribute('name') ? null : stat.ind,
+            'step1': stat.first_io_step,
+            'step2': stat.last_io_step,
+            'fid': stat.hasAttribute('name') ? stat.ind : null
+        };
+
+        console.log(item);
         
-        // if (this.props.get_execution) {
-        //     this.props.get_execution(item);
-        // }
+        if (this.props.get_execution) {
+            this.props.get_execution(item);
+        }
     }
 
     handleHistoryRequest = rank => {
-        console.log('onBarClick: ' + rank);
-
         if (isNaN(rank))
             return;
 
@@ -211,14 +208,13 @@ class ChimbukoApp extends React.Component {
     }
 
     handleExecutionQueryRequest = ev => {
-        const { execdata_config:config } = this.props;
         const { provdb_queries:prov_config} = this.props;
 
         const item = {'app': prov_config.app,
             'rank': prov_config.rank,
             'step1': prov_config.step,
             'step2': prov_config.step,
-            //'fid': xxx,
+            'fid': prov_config.func,
         };
         console.log(item);
         
@@ -300,7 +296,7 @@ class ChimbukoApp extends React.Component {
 
         const getSelectedName = () => {
             const {app, rank, step1, step2} = execdata_config;
-            return `${app}:${rank}:${step1}-${step2}`;
+            return `${app}:${rank}:${step1},${step2}`;
         } 
 
         return (
@@ -369,7 +365,7 @@ class ChimbukoApp extends React.Component {
                                     socketio={this.socketio}
                                     nQueries={nQueries}
                                     statKind={statKind}
-                                    onBarClick={this.handleHistoryRequest}
+                                    onBarClick={this.handleStatsExecutionRequest}  // {this.handleHistoryRequest}
                                 />
                             </div>
                         </div>

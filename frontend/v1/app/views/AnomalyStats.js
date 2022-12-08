@@ -102,19 +102,17 @@ class AnomalyStats extends React.Component
     }
                 
     handleBarClick = elem => {
-        console.log('Internal BarClick: ');
-        console.log(elem);
-
+        // first entry of bar click
+        
         if (elem.length == 0)
             return;
 
-        //------To Do---------------------------
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
-        const rank = this.state.data[datasetIndex].stat[index].rank;
+        let stat = this.state.data[datasetIndex].stat[index];
 
         if (this.props.onBarClick)
-            this.props.onBarClick(rank);
+            this.props.onBarClick(stat);
     }
 
     render() {

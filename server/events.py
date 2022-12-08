@@ -26,26 +26,53 @@ def push_data(data, event='updated_data',  namespace='/events'):
     socketio.emit(event, data, namespace=namespace)
 
 
-def load_execution_provdb(pid, rid, step1, step2):
+def load_execution_provdb(pid, rid, step1, step2, fid):
     """Load execution data from provdb as unqlite file"""
 
-    print("load_execution_provdb:", pid, rid, step1, step2)
+    print("load_execution_provdb:", pid, rid, step1, step2, fid)
     filtered_records = []
     # collection = pdb.open('anomalies')  # default collection
-    jx9_filter = "function($record) { return " \
-        "$record.pid == %d && " \
-        "$record.rid == %d && " \
-        "$record.io_step >= %d && " \
-        "$record.io_step <= %d; } " % (int(pid),
-                                       int(rid),  # random.randint(0, 1),
-                                       int(step1),  # random.randint(0, 8)),
-                                       int(step2))  # int(step1) + 1
+    jx9_filter = None
+    if rid:
+        if not fid:
+            jx9_filter = "function($record) { return " \
+                "$record.pid == %d && " \
+                "$record.rid == %d && " \
+                "$record.io_step >= %d && " \
+                "$record.io_step <= %d;} " % (int(pid),
+                                              int(rid),  # random.randint(0, 1),
+                                              int(step1),  # random.randint(0, 8)),
+                                              int(step2))  # int(step1) + 1
+        else:
+            jx9_filter = "function($record) { return " \
+                "$record.pid == %d && " \
+                "$record.rid == %d && " \
+                "$record.fid == %d && " \
+                "$record.io_step >= %d && " \
+                "$record.io_step <= %d;} " % (int(pid),
+                                              int(rid),  # random.randint(0, 1),
+                                              int(fid),
+                                              int(step1),  # random.randint(0, 8)),
+                                              int(step2))  # int(step1) + 1
+    else:
+        if fid:
+            jx9_filter = "function($record) { return " \
+                "$record.pid == %d && " \
+                "$record.fid == %d && " \
+                "$record.io_step >= %d && " \
+                "$record.io_step <= %d;} " % (int(pid),
+                                              int(fid),  # random.randint(0, 1),
+                                              int(step1),  # random.randint(0, 8)),
+                                              int(step2))  # int(step1) + 1
+        else:
+            print("Error: requires at least one of [rid, fid]")
+            return filtered_records
+
     if pdb and pdb.pdb_collections:
         for col in pdb.pdb_collections:
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result
-    print("{} records from provdb".format(
-        len(filtered_records)))
+    print("{} records from provdb".format(len(filtered_records)))
 
     # gpu_count = 0
     # for record in filtered_records:  # reduced_records:
@@ -60,33 +87,29 @@ def load_execution_provdb(pid, rid, step1, step2):
 def get_execution_pdb():
     """
     Return a list of execution data within a given time range
-    - required:
         pid: program index
         rid: rank index
         step1: lower io_step index
         step2: upper io_step index
-    - options
-        min_ts: minimum timestamp
-        max_ts: maximum timestamp
+        fid: function index
         order: [(asc) | desc]
     """
     pid = request.args.get('pid', None)
     rid = request.args.get('rid', None)
     step1 = request.args.get('step1', None)
     step2 = request.args.get('step2', None)
-    min_ts = request.args.get('min_ts', None)
-    max_ts = request.args.get('max_ts', None)
+    fid = request.args.get('fid', None)
 
     if all(v is None for v in [pid, rid, step1, step2]):
         abort(400)
 
-    print("queried:", pid, rid, step1, step2, min_ts, max_ts)
+    print("queried:", pid, rid, step1, step2, fid)
 
     # parse options
     order = request.args.get('order', 'asc')
 
     execdata = []
-    execdata = load_execution_provdb(pid, rid, step1, step2)
+    execdata = load_execution_provdb(pid, rid, step1, step2, fid)
     sort_desc = order == 'desc'
     execdata.sort(key=lambda d: d['entry'], reverse=sort_desc)
 
