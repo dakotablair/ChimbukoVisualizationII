@@ -426,7 +426,7 @@ class ChimbukoApp extends React.Component {
                     </Grid>
                     <Grid item xs={2}>
                         <div className={classes.viewroot}>
-                            <div className={classes.viewroot} style={{width: 100}}>
+                            <div className={classes.row} /*style="width: 100px;"*/>
                                 <TextField
                                     id="hist-app"
                                     label="app id"
