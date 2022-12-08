@@ -143,10 +143,10 @@ class ChimbukoApp extends React.Component {
         console.log(stat);
 
         const item = {'app': stat.app,
-            'rank': stat.hasAttribute('name') ? null : stat.ind,
+            'rank': stat.hasOwnProperty('name') ? null : stat.ind,
             'step1': stat.first_io_step,
             'step2': stat.last_io_step,
-            'fid': stat.hasAttribute('name') ? stat.ind : null
+            'fid': stat.hasOwnProperty('name') ? stat.ind : null
         };
 
         console.log(item);
