@@ -33,8 +33,8 @@ def load_execution_provdb(pid, rid, step1, step2, fid):
     filtered_records = []
     # collection = pdb.open('anomalies')  # default collection
     jx9_filter = None
-    if rid:
-        if not fid:
+    if rid is not 'null':
+        if fid is 'null':
             jx9_filter = "function($record) { return " \
                 "$record.pid == %d && " \
                 "$record.rid == %d && " \
@@ -55,7 +55,7 @@ def load_execution_provdb(pid, rid, step1, step2, fid):
                                               int(step1),  # random.randint(0, 8)),
                                               int(step2))  # int(step1) + 1
     else:
-        if fid:
+        if fid is not 'null':
             jx9_filter = "function($record) { return " \
                 "$record.pid == %d && " \
                 "$record.fid == %d && " \
