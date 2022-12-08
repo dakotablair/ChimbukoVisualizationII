@@ -151,8 +151,8 @@ class ChimbukoApp extends React.Component {
             'step1': stat.first_io_step,
             'step2': stat.last_io_step,
             'fid': stat.hasOwnProperty('name') ? stat.ind : '-1',
-            // 'severity': '-1',  // TBD
-            // 'score': '-1',  //TBD
+            'severity': '-1',  // TBD
+            'score': '-1',  //TBD
         };
 
         console.log(item);
@@ -363,7 +363,7 @@ class ChimbukoApp extends React.Component {
                                     value={nQueries || 5}
                                     onChange={this.handleStatChange('nQueries')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
@@ -488,7 +488,7 @@ class ChimbukoApp extends React.Component {
                                 </TextField>
                                 <TextField
                                     id="hist-severity"
-                                    label="severity (in ms)"
+                                    label="severity (ms)"
                                     value={provdb_queries.severity || 0}
                                     onChange={this.handleExecutionQuery('severity')}
                                     type="number"
@@ -535,7 +535,7 @@ class ChimbukoApp extends React.Component {
                                     value={this.state.funcX}
                                     onChange={this.handleFuncAxisChange('funcX')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {
@@ -552,7 +552,7 @@ class ChimbukoApp extends React.Component {
                                     value={this.state.funcY}
                                     onChange={this.handleFuncAxisChange('funcY')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {

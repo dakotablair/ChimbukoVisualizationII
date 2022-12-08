@@ -28,7 +28,7 @@ def push_data(data, event='updated_data',  namespace='/events'):
 
 def load_execution_provdb(conditions):
     """Load execution data from provdb as unqlite file
-    
+
     Assumption: must query by pid and io_steps at least, they could be -1,
     to return nothing
     """
@@ -38,7 +38,7 @@ def load_execution_provdb(conditions):
     filtered_records = []
     pid, rid, step1, step2, fid, severity, score = conditions[0], \
         conditions[1], conditions[2], conditions[3], conditions[4], \
-        conditions[6]
+        conditions[5]
     # collection = pdb.open('anomalies')  # default collection
     jx9_filter = None
     if rid:  # query by rank
