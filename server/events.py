@@ -27,14 +27,19 @@ def push_data(data, event='updated_data',  namespace='/events'):
 
 
 def load_execution_provdb(pid, rid, step1, step2, fid):
-    """Load execution data from provdb as unqlite file"""
+    """Load execution data from provdb as unqlite file
+    
+    Assumption: must query by pid and io_steps at least, they could be -1,
+    to return nothing
+    """
 
     print("load_execution_provdb:", pid, rid, step1, step2, fid)
+
     filtered_records = []
     # collection = pdb.open('anomalies')  # default collection
     jx9_filter = None
-    if rid is not 'null':
-        if fid is 'null':
+    if int(rid) != -1:  # query by rank
+        if int(fid) == -1:  # only by rank and io_steps
             jx9_filter = "function($record) { return " \
                 "$record.pid == %d && " \
                 "$record.rid == %d && " \
@@ -43,7 +48,7 @@ def load_execution_provdb(pid, rid, step1, step2, fid):
                                               int(rid),  # random.randint(0, 1),
                                               int(step1),  # random.randint(0, 8)),
                                               int(step2))  # int(step1) + 1
-        else:
+        else:  # query by rank and fid and io_steps
             jx9_filter = "function($record) { return " \
                 "$record.pid == %d && " \
                 "$record.rid == %d && " \
@@ -54,8 +59,8 @@ def load_execution_provdb(pid, rid, step1, step2, fid):
                                               int(fid),
                                               int(step1),  # random.randint(0, 8)),
                                               int(step2))  # int(step1) + 1
-    else:
-        if fid is not 'null':
+    else:  # rank is unknown
+        if int(fid) != -1:  # query by fid and io_steps
             jx9_filter = "function($record) { return " \
                 "$record.pid == %d && " \
                 "$record.fid == %d && " \
@@ -64,7 +69,7 @@ def load_execution_provdb(pid, rid, step1, step2, fid):
                                               int(fid),  # random.randint(0, 1),
                                               int(step1),  # random.randint(0, 8)),
                                               int(step2))  # int(step1) + 1
-        else:
+        else: # both rank and fid are unknown
             print("Error: requires at least one of [rid, fid]")
             return filtered_records
 
