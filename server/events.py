@@ -54,7 +54,7 @@ def load_execution_provdb(conditions):
                                                         int(rid),
                                                         int(step1),
                                                         int(step2),
-                                                        float(severity)/1000,
+                                                        float(severity)*1000,
                                                         float(score))
             elif severity and not score:
                 jx9_filter = "function($record) { return " \
@@ -66,7 +66,7 @@ def load_execution_provdb(conditions):
                                                            int(rid),
                                                            int(step1),
                                                            int(step2),
-                                                           float(severity)/1000)
+                                                           float(severity)*1000)
             elif not severity and score:
                 jx9_filter = "function($record) { return " \
                     "$record.pid == %d && " \
@@ -101,7 +101,7 @@ def load_execution_provdb(conditions):
                                                         int(fid),
                                                         int(step1),
                                                         int(step2),
-                                                        float(severity)/1000,
+                                                        float(severity)*1000,
                                                         float(score))
             elif severity and not score:
                 jx9_filter = "function($record) { return " \
@@ -115,7 +115,7 @@ def load_execution_provdb(conditions):
                                                            int(fid),
                                                            int(step1),
                                                            int(step2),
-                                                           float(severity)/1000)
+                                                           float(severity)*1000)
             elif not severity and score:
                 jx9_filter = "function($record) { return " \
                     "$record.pid == %d && " \
@@ -153,7 +153,7 @@ def load_execution_provdb(conditions):
                                                   int(fid),
                                                   int(step1),
                                                   int(step2),
-                                                  float(severity)/1000,
+                                                  float(severity)*1000,
                                                   float(score))
             elif severity and not score:
                 jx9_filter = "function($record) { return " \
@@ -165,7 +165,7 @@ def load_execution_provdb(conditions):
                                                            int(fid),
                                                            int(step1),
                                                            int(step2),
-                                                           float(severity)/1000)
+                                                           float(severity)*1000)
             elif not severity and score:
                 jx9_filter = "function($record) { return " \
                     "$record.pid == %d && " \
