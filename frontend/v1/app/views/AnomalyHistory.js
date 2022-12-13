@@ -29,7 +29,7 @@ class AnomalyHistory extends React.Component
         if (chartData.length === 0)
             return;
 
-        console.log(chartData);
+        // console.log(chartData);
 
         const { data:newData } = chartData;
         let { data:dataState } = this.state;
@@ -127,7 +127,7 @@ class AnomalyHistory extends React.Component
                                     return `App:Rank-${content1}`;
                                 }
                                 else {
-                                    return `App:Fid:Name-${content1}`;
+                                    return `App:Fid:Name-${content2}`;
                                 }
                             }
                         }
