@@ -121,13 +121,11 @@ class AnomalyHistory extends React.Component
                             title: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
-                                const content1 = ranks[datasetIndex][index];
-                                const content2 = funcs[datasetIndex][index];
                                 if (datasetIndex == 0) {    
-                                    return `App:Rank-${content1}`;
+                                    return `App:Rank-${ranks[datasetIndex][index]}`;
                                 }
                                 else {
-                                    return `App:Fid:Name-${content2}`;
+                                    return `App:Fid:Name-${funcs[datasetIndex][index]}`;
                                 }
                             }
                         }
