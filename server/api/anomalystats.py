@@ -261,6 +261,11 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             'data': [top_dataset, bottom_dataset]
         }, 'update_stats')
 
+        push_data({
+            'data': [{'name': 'Ranks', 'stat': reduced_hist_ranks},
+                     {'name': 'Functions', 'stat': reduced_hist_fids}]
+        }, 'update_history')
+
 
 def push_anomaly_stat(q, anomaly_stats: list, anomaly_counters):
 
@@ -309,7 +314,7 @@ def push_anomaly_data(q, anomaly_data: list):
     push_data(selected, 'update_history')
 
 
-@api.route('/anomalydata', methods=['POST'])
+@api.route('/anomalydata_old', methods=['POST'])
 @make_async
 def new_anomalydata():
     """
@@ -471,7 +476,7 @@ def new_anomalydata():
     return jsonify({}), 201
 
 
-@api.route('/anomalymetrics', methods=['POST'])
+@api.route('/anomalydata', methods=['POST'])
 @make_async
 def new_anomalymetrics():
     """

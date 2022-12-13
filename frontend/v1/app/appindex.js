@@ -38,7 +38,7 @@ import clsx from 'clsx';
 //import Paper from '@material-ui/core/Paper'
 
 import AnomalyStats from './views/AnomalyStats';
-import AnomalyHistory from './views/AnomalyHistory';
+import AnomalyHistory from './views/AnomalyHistory_old';
 // import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
@@ -232,17 +232,19 @@ class ChimbukoApp extends React.Component {
     }
 
     handleExecutionRequest = (item) => {
-        // for AnomalyHistory only, to be removed
-        const { execdata_config:config } = this.props;
-        
-        const is_same = Object.keys(config).map(key => {
-            return config[key] === item[key];
-        }).every(v => v);
+        // for AnomalyHistory
+        console.log(item);
 
-        if (!is_same && this.props.get_execution) {
-            this.props.get_execution(item);
-        }
-        // console.log('test');
+        // const { execdata_config:config } = this.props;
+        
+        // const is_same = Object.keys(config).map(key => {
+        //     return config[key] === item[key];
+        // }).every(v => v);
+
+        // if (!is_same && this.props.get_execution) {
+        //     this.props.get_execution(item);
+        // }
+        
     }
 
     handleSwitch = name => ev => {
@@ -418,12 +420,8 @@ class ChimbukoApp extends React.Component {
                             <div className={classes.row}>
                                 <AnomalyHistory
                                     height={200}
-                                    ranks={watched_ranks}
-                                    colors={rank_colors}
                                     socketio={this.socketio}
-                                    onLegendClick={this.handleHistoryRemove}
                                     onBarClick={this.handleExecutionRequest}
-                                    pause={this.state.pause}
                                 />                            
                             </div>
                         </div>
