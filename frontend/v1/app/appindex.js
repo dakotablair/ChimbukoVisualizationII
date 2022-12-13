@@ -38,7 +38,7 @@ import clsx from 'clsx';
 //import Paper from '@material-ui/core/Paper'
 
 import AnomalyStats from './views/AnomalyStats';
-import AnomalyHistory from './views/AnomalyHistory_old';
+import AnomalyHistory from './views/AnomalyHistory';
 // import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
