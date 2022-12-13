@@ -171,8 +171,8 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     # Task 1: pick top fids happening at more ranks
     # Task 2: generate small-bin histogram of distribution
     top_fids, hist_fids = {}, []
-    _test_fid = []
-    _test_ind = 333
+    # _test_fid = []
+    # _test_ind = 333
     first_step, last_step = float('inf'), -1  # the step range of the whole
     for d in anomaly_metrics:
         s, t = d['new_data']['first_io_step'], d['new_data']['last_io_step']
@@ -183,10 +183,10 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             top_fids[item] += 1
         else:
             top_fids[item] = 1
-        if int(item[1]) == _test_ind:
-            _test_fid.append(d['rank'])
+        # if int(item[1]) == _test_ind:
+        #     _test_fid.append(d['rank'])
     
-    print("Function {}'s ranks are: {}\n".format(_test_ind, _test_fid))
+    # print("Function {}'s ranks are: {}\n".format(_test_ind, _test_fid))
 
     top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
     hist_fids = [[item[0][0], item[0][1], item[0][2], item[1]]
@@ -754,7 +754,7 @@ def run_simulation():
                 db.session.commit()
         
             if len(data):
-                print("Received file: {}\n".format(filename))
+                # print("Received file: {}\n".format(filename))
                 push_anomaly_metrics(q, data, ts)
 
             time.sleep(1)
