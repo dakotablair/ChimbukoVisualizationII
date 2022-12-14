@@ -68,8 +68,7 @@ class AnomalyHistory extends React.Component
         const { height } = this.props;
         const { data } = this.state;
 
-        const ranks = [];
-        const funcs = []; 
+        const info = [];
         const lineData = [];
         let maxLen = 0;
         data.forEach((category, index) => {
@@ -84,7 +83,7 @@ class AnomalyHistory extends React.Component
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => `${d[0]}:${d[1]}`));
+                info.push(category.stat.map(d => `${d[0]}:${d[1]}`));
             }
             else { // funcitons
                 lineData.push({
@@ -96,18 +95,15 @@ class AnomalyHistory extends React.Component
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                funcs.push(category.stat.map(d => `${d[0]}:${d[1]}:${d[2]}`));
+                info.push(category.stat.map(d => `${d[0]}:${d[1]}:${d[2]}`));
             }
 
             if (category.stat.length > maxLen)
                 maxLen = category.stat.length;
         });
 
-        console.log(ranks);
-        console.log(funcs);
-
         const _data = {
-            labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => i),  //ranks[0], 
+            labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => i),  //info[0], 
             datasets: lineData
         };
 
@@ -125,10 +121,10 @@ class AnomalyHistory extends React.Component
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
                                 if (datasetIndex == 0) {    
-                                    return `App:Rank-${ranks[datasetIndex][index]}`;
+                                    return `App:Rank-${info[datasetIndex][index]}`;
                                 }
                                 else {
-                                    return `App:Fid:Name-${funcs[datasetIndex][index]}`;
+                                    return `App:Fid:Name-${info[datasetIndex][index]}`;
                                 }
                             }
                         }
