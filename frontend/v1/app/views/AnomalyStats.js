@@ -47,6 +47,9 @@ class AnomalyStats extends React.Component
         //    console.log(newData[1]);
 
         newData.forEach( (category, index) => {
+            /*
+            ////// for anomaly_stats data //////
+            ////// need to filter with ts //////
             if (index == 0) {
                 const keys = new Set([]);
                 let stat = [...dataState[index].stat, ...category.stat];
@@ -69,6 +72,28 @@ class AnomalyStats extends React.Component
                     stat = stat.slice(0, nQueries);
                 dataState[index].stat = stat;
             }
+            */
+            ////// for anomaly_metrics //////
+            ////// partial order: (count, ts) //////
+            let stat = [...dataState[index].stat, ...category.stat];
+            stat.sort((a, b) => {
+                if (a.count == b.count) {
+                    return a.created_at > b.created_at ? -1 : 1;
+                }
+                else {
+                    return a.count > b.count ? -1 : 1;
+                }
+            })
+            const keys = new Set([]);
+            stat = stat.filter((d, i) => {
+                if (keys.has(d.key))
+                    return false;
+                keys.add(d.key);
+                return true;
+            }); // when merged, only keep latest
+            if (nQueries < stat.length)
+                stat = stat.slice(0, nQueries);
+            dataState[index].stat = stat;
         });
 
         // console.log(dataState);
@@ -77,15 +102,17 @@ class AnomalyStats extends React.Component
     }
                 
     handleBarClick = elem => {
+        // first entry of bar click
+        
         if (elem.length == 0)
             return;
 
         const datasetIndex = elem[0]._datasetIndex;
         const index = elem[0]._index;
-        const rank = this.state.data[datasetIndex].stat[index].rank;
+        let stat = this.state.data[datasetIndex].stat[index];
 
         if (this.props.onBarClick)
-            this.props.onBarClick(rank);
+            this.props.onBarClick(stat);
     }
 
     render() {
@@ -93,6 +120,7 @@ class AnomalyStats extends React.Component
         const { data } = this.state;
 
         const ranks = [];
+        const ioSteps = []; 
         const barData = [];
         let maxLen = 0;
         data.forEach((category, index) => {
@@ -100,28 +128,28 @@ class AnomalyStats extends React.Component
             if (index == 0) {
                 barData.push({
                     label: category.name,
-                    data: category.stat.map(d => d[statKind]),
+                    data: category.stat.map(d => d.count), // d => d[statKind]
                     backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
                     borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
                     borderWidth: 1,
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                     hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
                 });
-                ranks.push(category.stat.map(d => d.key)); // xw
+                ranks.push(category.stat.map(d => d.key));
+                ioSteps.push(category.stat.map(d => `${d.first_io_step}-${d.last_io_step}`));
             }
             else {
-                if (category.stat.length != 0) {
-                    barData.push({
-                        label: category.name,
-                        data: category.stat.map(d => d.stats[statKind]),
-                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                        borderWidth: 1,
-                        hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                        hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-                    });
-                    ranks.push(category.stat.map(d => d.counter));
-                }
+                barData.push({
+                    label: category.name,
+                    data: category.stat.map(d => d.count), // d => d.stats[statKind]
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                    borderWidth: 1,
+                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+                });
+                ranks.push(category.stat.map(d => `${d.key}:${d.name}`));
+                ioSteps.push(category.stat.map(d => `${d.first_io_step}-${d.last_io_step}`));
             }
 
             if (category.stat.length > maxLen)
@@ -129,7 +157,7 @@ class AnomalyStats extends React.Component
         });
 
         const _data = {
-            labels: maxLen==0?[]:ranks[0], // Array(maxLen).fill(0).map((_, i) => i),
+            labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => i), //ranks[0], // 
             datasets: barData
         };
         // console.log("ready to show AnomalyStats:");
@@ -149,12 +177,13 @@ class AnomalyStats extends React.Component
                             title: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
-                                const content = ranks[datasetIndex][index];
+                                const content1 = ranks[datasetIndex][index];
+                                const content2 = ioSteps[datasetIndex][index];
                                 if (datasetIndex == 0) {    
-                                    return `App:Rank-${content}`;
+                                    return `App:Rank-${content1}; Step:${content2}`;
                                 }
                                 else {
-                                    return content;
+                                    return `App:Fid:Name-${content1}; Step:${content2}`;
                                 }
                             }
                         }
@@ -163,7 +192,7 @@ class AnomalyStats extends React.Component
                         yAxes: [{
                             scaleLabel: {
                                 display: true,
-                                labelString: statKind
+                                labelString: `count` //statKind
                             }
                         }]
                     }         

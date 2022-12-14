@@ -58,13 +58,17 @@ const styles = theme => ({
         width: '100%'
     },
     col: {
-        margin: '2px'
+        display: 'flex',
+        flexWrap: 'wrap',
     },
     margin: {
         margin: theme.spacing(1)
     },
-    textField: {
+    textField_wide: {
         flexBasis: 200
+    },
+    textField_narrow: {
+        flexBasis: 100
     },
     chip: {
         padding: theme.spacing(3, 2),
@@ -87,7 +91,7 @@ class ChimbukoApp extends React.Component {
         super(props);
         this.state = {
             pause: false,
-            funcX: "runtime_total",
+            funcX: "event_id",
             funcY: "function_id",
             run_simulate: false
         };
@@ -139,8 +143,25 @@ class ChimbukoApp extends React.Component {
         }
     }
 
+    handleStatsExecutionRequest = (stat) => {
+
+        const item = {'app': stat.app,
+            'rank': stat.hasOwnProperty('name') ? '-1' : stat.ind,
+            'step1': stat.first_io_step,
+            'step2': stat.last_io_step,
+            'fid': stat.hasOwnProperty('name') ? stat.ind : '-1',
+            'severity': '-1',  // TBD
+            'score': '-1',  //TBD
+        };
+
+        console.log(item);
+        
+        if (this.props.get_execution) {
+            this.props.get_execution(item);
+        }
+    }
+
     handleHistoryRequest = rank => {
-        // console.log('onBarClick: ' + rank);
         if (isNaN(rank))
             return;
 
@@ -187,32 +208,52 @@ class ChimbukoApp extends React.Component {
                     [key]: ev.target.value
                 });
         }
-        console.log(this.props.provdb_queries);
+        // console.log('set query key: ' + key);
+        // console.log(this.props.provdb_queries);
     }
 
     handleExecutionQueryRequest = ev => {
-        const { execdata_config:config } = this.props;
         const { provdb_queries:prov_config} = this.props;
 
         const item = {'app': prov_config.app,
             'rank': prov_config.rank,
-            'step': prov_config.step,
-            //'fid': xxx,
+            'step1': prov_config.step1,
+            'step2': prov_config.step2,
+            'fid': prov_config.func,
+            'severity': prov_config.severity,
+            'score': prov_config.score,
         };
+        console.log(item);
+        
         if (this.props.get_execution) {
             this.props.get_execution(item);
         }
     }
 
     handleExecutionRequest = (item) => {
-        const { execdata_config:config } = this.props;
-        
-        const is_same = Object.keys(config).map(key => {
-            return config[key] === item[key];
-        }).every(v => v);
+        // for AnomalyHistory
 
-        if (!is_same && this.props.get_execution) {
-            this.props.get_execution(item);
+        // const { execdata_config:config } = this.props;
+        
+        // const is_same = Object.keys(config).map(key => {
+        //     return config[key] === item[key];
+        // }).every(v => v);
+
+        // if (!is_same && this.props.get_execution) {
+        //     this.props.get_execution(item);
+        // }
+        const elem = {'app': item[0],
+            'rank': item.length > 5 ? -1 : item[1],
+            'step1': item.length > 5 ? item[4] : item[3],
+            'step2': item.length > 5 ? item[5] : item[4],
+            'fid': item.length > 5 ? item[1] : -1,
+            'severity': -1,
+            'score': -1,
+        };
+        console.log(elem);
+
+        if (this.props.get_execution) {
+            this.props.get_execution(elem);
         }
     }
 
@@ -267,17 +308,25 @@ class ChimbukoApp extends React.Component {
             "count", "accumulate"
         ];
         const funcFeat = [
-            "function_id", "event_id",
+            "function_id", "event_id", "rid",
             "entry", "exit", "runtime_total", "runtime_exclusive",
-            "is_gpu_event"
+            "io_step", "outlier_score", "outlier_severity", "is_gpu_event"
         ];
 
         const { statKind, nQueries } = stats;
 
         const getSelectedName = () => {
-            const {app, rank, step} = execdata_config;
-            return `${app}:${rank}:${step}`;
-        } 
+            const {app, rank, step1, step2, fid} = execdata_config;
+            if (parseInt(fid) == -1) {
+                return `a${app}r${rank}s${step1}e${step2}`;
+            }
+            else {
+                if (parseInt(rank) == -1)
+                    return `a${app}f${fid}s${step1}e${step2}`;
+                else
+                    return `a${app}r${rank}f${fid}s${step1}e${step2}`;
+            }
+        }
 
         return (
             <div className={classes.root}>
@@ -309,7 +358,7 @@ class ChimbukoApp extends React.Component {
                                     value={statKind || "mean"}
                                     onChange={this.handleStatChange('statKind')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {
@@ -326,7 +375,7 @@ class ChimbukoApp extends React.Component {
                                     value={nQueries || 5}
                                     onChange={this.handleStatChange('nQueries')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
@@ -345,12 +394,12 @@ class ChimbukoApp extends React.Component {
                                     socketio={this.socketio}
                                     nQueries={nQueries}
                                     statKind={statKind}
-                                    onBarClick={this.handleHistoryRequest}
+                                    onBarClick={this.handleStatsExecutionRequest}  // {this.handleHistoryRequest}
                                 />
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={6}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -381,26 +430,23 @@ class ChimbukoApp extends React.Component {
                             <div className={classes.row}>
                                 <AnomalyHistory
                                     height={200}
-                                    ranks={watched_ranks}
-                                    colors={rank_colors}
                                     socketio={this.socketio}
-                                    onLegendClick={this.handleHistoryRemove}
                                     onBarClick={this.handleExecutionRequest}
                                     pause={this.state.pause}
                                 />                            
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={1}>
+                    <Grid item xs={2}>
                         <div className={classes.viewroot}>
-                            <div className={classes.viewroot} style={{width: 200}}>
+                            <div className={classes.viewroot} /*style="width: 100px;"*/>
                                 <TextField
                                     id="hist-app"
                                     label="app id"
                                     value={provdb_queries.app || 0}
                                     onChange={this.handleExecutionQuery('app')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
                                     inputProps={{min: 0, max:100, step: 1}}
                                 >
@@ -411,20 +457,31 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.rank || 0}
                                     onChange={this.handleExecutionQuery('rank')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
-                                    id="hist-step"
-                                    label="step id"
-                                    value={provdb_queries.step || 0}
-                                    onChange={this.handleExecutionQuery('step')}
+                                    id="hist-step1"
+                                    label="first_io_step"
+                                    value={provdb_queries.step1 || 0}
+                                    onChange={this.handleExecutionQuery('step1')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-step2"
+                                    label="last_io_step"
+                                    value={provdb_queries.step2 || 0}
+                                    onChange={this.handleExecutionQuery('step2')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField_narrow)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:1000, step: 1}}
                                 >
                                 </TextField>
                                 <TextField
@@ -433,9 +490,31 @@ class ChimbukoApp extends React.Component {
                                     value={provdb_queries.func || 0}
                                     onChange={this.handleExecutionQuery('func')}
                                     type="number"
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_narrow)}
                                     margin="dense"
-                                    inputProps={{min: 0, max:100, step: 1}}
+                                    inputProps={{min: 0, max:1000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-severity"
+                                    label="severity (ms)"
+                                    value={provdb_queries.severity || 0}
+                                    onChange={this.handleExecutionQuery('severity')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField_narrow)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:100000, step: 1}}
+                                >
+                                </TextField>
+                                <TextField
+                                    id="hist-score"
+                                    label="score"
+                                    value={provdb_queries.score || 0}
+                                    onChange={this.handleExecutionQuery('score')}
+                                    type="number"
+                                    className={clsx(classes.margin, classes.textField_narrow)}
+                                    margin="dense"
+                                    inputProps={{min: 0, max:10000, step: 1}}
                                 >
                                 </TextField>
                                 <Button 
@@ -465,7 +544,7 @@ class ChimbukoApp extends React.Component {
                                     value={this.state.funcX}
                                     onChange={this.handleFuncAxisChange('funcX')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {
@@ -482,7 +561,7 @@ class ChimbukoApp extends React.Component {
                                     value={this.state.funcY}
                                     onChange={this.handleFuncAxisChange('funcY')}
                                     select
-                                    className={clsx(classes.margin, classes.textField)}
+                                    className={clsx(classes.margin, classes.textField_wide)}
                                     margin="dense"
                                 >
                                 {

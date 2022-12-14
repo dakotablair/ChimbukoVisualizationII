@@ -18,8 +18,11 @@ const INIT_STATE = {
     provdb_queries: {
         app: -1,
         rank: -1,
-        step: -1,
-        func: -1
+        step1: -1,
+        step2: -1,
+        func: -1,
+        severity: -1,
+        score: -1,
     },
 
     // execution data 
@@ -29,7 +32,9 @@ const INIT_STATE = {
     execdata_config: {
         app: -1,
         rank: -1,
-        step: -1,
+        step1: -1,
+        step2: -1,
+        fid: -1,
         min_timestamp: -1,
         max_timestamp: -1
     },
