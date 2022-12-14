@@ -30,9 +30,6 @@ class AnomalyHistory extends React.Component
         if (chartData.length === 0)
             return;
 
-        if (this.pause)
-            return;
-
         // console.log(chartData);
 
         const { data:newData } = chartData;
@@ -60,12 +57,15 @@ class AnomalyHistory extends React.Component
         console.log("test component update");
 
         const { pause } = nextProps;
+
+        console.log(pause);
+        console.log(this.pause);
+        
         if (this.chart) {
-            if (this.pause !== pause) {
-                this.pause = pause;
-                // this.chart.options.plugins.streaming.pause = this.pause;
-                // this.chart.chart.update({duration: 0});
-            }
+            if (pause)
+                return false;
+            else
+                return true;
         }
         return false;
     }
