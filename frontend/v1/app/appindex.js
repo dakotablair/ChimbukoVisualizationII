@@ -249,9 +249,6 @@ class ChimbukoApp extends React.Component {
     handleSwitch = name => ev => {
         // pause was defined as state variable, can be set directly
         this.setState({...this.state, [name]: ev.target.checked});
-        console.log('outside...');
-        console.log(this.state.pause);
-        console.log(this.state);
     }    
 
     handleFuncAxisChange = key => ev => {
@@ -424,6 +421,7 @@ class ChimbukoApp extends React.Component {
                                     height={200}
                                     socketio={this.socketio}
                                     onBarClick={this.handleExecutionRequest}
+                                    pause={this.state.pause}
                                 />                            
                             </div>
                         </div>
