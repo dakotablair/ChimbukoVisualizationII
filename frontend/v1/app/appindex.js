@@ -244,8 +244,8 @@ class ChimbukoApp extends React.Component {
         // }
         const elem = {'app': item[0],
             'rank': item.length > 5 ? -1 : item[1],
-            'step1': item[-2],
-            'step2': item[-1],
+            'step1': item.length > 5 ? item[4] : item[3],
+            'step2': item.length > 5 ? item[5] : item[4],
             'fid': item.length > 5 ? item[1] : -1,
             'severity': -1,
             'score': -1,
