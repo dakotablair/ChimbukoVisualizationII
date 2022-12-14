@@ -11,6 +11,7 @@ class AnomalyHistory extends React.Component
             data: [],
         };
         this.socketio = props.socketio;
+        this.pause = false;
     }
 
     componentDidMount() {
@@ -50,6 +51,20 @@ class AnomalyHistory extends React.Component
         });
 
         this.setState({...this.state, data: dataState});
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log("test component update");
+        
+        const { pause } = nextProps;
+        if (this.chart) {
+            if (this.pause !== pause) {
+                this.pause = pause;
+                this.chart.options.plugins.streaming.pause = this.pause;
+                this.chart.chart.update({duration: 0});
+            }
+        }
+        return false;
     }
 
     handleBarClick = elem => {

@@ -91,7 +91,7 @@ class ChimbukoApp extends React.Component {
         super(props);
         this.state = {
             pause: false,
-            funcX: "runtime_total",
+            funcX: "event_id",
             funcY: "function_id",
             run_simulate: false
         };
@@ -144,7 +144,6 @@ class ChimbukoApp extends React.Component {
     }
 
     handleStatsExecutionRequest = (stat) => {
-        console.log(stat);
 
         const item = {'app': stat.app,
             'rank': stat.hasOwnProperty('name') ? '-1' : stat.ind,
