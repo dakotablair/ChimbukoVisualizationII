@@ -56,8 +56,8 @@ class AnomalyHistory extends React.Component
     shouldComponentUpdate(nextProps, nextState) {
         console.log("test component update");
 
-        const { pause } = nextState;
-
+        const pause = this.state.pause
+        
         console.log(pause);
         console.log(this.pause);
 
