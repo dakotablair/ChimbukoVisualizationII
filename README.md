@@ -6,7 +6,7 @@ Scalable Visualization Module for Chimbuko
 
 ## Overview 
 
-![Overview](./data/images/new interface 2.png)
+![Overview](./data/images/new%20interface%202.png)
 
 The visualization module of Chimbuko provides a real-time inspection of the identified anomalous performance behaviors. It receives anomalous function streams from Chimbuko anomaly detection module while the application or workflow is still running. It presents as a multi-scale interactive visualization platform that allows users to learn different levels of details about the anomalies. It also serves as the interface to query back end provenance database online and perform a deeper investigation of function executions. This module consists of two major components as below.
 
