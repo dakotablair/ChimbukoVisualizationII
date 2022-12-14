@@ -56,10 +56,9 @@ class AnomalyHistory extends React.Component
     shouldComponentUpdate(nextProps, nextState) {
         console.log("test component update");
 
-        const pause = this.state.pause
+        const { pause } = nextProps;
         
         console.log(pause);
-        console.log(this.pause);
 
         if (this.chart) {
             if (pause)
@@ -68,6 +67,10 @@ class AnomalyHistory extends React.Component
                 return true;
         }
         return false;
+    }
+
+    handleSwitch = name => ev => {
+        this.setState({...this.state, [name]: ev.target.checked});
     }
 
     handleBarClick = elem => {
