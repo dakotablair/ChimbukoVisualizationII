@@ -103,6 +103,9 @@ class AnomalyHistory extends React.Component
                 maxLen = category.stat.length;
         });
 
+        console.log(ranks);
+        console.log(funcs);
+
         const _data = {
             labels: maxLen==0?[]:Array(maxLen).fill(0).map((_, i) => i),  //ranks[0], 
             datasets: lineData
