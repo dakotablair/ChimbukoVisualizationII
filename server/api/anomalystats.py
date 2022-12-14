@@ -189,7 +189,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     # print("Function {}'s ranks are: {}\n".format(_test_ind, _test_fid))
 
     top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
-    hist_fids = [[item[0][0], item[0][1], item[0][2], item[1]]
+    hist_fids = [[item[0][0], item[0][1], item[0][2], item[1], first_step, last_step]
                  for item in top_fids]
     M = min(bins, len(hist_fids))
     reduced_hist_fids = [hist_fids[i * len(hist_fids) // M] for i in range(M)]
@@ -208,7 +208,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             top_ranks[item] = 1
 
     ordered_ranks = sorted(top_ranks.items(), key=lambda item: item[0][1])
-    hist_ordered_ranks = [[item[0][0], item[0][1], item[1]]
+    hist_ordered_ranks = [[item[0][0], item[0][1], item[1], first_step, last_step]
                           for item in ordered_ranks]
     M = min(bins, len(hist_ordered_ranks))
     reduced_hist_ordered_ranks = [hist_ordered_ranks[i *
@@ -216,7 +216,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
                                   for i in range(M)]
     top_ranks = sorted(top_ranks.items(), key=lambda item: item[1],
                        reverse=True)
-    hist_ranks = [[item[0][0], item[0][1], item[1]] for item in top_ranks]
+    hist_ranks = [[item[0][0], item[0][1], item[1], first_step, last_step] for item in top_ranks]
     M = min(bins, len(hist_ranks))
     reduced_hist_ranks = [hist_ranks[i * len(hist_ranks) // M]
                           for i in range(M)]

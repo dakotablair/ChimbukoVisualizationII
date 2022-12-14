@@ -232,7 +232,6 @@ class ChimbukoApp extends React.Component {
 
     handleExecutionRequest = (item) => {
         // for AnomalyHistory
-        console.log(item);
 
         // const { execdata_config:config } = this.props;
         
@@ -243,7 +242,19 @@ class ChimbukoApp extends React.Component {
         // if (!is_same && this.props.get_execution) {
         //     this.props.get_execution(item);
         // }
-        
+        const elem = {'app': item[0],
+            'rank': item.length > 5 ? -1 : item[1],
+            'step1': item[-2],
+            'step2': item[-1],
+            'fid': item.length > 5 ? item[1] : -1,
+            'severity': -1,
+            'score': -1,
+        };
+        console.log(elem);
+
+        if (this.props.get_execution) {
+            this.props.get_execution(elem);
+        }
     }
 
     handleSwitch = name => ev => {
