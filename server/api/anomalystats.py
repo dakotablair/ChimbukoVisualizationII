@@ -757,12 +757,12 @@ def run_simulation():
                 })
                 db.session.add(q)
                 db.session.commit()
-        
+
             if len(data):
                 # print("Received file: {}\n".format(filename))
                 push_anomaly_metrics(q, data, ts)
 
-            time.sleep(1)
+            time.sleep(2)
     except Exception as e:
         print('Exception on run simulation: ', e)
         error = 'exception while running simulation'
