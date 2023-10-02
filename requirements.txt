@@ -21,7 +21,7 @@ Flask-Script==2.0.6
 Flask-SocketIO==4.2.1
 Flask-SQLAlchemy==2.4.0
 Flask-SSE==0.2.1
-gevent==1.4.0
+gevent==23.9.1
 gevent-websocket==0.10.1
 greenlet==0.4.15
 html5lib==1.0.1
