@@ -120,6 +120,7 @@ node_modules/
 # large files
 data/*.tar.gz
 data/backup/
+data/grid/
 *.unqlite
 *.json
 *.txt

@@ -8,7 +8,7 @@ import pickle
 from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
-from sklearn.manifold import TSNE
+#from sklearn.manifold import TSNE
 
 
 def countAnomalyStats(files, fname):
@@ -173,7 +173,8 @@ def countScoreStats(files, fname):
     metric = 'accumulate'
     df = pd.DataFrame(columns=['stream_id', 'fid', 'fname', 'app', 'rank',
                                'new_score', 'new_severity', 'new_count',
-                               'all_score', 'all_severity', 'all_count'])
+                               'all_score', 'all_severity', 'all_count',
+                               'new_iostep_1', 'new_iostep_2', 'all_iostep_1', 'all_iostep_2'])
     for i, filename in enumerate(files):
         print("File {} out of {} files.".format(filename, max(ids)))
         with open(filename) as f:
@@ -196,6 +197,10 @@ def countScoreStats(files, fname):
                      'all_count': float(item['all_data']['count'][metric]),
                      'all_score': float(item['all_data']['score'][metric]),
                      'all_severity': float(item['all_data']['severity'][metric]),
+                     'new_iostep_1': int(item['new_data']['first_io_step']),
+                     'new_iostep_2': int(item['new_data']['last_io_step']),
+                     'all_iostep_1': int(item['all_data']['first_io_step']),
+                     'all_iostep_2': int(item['all_data']['last_io_step']),
                      }
                 df = df.append(d, ignore_index=True)
 
@@ -269,17 +274,17 @@ def calcTSNE(files, n_rank):
     data = np.array(data)
     print("Done data preparation...")
     init = 'random'
-    for i in range(5):  # n_iostep
-        tsne = TSNE(n_components=2)  # , init=init)
-        features = data[:, i:i+1]
-        df = pd.DataFrame(features, columns=['step'])
-        projections = tsne.fit_transform(df)
-        # init = projections
-
-        fig = px.scatter(projections, x=0, y=1,
-                         color=df.index, labels={'color': 'rank'}
-                         )
-        fig.show()
+    # for i in range(5):  # n_iostep
+    #    tsne = TSNE(n_components=2)  # , init=init)
+    #    features = data[:, i:i+1]
+    #    df = pd.DataFrame(features, columns=['step'])
+    #    projections = tsne.fit_transform(df)
+    #    # init = projections
+    #
+    #    fig = px.scatter(projections, x=0, y=1,
+    #                     color=df.index, labels={'color': 'rank'}
+    #                     )
+    #    fig.show()
 
 
 def calcMockUp(files):
@@ -372,7 +377,8 @@ if __name__ == '__main__':
     if (argc < 2):
         # pre = os.path.join(os.getcwd(), '../../data/48rank_100step')
         # pre = os.path.join(os.getcwd(), '../data/anomalyscore_example3')
-        pre = os.path.join(os.getcwd(), '../data/21nodes_120task_online_11_2_21/SSTD')
+        # pre = os.path.join(os.getcwd(), '../data/21nodes_120task_online_11_2_21/SSTD')
+        pre = None
     else:
         pre = sys.argv[1]
 
@@ -400,16 +406,37 @@ if __name__ == '__main__':
     # calcMockUp(files)
 
     ########
-    # for anomaly_metrics
-    path = pre + '/stats/'
-    json_files = glob.glob(path + '*.json')
-    # extract number as index
-    ids = [int(f.split('_')[-1][:-5]) for f in json_files]
-    # sort as numeric values
-    inds = sorted(range(len(ids)), key=lambda k: ids[k])
-    files = [json_files[i] for i in inds]  # files in correct order
-    fname = pre.split('/')[-1]
-    countScoreStats(files, fname)
-    visScoreStats(fname)
+    if not pre:
+        repeat_dirs = ['304740', '306239', '309131']
+        model_dirs = ['306104', '306124', '306253', '309126']
+        pres = []
+        decor = '../data/grid/'
+        for item in repeat_dirs:
+            pres.append(decor + 'repeat_1rank/chimbuko.' + item)
+        for item in model_dirs:
+            pres.append(decor + 'model_reuse/chimbuko.' + item)
+        for pre in pres:
+            # for anomaly_metrics
+            path = pre + '/stats/'
+            json_files = glob.glob(path + '*.json')
+            # extract number as index
+            ids = [int(f.split('_')[-1][:-5]) for f in json_files]
+            # sort as numeric values
+            inds = sorted(range(len(ids)), key=lambda k: ids[k])
+            files = [json_files[i] for i in inds]  # files in correct order
+            fname = pre.split('/')[-1]
+            countScoreStats(files, fname)
+            # visScoreStats(fname)
+    else:
+        # for anomaly_metrics
+        path = pre + '/stats/'
+        json_files = glob.glob(path + '*.json')
+        # extract number as index
+        ids = [int(f.split('_')[-1][:-5]) for f in json_files]
+        # sort as numeric values
+        inds = sorted(range(len(ids)), key=lambda k: ids[k])
+        files = [json_files[i] for i in inds]  # files in correct order
+        fname = pre.split('/')[-1]
+        countScoreStats(files, fname)
+        # visScoreStats(fname)
     ########
-

@@ -12,11 +12,11 @@ WORK_DIR="${ROOT_DIR}/data"
 cd "$ROOT_DIR" #cd command must use doublequote to take space in filename
 
 # for test data
-DATA_NAME="ethanol-3x3x3-200rank-06_03_22"
+DATA_NAME="grid/repeat_1rank/chimbuko.304740" #"ethanol-3x3x3-200rank-06_03_22"
 # "48rank_100step"
 
 # for sharded n_instance provdb
-provdb_ninstances=40
+provdb_ninstances=4 #40
 provdb_nshards=1
 provdb_writedir="${WORK_DIR}/${DATA_NAME}/provdb/"
 provdb_addr_dir=""
