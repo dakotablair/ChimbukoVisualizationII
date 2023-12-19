@@ -16,6 +16,7 @@ from sqlalchemy import func, and_
 import json
 import time
 import math
+import glob
 
 
 def process_on_anomaly(data: list, ts):
@@ -226,6 +227,29 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     # ---------------------------------------------------
     # processing data for the front-end
     # --------------------------------------------------
+    labels, new_series, all_series = [], [], []
+    labels = ['app', 'rank', 'fid', 'fname', 'min_ts', 'max_ts', 'severity', 'score', 'count']
+    for d in top_new_data:
+        new_series.append([d['app'],
+                           d['rank'],
+                           d['fid'],
+                           d['fname'],
+                           d['min_timestamp'],
+                           d['max_timestamp'],
+                           d['new_data']['severity'][runStats],
+                           d['new_data']['score'][runStats],
+                           d['new_data']['count'][runStats]])
+    for d in top_all_data:
+        all_series.append([d['app'],
+                           d['rank'],
+                           d['fid'],
+                           d['fname'],
+                           d['min_timestamp'],
+                           d['max_timestamp'],
+                           d['all_data']['severity'][runStats],
+                           d['all_data']['score'][runStats],
+                           d['all_data']['count'][runStats]]) 
+    
     ranks, fids = [], []
     for d in top_ranks:
         ranks.append({'app': d[0][0],
@@ -245,7 +269,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
                      'count': d[1],
                      'create_at': ts})
 
-    if len(fids) or len(ranks):
+    if len(fids) or len(ranks) or len(new_series) or len(all_series):
         top_dataset = {
             'name': 'Top Ranks',
             'stat': ranks
@@ -255,6 +279,12 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             'stat': fids
         }
         # broadcast the statistics to all clients
+        push_data({
+            'labels': labels,
+            'new_series': new_series,
+            'all_series': all_series
+        }, 'update_metrics')
+
         push_data({
             'nQueries': nQueries,
             'statKind': statKind,
@@ -592,115 +622,17 @@ def new_anomalystats():
     return jsonify({}), 200
 
 
-@api.route('/run_simulation_old', methods=['GET'])
+@api.route('/stop_simulation', methods=['GET'])
 @make_async
-def run_simulation_old():
-    import time
-    import glob
-
-    error = 'OK'
-    path = os.environ.get('SIMULATION_JSON', 'json/')
-    json_files = glob.glob(path + '*.json')
-    # extract number as index
-    ids = [int(f.split('_')[-1][:-5]) for f in json_files]
-    # sort as numeric values
-    inds = sorted(range(len(ids)), key=lambda k: ids[k])
-    files = [json_files[i] for i in inds]  # files in correct order
-
-    # clean up db before the simulation
-    # delete_all_db()
-
+def stop_simulation():
     try:
-        at_beginning = True
-        for filename in files:
-            # print("File {} out of {} files.".format(filename, len(files)))
-            data = None
-            with open(filename) as f:
-                loaded = json.load(f)
-                data = loaded.get('anomaly_stats', None)
-                counter_stats = loaded.get('counter_stats', None)
-
-            if data is None:
-                if not at_beginning:
-                    time.sleep(0.2)
-                continue
-            else:
-                at_beginning = False
-
-            ts = data.get('created_at', None)
-            if ts is None:
-                abort(400)
-
-            # process counter stats
-            anomaly_counters = []
-            cpu_counters = ['cpu: User %',
-                            'cpu: Idle %',
-                            'cpu: System %',
-                            'cpu: I/O Wait']
-                            # 'Message size for gather',
-                            # 'Message size for all-reduce',
-                            # 'Message size for broadcast']
-            gpu_counters = ['GPU Occupancy (Warps)',
-                            'Block Size',
-                            'OpenACC Workers']
-                            # 'Local Memory (bytes per thread)',
-                            # 'Shared Static Memory (bytes)',
-                            # 'OpenACC Gangs',
-                            # 'Bytes copied from Device to Host',
-                            # 'Bytes copied from Host to Device']
-            if counter_stats:
-                for d in counter_stats:
-                    if d['counter'] in gpu_counters or \
-                       d['counter'] in cpu_counters:
-                        anomaly_counters.append(d)
-
-            # print('processing...')
-            anomaly_stat, anomaly_data = \
-                process_on_anomaly(data.get('anomaly', []), ts)
-            func_stat = process_on_func(data.get('func', []), ts)
-
-            # print('update db...')
-            try:
-                if len(anomaly_stat):
-                    db.get_engine(app=current_app,
-                                  bind='anomaly_stats').execute(
-                        AnomalyStat.__table__.insert(), anomaly_stat
-                    )
-                    db.get_engine(app=current_app,
-                                  bind='anomaly_data').execute(
-                        AnomalyData.__table__.insert(), anomaly_data
-                    )
-                if len(func_stat):
-                    db.get_engine(app=current_app, bind='func_stats').execute(
-                        FuncStat.__table__.insert(), func_stat
-                    )
-
-            except Exception as e:
-                print(e)
-
-            q = AnomalyStatQuery.query. \
-                order_by(AnomalyStatQuery.created_at.desc()).first()
-
-            if q is None:
-                q = AnomalyStatQuery.create({
-                    'nQueries': 5,
-                    'statKind': 'stddev',
-                    'ranks': []
-                })
-                db.session.add(q)
-                db.session.commit()
-
-            # print("ts: {}, data: {}", ts, len(data))
-            if len(anomaly_stat):
-                push_anomaly_stat(q, anomaly_stat, anomaly_counters)
-
-            if len(anomaly_data):
-                push_anomaly_data(q, anomaly_data)
-
-            time.sleep(1)
+        print('This is under development.')
+        # need to find the celery worker of the previous run_simulation
+        # then stop the worker
+        pass
     except Exception as e:
         print('Exception on run simulation: ', e)
-        error = 'exception while running simulation'
+        error = 'exception while stopping simulation'
         pass
 
     push_data({'result': error}, 'run_simulation')
@@ -711,9 +643,6 @@ def run_simulation_old():
 @api.route('/run_simulation', methods=['GET'])
 @make_async
 def run_simulation():
-    import time
-    import glob
-
     error = 'OK'
     path = os.environ.get('SIMULATION_JSON', 'json/')
     json_files = glob.glob(path + '*.json')

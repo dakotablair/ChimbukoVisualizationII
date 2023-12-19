@@ -39,6 +39,7 @@ import clsx from 'clsx';
 
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
+import AnomalyMetric from './views/AnomalyMetrics';
 // import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
@@ -283,14 +284,22 @@ class ChimbukoApp extends React.Component {
     }
 
     handleRunSimulation = ev => {
-        if (this.state.run_simulate)
-            return;
+        let flag_run, url;
+        if (this.state.run_simulate) {
+            console.log('time to stop the simulation');
+            flag_run = false;
+            url = '/api/stop_simulation';
+        }
+        else {
+            console.log('time to run the simulation');
+            flag_run = true;
+            url = '/api/run_simulation';
+        }
 
-        const url = '/api/run_simulation';
         axis.get(url)
             .then(resp => {
                 if (resp.status === 202) {
-                    this.setState({run_simulate: true});
+                    this.setState({run_simulate: flag_run});
                 }
             })
             .catch(e => {
@@ -426,6 +435,12 @@ class ChimbukoApp extends React.Component {
                                             : "RUN SIMULATION"
                                     }
                                 </Button>                         
+                            </div>
+                            <div className={classes.row}>
+                                <AnomalyMetrics
+                                    height={200}
+                                    socketio={this.socketio}
+                                />                            
                             </div>
                             <div className={classes.row}>
                                 <AnomalyHistory
