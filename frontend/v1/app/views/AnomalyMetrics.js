@@ -31,8 +31,8 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
-        const { labels, new_series, all_series } = chartData;
-        let { labelsState, newDataState, allDataState } = this.state;
+        const { labels:labels, new_series:new_series, all_series:all_series } = chartData;
+        let { labels:labelsState, newData:newDataState, allData:allDataState } = this.state;
 
         if (new_series.length === 0)
             return;
@@ -54,13 +54,17 @@ class AnomalyMetrics extends React.Component
 
     render() {
         const { height } = this.props;
-        const { labels, newData, allData, colors } = this.state;
+        const { labels:labels, newData:newData, allData:allData, colors:colors } = this.state;
 
         const info = [];
         const datasets = [];
         
         newData.forEach((d, i) => {
             const rgb = i<colors.length?colors[i]:getRandomColor();
+            if (i >= colors.length) {
+                colors.push(rgb);
+            }
+
             datasets.push({
                 label: `${d.fid}`,
                 data: d,
@@ -78,6 +82,8 @@ class AnomalyMetrics extends React.Component
             datasets: datasets,
         };
         
+        this.setState({...this.state, colors:colors});
+
         console.log(_data);
 
         return (
