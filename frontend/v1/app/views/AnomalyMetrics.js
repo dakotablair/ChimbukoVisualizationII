@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import { Radar } from 'react-chartjs-2';
 
+import { getRandomColor } from '../utils'
+
 class AnomalyMetrics extends React.Component
 {
     constructor(props) {
@@ -27,18 +29,19 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
-        if (chartData.length === 0)
-            return;
+        // if (chartData.length === 0)
+        //    return;
 
-        // console.log(chartData);
+        console.log(chartData);
 
         //--------
+        /*
         const { data:newData } = chartData;
         let { labels, data:dataState } = this.state;
 
         if (dataState.length == 0) {
             newData.forEach( (category, i) => {
-                const color = [{r: 0, g: 204, b: 255}, {r: 255, g: 150, b: 150}];
+                const color = 
                 dataState.push({ // define as need in render function
                     'color': color[i],
                     'name': category.name,
@@ -53,6 +56,7 @@ class AnomalyMetrics extends React.Component
 
         //---------
         this.setState({...this.state, data: dataState, labels});
+        */
     }
 
     render() {
@@ -60,6 +64,7 @@ class AnomalyMetrics extends React.Component
         const { data, labels } = this.state;
 
         //------------
+        /*
         const info = [];
         const lineData = [];
         let maxLen = 0;
@@ -93,13 +98,13 @@ class AnomalyMetrics extends React.Component
             if (category.stat.length > maxLen)
                 maxLen = category.stat.length;
         });
-
+        */
         const _data = {
-            labels: labels,
-            datasets: radarData
+            labels: ['app', 'rank', 'severity'], //labels,
+            datasets: [[0, 10, 1], [1, 2, 10], [1, 3, 20]] // radarData
         };
         //------------
-
+        
         return (
             <Radar 
                 ref={ref => this.chart = ref}
@@ -120,13 +125,13 @@ class AnomalyMetrics extends React.Component
     }
 }
 
-AnomalyMetric.defaultProps = {
+AnomalyMetrics.defaultProps = {
     height: 100,
 };
 
-AnomalyMetric.propTypes = {
+AnomalyMetrics.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number.isRequired,
 };
 
-export default AnomalyMetric;
+export default AnomalyMetrics;
