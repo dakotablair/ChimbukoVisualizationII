@@ -9,9 +9,10 @@ class AnomalyMetrics extends React.Component
 {
     constructor(props) {
         super(props);
-        this.state = {
-            data: [],
-            labels: [],
+        this.state = { // variables kept as state
+            newData: [],
+            allData: [],
+            colors: [],
         };
         this.socketio = props.socketio;
     }
@@ -29,52 +30,38 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
-        // if (chartData.length === 0)
-        //    return;
+        const { labels, new_series, all_series } = chartData;
+        let { newData, allData } = this.state;
 
-        console.log(chartData);
+        if (new_series.length === 0)
+            return;
 
-        //--------
-        /*
-        const { data:newData } = chartData;
-        let { labels, data:dataState } = this.state;
+        console.log('before:' + newData);
 
-        if (dataState.length == 0) {
-            newData.forEach( (category, i) => {
-                const color = 
-                dataState.push({ // define as need in render function
-                    'color': color[i],
-                    'name': category.name,
-                    'stat': []
-                }); 
-            });
-        }
+        newData.length = 0;
+        allData.length = 0;
+        newData = [...new_series];
+        allData = [...all_series];
 
-        newData.forEach((category, index) => {
-            dataState[index].stat = category.stat;
-        });
+        console.log('after:' + newData);
 
-        //---------
-        this.setState({...this.state, data: dataState, labels});
-        */
+        this.setState({...this.state, newData, allData});
     }
 
     render() {
         const { height } = this.props;
-        const { data, labels } = this.state;
+        const { newData, allData, colors } = this.state;
 
-        //------------
-        /*
         const info = [];
-        const lineData = [];
+        const radarData = [];
         let maxLen = 0;
-        data.forEach((category, index) => { // one category is one dataset
-            const rgb = category.color;
-            if (index == 0) { // ranks
-                lineData.push({
+        /*
+        newData.forEach((d, i) => {
+            const rgb = i<colors.length?colors[i]:getRandomColor();
+            radarData.push({
                     label: category.name,
                     data: category.stat.map(d => d[2]),
-                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`, // const color = 
                     borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
                     borderWidth: 1,
                     hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
@@ -101,7 +88,7 @@ class AnomalyMetrics extends React.Component
         */
         const _data = {
             labels: ['app', 'rank', 'severity'], //labels,
-            datasets: [[0, 10, 1], [1, 2, 10], [1, 3, 20]] // radarData
+            datasets: [{data: [0, 10, 1]}, {data:[1, 2, 10]}, {data:[1, 3, 20]}] // radarData
         };
         //------------
         
