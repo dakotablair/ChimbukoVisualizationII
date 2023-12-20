@@ -10,6 +10,7 @@ class AnomalyMetrics extends React.Component
     constructor(props) {
         super(props);
         this.state = { // variables kept as state
+            labels: [],
             newData: [],
             allData: [],
             colors: [],
@@ -31,67 +32,54 @@ class AnomalyMetrics extends React.Component
 
     updateChartData = chartData => {
         const { labels, new_series, all_series } = chartData;
-        let { newData, allData } = this.state;
+        let { labelsState, newDataState, allDataState } = this.state;
 
         if (new_series.length === 0)
             return;
 
-        console.log('before:' + newData);
+        console.log('before:' + newDataState);
 
-        newData.length = 0;
-        allData.length = 0;
-        newData = [...new_series];
-        allData = [...all_series];
+        newDataState.length = 0;
+        allDataState.length = 0;
+        labelsState.length = 0;
 
-        console.log('after:' + newData);
+        newDataState = [...new_series];
+        allDataState = [...all_series];
+        labelsState = [...labels];
 
-        this.setState({...this.state, newData, allData});
+        console.log('after:' + newDataState);
+
+        this.setState({...this.state, labels:labelsState, newData:newDataState, allData:allDataState});
     }
 
     render() {
         const { height } = this.props;
-        const { newData, allData, colors } = this.state;
+        const { labels, newData, allData, colors } = this.state;
 
         const info = [];
-        const radarData = [];
-        let maxLen = 0;
-        /*
+        const datasets = [];
+        
         newData.forEach((d, i) => {
             const rgb = i<colors.length?colors[i]:getRandomColor();
-            radarData.push({
-                    label: category.name,
-                    data: category.stat.map(d => d[2]),
-                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`, // const color = 
-                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                    borderWidth: 1,
-                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-                });
-                info.push(category.stat.map(d => `${d[0]}:${d[1]}`));
-            }
-            else { // funcitons
-                lineData.push({
-                    label: category.name,
-                    data: category.stat.map(d => d[3]),
-                    backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-                    borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
-                    borderWidth: 1,
-                    hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
-                    hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
-                });
-                info.push(category.stat.map(d => `${d[0]}:${d[1]}:${d[2]}`));
-            }
-
-            if (category.stat.length > maxLen)
-                maxLen = category.stat.length;
+            datasets.push({
+                label: `${d.fid}`,
+                data: d,
+                backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+                borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                borderWidth: 1,
+                hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
+                hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
+            });
+            info.push(`${d.fname}`);
         });
-        */
+
         const _data = {
-            labels: ['app', 'rank', 'severity'], //labels,
-            datasets: [{data: [0, 10, 1]}, {data:[1, 2, 10]}, {data:[1, 3, 20]}] // radarData
+            labels: labels,
+            datasets: datasets,
         };
-        //------------
         
+        console.log(_data);
+
         return (
             <Radar 
                 ref={ref => this.chart = ref}
@@ -102,10 +90,15 @@ class AnomalyMetrics extends React.Component
                     tooltips: {
                         callbacks: {
                             title: (tooltipItem, data) => {
-                                console.log(tooltipItem);
+                                    // datasetIndex is the index in datasets
+                                    // index is the index of labels
+                                    const datasetIndex = tooltipItem[0].datasetIndex;
+                                    const index = tooltipItem[0].index;
+                                    
+                                    return `${info[datasetIndex]}`;
                             }
                         }
-                    }      
+                    }
                 }}
             />
         );

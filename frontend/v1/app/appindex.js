@@ -436,7 +436,7 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.row} style={{width: 280}}>
+                            <div className={classes.row} style={{width: 380}}>
                                 <AnomalyMetrics
                                     height={200}
                                     socketio={this.socketio}
