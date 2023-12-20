@@ -39,7 +39,7 @@ import clsx from 'clsx';
 
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
-import AnomalyMetric from './views/AnomalyMetrics';
+import AnomalyMetrics from './views/AnomalyMetrics';
 // import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
