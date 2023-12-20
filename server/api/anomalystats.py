@@ -234,8 +234,8 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
                            d['rank'],
                            d['fid'],
                            d['fname'],
-                           d['min_timestamp'],
-                           d['max_timestamp'],
+                           d['new_data']['min_timestamp'],
+                           d['new_data']['max_timestamp'],
                            d['new_data']['severity'][runStats],
                            d['new_data']['score'][runStats],
                            d['new_data']['count'][runStats]])
@@ -244,8 +244,8 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
                            d['rank'],
                            d['fid'],
                            d['fname'],
-                           d['min_timestamp'],
-                           d['max_timestamp'],
+                           d['all_data']['min_timestamp'],
+                           d['all_data']['max_timestamp'],
                            d['all_data']['severity'][runStats],
                            d['all_data']['score'][runStats],
                            d['all_data']['count'][runStats]]) 
