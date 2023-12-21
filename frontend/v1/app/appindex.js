@@ -39,6 +39,7 @@ import clsx from 'clsx';
 
 import AnomalyStats from './views/AnomalyStats';
 import AnomalyHistory from './views/AnomalyHistory';
+import AnomalyMetrics from './views/AnomalyMetrics';
 // import SelectedFrame from './views/SelectedFrame';
 import AnomalyFunc from './views/AnomalyFunc';
 import TemporalCallStack from './views/TemporalCallStack';
@@ -283,14 +284,22 @@ class ChimbukoApp extends React.Component {
     }
 
     handleRunSimulation = ev => {
-        if (this.state.run_simulate)
-            return;
+        let flag_run, url;
+        if (this.state.run_simulate) {
+            console.log('time to stop the simulation');
+            flag_run = false;
+            url = '/api/stop_simulation';
+        }
+        else {
+            console.log('time to run the simulation');
+            flag_run = true;
+            url = '/api/run_simulation';
+        }
 
-        const url = '/api/run_simulation';
         axis.get(url)
             .then(resp => {
                 if (resp.status === 202) {
-                    this.setState({run_simulate: true});
+                    this.setState({run_simulate: flag_run});
                 }
             })
             .catch(e => {
@@ -349,9 +358,9 @@ class ChimbukoApp extends React.Component {
                     </Toolbar>
                 </AppBar>
                 <Grid container spacing={3}>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <div className={classes.viewroot}>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{width: 500}}>
                                 <TextField
                                     id="stat-kind"
                                     label="Anomaly statistics"
@@ -388,9 +397,9 @@ class ChimbukoApp extends React.Component {
                                     Refresh
                                 </Button>
                             </div>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{width: 500}}>
                                 <AnomalyStats 
-                                    height={200}
+                                    height={300}
                                     socketio={this.socketio}
                                     nQueries={nQueries}
                                     statKind={statKind}
@@ -399,7 +408,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={7}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -427,9 +436,16 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{width: 500}}>
+                                <AnomalyMetrics
+                                    height={300}
+                                    socketio={this.socketio}
+                                    pause={this.state.pause}
+                                />                            
+                            </div>
+                            <div className={classes.row} style={{width: 560}}>
                                 <AnomalyHistory
-                                    height={200}
+                                    height={300}
                                     socketio={this.socketio}
                                     onBarClick={this.handleExecutionRequest}
                                     pause={this.state.pause}
@@ -527,12 +543,13 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={5}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
                                 {/*<Chip className={classes.chip} label={getSelectedName()} />*/}
                                 <Button 
-                                    variant="contained" 
+                                    variant="contained"
+                                    //fullWidth={true}
                                     className={classes.button} 
                                     /*onClick={this.chart.resetZoom()}*/
                                 >
@@ -587,7 +604,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={7}>
                         <TemporalCallStack
                             id="temporal-callstack"
                             height={400}
