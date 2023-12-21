@@ -16,7 +16,7 @@ class AnomalyMetrics extends React.Component
             colors: [],
         };
         this.socketio = props.socketio;
-        //this.pause = false;
+        this.pause = false;
     }
 
     componentDidMount() {
@@ -32,8 +32,8 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
-        //if (this.pause)
-        //    return;
+        if (this.pause)
+           return;
 
         const { labels, new_series, all_series } = chartData; //destructuring assignment
         let { labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState } = this.state; //assign a property to a new name
@@ -62,23 +62,23 @@ class AnomalyMetrics extends React.Component
         this.setState({...this.state, labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState});
     }
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     console.log("test pause update");
+    shouldComponentUpdate(nextProps, nextState) {
+        console.log("test pause update");
 
-    //     const { pause } = nextProps;
-    //     this.pause = pause
-    //     if (this.chart) {
-    //         if (pause)
-    //             return false;
-    //         else
-    //             return true;
-    //     }
-    //     return false;
-    // }
+        const { pause } = nextProps;
+        this.pause = pause
+        if (this.chart) {
+            if (pause)
+                return false;
+            else
+                return true;
+        }
+        return false;
+    }
 
-    // handleSwitch = name => ev => {
-    //     this.setState({...this.state, [name]: ev.target.checked});
-    // }
+    handleSwitch = name => ev => {
+        this.setState({...this.state, [name]: ev.target.checked});
+    }
 
     render() {
         const { height } = this.props;

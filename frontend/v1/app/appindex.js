@@ -440,7 +440,7 @@ class ChimbukoApp extends React.Component {
                                 <AnomalyMetrics
                                     height={300}
                                     socketio={this.socketio}
-                                    //pause={this.state.pause}
+                                    pause={this.state.pause}
                                 />                            
                             </div>
                             <div className={classes.row} style={{width: 560}}>
