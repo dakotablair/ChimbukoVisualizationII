@@ -127,7 +127,7 @@ class AnomalyMetrics extends React.Component
                             },
                             label: (tooltipItem, data) => {
                                 const datasetIndex = tooltipItem.datasetIndex;
-                                const index = tooltipItem[0].index;
+                                const index = tooltipItem.index;
                                 var label = 'fid-' + data.datasets[datasetIndex].label + ': ';
                                 label += data.labels[index] + '-';
                                 label += tooltipItem.yLabel;
