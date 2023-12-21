@@ -195,8 +195,8 @@ def load_execution_provdb(conditions):
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result
     n = len(filtered_records)
-    filtered_records = filter(lambda x: x['runtime_total'] < 1000,
-                              filtered_records)  # smaller than 1ms
+    filtered_records = [x for x in filtered_records
+                        if x['runtime_total'] >= 1000]  # 1ms
     m = len(filtered_records)
     print("{} records from provdb, return filtered {} records".format(n, m))
 
