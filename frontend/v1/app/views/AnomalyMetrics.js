@@ -63,7 +63,7 @@ class AnomalyMetrics extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("test pause update");
+        // console.log("test pause update");
 
         const { pause } = nextProps;
         this.pause = pause
@@ -126,14 +126,12 @@ class AnomalyMetrics extends React.Component
                                     return `${info[datasetIndex]}`;
                             },
                             label: (tooltipItem, data) => {
-                                var label = data.datasets[tooltipItem.datasetIndex].label || '';
-                                
-                                console.log(tooltipItem);
-                                console.log(data);
-                                // if (label) {
-                                //     label += ': ';
-                                // }
-                                // label += Math.round(tooltipItem.yLabel * 100) / 100;
+                                const datasetIndex = tooltipItem.datasetIndex;
+                                const index = tooltipItem[0].index;
+                                var label = 'fid-' + data.datasets[datasetIndex].label + ': ';
+                                label += data.labels[index] + '-';
+                                label += tooltipItem.yLabel;
+
                                 return label;
                             }
                         }
