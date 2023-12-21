@@ -104,6 +104,12 @@ class AnomalyMetrics extends React.Component
                                     return `${info[datasetIndex]}`;
                             }
                         }
+                    },
+                    scale: {
+                        ticks: {
+                             callback: function() {return ""},
+                             backdropColor: "rgba(0, 0, 0, 0)"
+                         }
                     }
                 }}
             />
