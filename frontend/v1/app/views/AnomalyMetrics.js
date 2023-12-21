@@ -144,7 +144,7 @@ class AnomalyMetrics extends React.Component
                     },
                     legend: {
                         display: true,
-                        position: 'bottom',
+                        position: 'right',
                         fullWidth: false
                     }
                 }}
