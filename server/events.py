@@ -195,8 +195,11 @@ def load_execution_provdb(conditions):
             result = [json.loads(x) for x in col.filter(jx9_filter)]
             filtered_records += result
     n = len(filtered_records)
-    print("{} records from provdb, returned {}".format(n,
-                                                       n if n <= 100 else 100))
+    filtered_records = filter(lambda x: x['runtime_total'] < 1000,
+                              filtered_records)  # smaller than 1ms
+
+    print("{} records from provdb, return filtered {} records \
+          ".format(n, len(filtered_records)))
 
     # gpu_count = 0
     # for record in filtered_records:  # reduced_records:
@@ -204,7 +207,7 @@ def load_execution_provdb(conditions):
     #         gpu_count += 1
     # print("...{} are gpu events...".format(gpu_count))
 
-    return filtered_records[:100]  # reduced_records
+    return filtered_records  # reduced_records
 
 
 @events.route('/query_executions_pdb', methods=['GET'])
