@@ -436,14 +436,14 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.row}>
+                            {/* <div className={classes.row} style={{width: 500}}>
                                 <AnomalyMetrics
                                     height={300}
                                     socketio={this.socketio}
                                     pause={this.state.pause}
                                 />                            
-                            </div>
-                            <div className={classes.row}>
+                            </div> */}
+                            <div className={classes.row} style={{width: 560}}>
                                 <AnomalyHistory
                                     height={300}
                                     socketio={this.socketio}
@@ -549,7 +549,7 @@ class ChimbukoApp extends React.Component {
                                 {/*<Chip className={classes.chip} label={getSelectedName()} />*/}
                                 <Button 
                                     variant="contained"
-                                    fullWidth={true}
+                                    //fullWidth={true}
                                     className={classes.button} 
                                     /*onClick={this.chart.resetZoom()}*/
                                 >
