@@ -228,27 +228,28 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
     # processing data for the front-end
     # --------------------------------------------------
     labels, new_series, all_series = [], [], []
-    labels = ['app', 'rank', 'fid', 'fname', 'min_ts', 'max_ts', 'severity', 'score', 'count']
+    labels = ['app', 'rank', 'fid',  # 'min_ts', 'max_ts',
+              'severity', 'score', 'count', 'fname']
     for d in top_new_data:
         new_series.append([d['app'],
                            d['rank'],
                            d['fid'],
-                           d['fname'],
-                           d['new_data']['min_timestamp'],
-                           d['new_data']['max_timestamp'],
+                           # d['new_data']['min_timestamp'],
+                           # d['new_data']['max_timestamp'],
                            d['new_data']['severity'][runStats],
                            d['new_data']['score'][runStats],
-                           d['new_data']['count'][runStats]])
+                           d['new_data']['count'][runStats],
+                           d['fname']])
     for d in top_all_data:
         all_series.append([d['app'],
                            d['rank'],
                            d['fid'],
-                           d['fname'],
-                           d['all_data']['min_timestamp'],
-                           d['all_data']['max_timestamp'],
+                           # d['all_data']['min_timestamp'],
+                           # d['all_data']['max_timestamp'],
                            d['all_data']['severity'][runStats],
                            d['all_data']['score'][runStats],
-                           d['all_data']['count'][runStats]]) 
+                           d['all_data']['count'][runStats],
+                           d['fname']])
     
     ranks, fids = [], []
     for d in top_ranks:

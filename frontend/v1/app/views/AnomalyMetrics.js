@@ -68,19 +68,19 @@ class AnomalyMetrics extends React.Component
         newData.forEach((d, i) => {
             const rgb = colors[i];
             datasets.push({
-                label: `${d.fid}`,
-                data: d,
+                label: `${d[2]}`, //fid
+                data: d.slice(0, 6), // (app, rank, fid, s, s, c)
                 backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
                 borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
                 borderWidth: 1,
                 hoverBackgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`,
                 hoverBorderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,        
             });
-            info.push(`${d.fname}`);
+            info.push(`${d[6]}`); //fname
         });
 
         const _data = {
-            labels: labels,
+            labels: labels.slice(0, 6),
             datasets: datasets,
         };
 
