@@ -63,7 +63,7 @@ class AnomalyMetrics extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        // console.log("test component update");
+        console.log("test pause update");
 
         const { pause } = nextProps;
         this.pause = pause
