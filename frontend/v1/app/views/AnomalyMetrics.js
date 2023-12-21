@@ -44,7 +44,7 @@ class AnomalyMetrics extends React.Component
         // console.log('before:' + newDataState);
 
         // add to previous data
-        let topN = Math.max(new_series.length, newDataState.length);
+        const topN = Math.max(new_series.length, newDataState.length);
         newDataState = [...newDataState, ...new_series];
         allDataState = [...allDataState, ...all_series];
         labelsState = [...labels];
@@ -58,6 +58,13 @@ class AnomalyMetrics extends React.Component
                 return a[3] > b[3] ? -1 : 1;
             }
         });
+        let keys = new Set([]);
+        newDataState = newDataState.filter((d, i) => {
+            if (keys.has(d[2]))
+                return false;
+            keys.add(d[2]);
+            return true;
+        }); // when merged, remove duplicates
         newDataState = newDataState.slice(0, topN);
         allDataState.sort((a, b) => {
             if ((a[3] - b[3]) < 0.0001) {
@@ -67,6 +74,13 @@ class AnomalyMetrics extends React.Component
                 return a[3] > b[3] ? -1 : 1;
             }
         });
+        let keys_ = new Set([]);
+        allDataState = allDataState.filter((d, i) => {
+            if (keys_.has(d[2]))
+                return false;
+            keys_.add(d[2]);
+            return true;
+        }); // when merged, remove duplicates
         allDataState = allDataState.slice(0, topN);
 
         let num = newDataState.length - colorsState.length;
