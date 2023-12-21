@@ -186,7 +186,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
             top_fids[item] = 1
         # if int(item[1]) == _test_ind:
         #     _test_fid.append(d['rank'])
-    
+
     # print("Function {}'s ranks are: {}\n".format(_test_ind, _test_fid))
 
     top_fids = sorted(top_fids.items(), key=lambda item: item[1], reverse=True)
@@ -250,7 +250,7 @@ def push_anomaly_metrics(q, anomaly_metrics: list, ts):
                            d['all_data']['score'][runStats],
                            d['all_data']['count'][runStats],
                            d['fname']])
-    
+
     ranks, fids = [], []
     for d in top_ranks:
         ranks.append({'app': d[0][0],

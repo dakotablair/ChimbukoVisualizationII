@@ -358,9 +358,9 @@ class ChimbukoApp extends React.Component {
                     </Toolbar>
                 </AppBar>
                 <Grid container spacing={3}>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <div className={classes.viewroot}>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{width: 500}}>
                                 <TextField
                                     id="stat-kind"
                                     label="Anomaly statistics"
@@ -397,9 +397,9 @@ class ChimbukoApp extends React.Component {
                                     Refresh
                                 </Button>
                             </div>
-                            <div className={classes.row}>
+                            <div className={classes.row} style={{width: 500}}>
                                 <AnomalyStats 
-                                    height={200}
+                                    height={300}
                                     socketio={this.socketio}
                                     nQueries={nQueries}
                                     statKind={statKind}
@@ -408,7 +408,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={7}>
                         <div className={classes.viewroot}>
                             <div className={classes.row} style={{height: 61}}>
                                 <FormGroup row>
@@ -436,15 +436,16 @@ class ChimbukoApp extends React.Component {
                                     }
                                 </Button>                         
                             </div>
-                            <div className={classes.row} style={{width: 380}}>
+                            <div className={classes.row} style={{width: 400}}>
                                 <AnomalyMetrics
-                                    height={200}
+                                    height={300}
                                     socketio={this.socketio}
+                                    pause={this.state.pause}
                                 />                            
                             </div>
-                            <div className={classes.row} style={{width: 560}}>
+                            <div className={classes.row} style={{width: 540}}>
                                 <AnomalyHistory
-                                    height={200}
+                                    height={300}
                                     socketio={this.socketio}
                                     onBarClick={this.handleExecutionRequest}
                                     pause={this.state.pause}
@@ -542,7 +543,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={5}>
                         <div className={classes.viewroot}>
                             <div className={classes.row}>
                                 {/*<Chip className={classes.chip} label={getSelectedName()} />*/}
@@ -602,7 +603,7 @@ class ChimbukoApp extends React.Component {
                             </div>
                         </div>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={7}>
                         <TemporalCallStack
                             id="temporal-callstack"
                             height={400}

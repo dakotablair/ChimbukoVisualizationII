@@ -16,6 +16,7 @@ class AnomalyMetrics extends React.Component
             colors: [],
         };
         this.socketio = props.socketio;
+        this.pause = false;
     }
 
     componentDidMount() {
@@ -31,13 +32,16 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
+        if (this.pause)
+            return;
+
         const { labels, new_series, all_series } = chartData; //destructuring assignment
         let { labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState } = this.state; //assign a property to a new name
 
         if (new_series.length === 0)
             return;
 
-        console.log('before:' + newDataState);
+        // console.log('before:' + newDataState);
 
         newDataState.length = 0;
         allDataState.length = 0;
@@ -53,9 +57,27 @@ class AnomalyMetrics extends React.Component
             colorsState.push(rgb);
         }
 
-        console.log('after:' + newDataState);
+        // console.log('after:' + newDataState);
 
         this.setState({...this.state, labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState});
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        // console.log("test component update");
+
+        const { pause } = nextProps;
+        this.pause = pause
+        if (this.chart) {
+            if (pause)
+                return false;
+            else
+                return true;
+        }
+        return false;
+    }
+
+    handleSwitch = name => ev => {
+        this.setState({...this.state, [name]: ev.target.checked});
     }
 
     render() {
@@ -84,7 +106,7 @@ class AnomalyMetrics extends React.Component
             datasets: datasets,
         };
 
-        console.log(_data);
+        // console.log(_data);
 
         return (
             <Radar 
@@ -110,6 +132,9 @@ class AnomalyMetrics extends React.Component
                              callback: function() {return ""},
                              backdropColor: "rgba(0, 0, 0, 0)"
                          }
+                    },
+                    legend: {
+                        position: 'end'
                     }
                 }}
             />

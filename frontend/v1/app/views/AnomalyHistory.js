@@ -56,7 +56,7 @@ class AnomalyHistory extends React.Component
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("test component update");
+        // console.log("test component update");
 
         const { pause } = nextProps;
         this.pause = pause
@@ -139,6 +139,8 @@ class AnomalyHistory extends React.Component
                     tooltips: {
                         callbacks: {
                             title: (tooltipItem, data) => {
+                                // datasetIndex is the index in datasets
+                                // index is the index of labels
                                 const datasetIndex = tooltipItem[0].datasetIndex;
                                 const index = tooltipItem[0].index;
                                 if (datasetIndex == 0) {    
