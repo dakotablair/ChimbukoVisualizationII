@@ -102,8 +102,8 @@ class AnomalyMetrics extends React.Component
         });
 
         const _data = {
-            labels: labels.slice(0, 6),
-            datasets: datasets,
+            labels: labels.length>0?labels.slice(0, 6):['app', 'rank', 'fid', 'severity', 'score', 'count'],
+            datasets: datasets.length>0?datasets:[],
         };
 
         // console.log(_data);
@@ -124,10 +124,21 @@ class AnomalyMetrics extends React.Component
                                     const index = tooltipItem[0].index;
                                     
                                     return `${info[datasetIndex]}`;
+                            },
+                            label: (tooltipItem, data) => {
+                                var label = data.datasets[tooltipItem[0].datasetIndex].label || '';
+                                
+                                console.log(tooltipItem);
+                                console.log(data);
+                                // if (label) {
+                                //     label += ': ';
+                                // }
+                                // label += Math.round(tooltipItem.yLabel * 100) / 100;
+                                return label;
                             }
                         }
                     },
-                    scale: {
+                    scale: { // do not show tick
                         ticks: {
                              callback: function() {return ""},
                              backdropColor: "rgba(0, 0, 0, 0)"
