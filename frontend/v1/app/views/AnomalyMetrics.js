@@ -31,8 +31,8 @@ class AnomalyMetrics extends React.Component
     }
 
     updateChartData = chartData => {
-        const { labels:labels, new_series:new_series, all_series:all_series } = chartData;
-        let { labels:labelsState, newData:newDataState, allData:allDataState } = this.state;
+        const { labels, new_series, all_series } = chartData; //destructuring assignment
+        let { labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState } = this.state; //assign a property to a new name
 
         if (new_series.length === 0)
             return;
@@ -46,10 +46,16 @@ class AnomalyMetrics extends React.Component
         newDataState = [...new_series];
         allDataState = [...all_series];
         labelsState = [...labels];
+        
+        let num = newDataState.length - colorsState.length;
+        for (let index = 0; index < num; index++) {
+            const rgb = getRandomColor();
+            colorsState.push(rgb);
+        }
 
         console.log('after:' + newDataState);
 
-        this.setState({...this.state, labels:labelsState, newData:newDataState, allData:allDataState});
+        this.setState({...this.state, labels:labelsState, newData:newDataState, allData:allDataState, colors:colorsState});
     }
 
     render() {
@@ -60,11 +66,7 @@ class AnomalyMetrics extends React.Component
         const datasets = [];
         
         newData.forEach((d, i) => {
-            const rgb = i<colors.length?colors[i]:getRandomColor();
-            if (i >= colors.length) {
-                colors.push(rgb);
-            }
-
+            const rgb = colors[i];
             datasets.push({
                 label: `${d.fid}`,
                 data: d,
@@ -81,8 +83,6 @@ class AnomalyMetrics extends React.Component
             labels: labels,
             datasets: datasets,
         };
-        
-        this.setState({...this.state, colors:colors});
 
         console.log(_data);
 
