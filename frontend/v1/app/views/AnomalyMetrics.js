@@ -133,9 +133,9 @@ class AnomalyMetrics extends React.Component
                              backdropColor: "rgba(0, 0, 0, 0)"
                          }
                     },
-                    legend: {
-                        position: 'end'
-                    }
+                    // legend: {
+                    //     position: 'end'
+                    // }
                 }}
             />
         );
