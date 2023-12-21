@@ -43,14 +43,32 @@ class AnomalyMetrics extends React.Component
 
         // console.log('before:' + newDataState);
 
-        newDataState.length = 0;
-        allDataState.length = 0;
-        labelsState.length = 0;
-
-        newDataState = [...new_series];
-        allDataState = [...all_series];
+        // add to previous data
+        let topN = Math.max(new_series.length, newDataState.length);
+        newDataState = [...newDataState, ...new_series];
+        allDataState = [...allDataState, ...all_series];
         labelsState = [...labels];
-        
+        // sort and only take the top ones
+        // partial order: (severity, score)
+        newDataState.sort((a, b) => {
+            if ((a[3] - b[3]) < 0.0001) {
+                return a[4] > b[4] ? -1 : 1;
+            }
+            else {
+                return a[3] > b[3] ? -1 : 1;
+            }
+        });
+        newDataState = newDataState.slice(0, topN);
+        allDataState.sort((a, b) => {
+            if ((a[3] - b[3]) < 0.0001) {
+                return a[4] > b[4] ? -1 : 1;
+            }
+            else {
+                return a[3] > b[3] ? -1 : 1;
+            }
+        });
+        allDataState = allDataState.slice(0, topN);
+
         let num = newDataState.length - colorsState.length;
         for (let index = 0; index < num; index++) {
             const rgb = getRandomColor();
