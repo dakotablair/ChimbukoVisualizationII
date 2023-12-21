@@ -126,7 +126,7 @@ class AnomalyMetrics extends React.Component
                                     return `${info[datasetIndex]}`;
                             },
                             label: (tooltipItem, data) => {
-                                var label = data.datasets[tooltipItem[0].datasetIndex].label || '';
+                                var label = data.datasets[tooltipItem.datasetIndex].label || '';
                                 
                                 console.log(tooltipItem);
                                 console.log(data);
