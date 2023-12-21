@@ -198,8 +198,7 @@ def load_execution_provdb(conditions):
     filtered_records = filter(lambda x: x['runtime_total'] < 1000,
                               filtered_records)  # smaller than 1ms
 
-    print("{} records from provdb, return filtered {} records \
-          ".format(n, len(filtered_records)))
+    print("{} records from provdb, return filtered {} records".format(n, len(filtered_records)))
 
     # gpu_count = 0
     # for record in filtered_records:  # reduced_records:
