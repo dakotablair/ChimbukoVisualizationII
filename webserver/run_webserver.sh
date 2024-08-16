@@ -23,10 +23,10 @@ provdb_addr_dir=""
 
 # server config
 export SERVER_CONFIG="production"
-export DATABASE_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/main.sqlite"
-export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_stats.sqlite"
-export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/anomaly_data.sqlite"
-export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/db/func_stats.sqlite"
+export DATABASE_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/main.sqlite"
+export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/anomaly_stats.sqlite"
+export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/anomaly_data.sqlite"
+export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/func_stats.sqlite"
 export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
 
 # Provide parameters for provenance database
@@ -44,18 +44,18 @@ else
 fi
 
 echo "create db ..."
-python3 manager.py createdb
+python3.8 manager.py createdb
 
 echo "run redis ..."
 webserver/run-redis.sh &
 sleep 10
 
 echo "run celery ..."
-python3 manager.py celery --loglevel=info --pool=gevent --concurrency=5 &
+python3.8 manager.py celery --loglevel=info --pool=gevent --concurrency=5 &
 sleep 10
 
 echo "run webserver ..."
-python3 manager.py runserver --host 0.0.0.0 --port 5002 --debug
+python3.8 manager.py runserver --host 0.0.0.0 --port 5002 --debug
 
 
 
