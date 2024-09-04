@@ -5,6 +5,8 @@ import os
 import eventlet
 eventlet.monkey_patch()
 
+import click
+
 from flask_script import Manager, Command, Server as _Server, Option
 
 from server import create_app, db, socketio
@@ -108,7 +110,7 @@ def test():
 @manager.command
 def lint():
     """Runs code linter"""
-    lint = subprocess.call(['flake8', '--ignore=E402', 'server/', 'manage.py', 'tests/'])
+    lint = subprocess.call(['flake8', '--ignore=E402', 'server/', 'manager.py', 'tests/'])
 
     if lint:
         print('OK')
