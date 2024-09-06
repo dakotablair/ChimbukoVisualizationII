@@ -13,6 +13,15 @@ from server import create_app, db, socketio
 
 manager = Manager(create_app)
 
+@click.group()
+def cli():
+    pass
+
+@click.command()
+def runserver():
+    app = create_app()
+    app.run()
+
 
 # Note that socketio.run(app) runs a production ready server
 # when eventlet or gevent are installed. If neither of these
@@ -92,22 +101,19 @@ class CeleryWorker(Command):
 manager.add_command("celery", CeleryWorker())
 
 
-@manager.command
+@cli.command
 def createdb(drop_first=False):
-    """Creates the database."""
-    if drop_first:
-        db.drop_all()
-    db.create_all()
+    pass
 
 
-@manager.command
+@cli.command
 def test():
     """Runs unit tests."""
     tests = subprocess.call(['python3', '-c', 'import tests; tests.run()'])
     sys.exit(tests)
 
 
-@manager.command
+@cli.command
 def lint():
     """Runs code linter"""
     lint = subprocess.call(['flake8', '--ignore=E402', 'server/', 'manager.py', 'tests/'])
@@ -118,8 +124,8 @@ def lint():
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == 'test' or sys.argv[1] == 'lint':
+    if len(sys.argv) > 1 and sys.argv[1] in ('lint', 'test'):
         os.environ['SERVER_CONFIG'] = 'testing'
         os.environ['PROVENANCE_DB'] = 'data/test/'
         os.environ['SHARDED_NUM'] = '1'
-    manager.run()
+    cli()
