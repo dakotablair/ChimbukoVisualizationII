@@ -11,6 +11,9 @@ import os  # noqa: E402, F401
 
 from server import create_app  # noqa: E402
 
+# def create_app():
+#     pass
+
 
 # manager = Manager(create_app)
 class M:
@@ -28,6 +31,7 @@ def cli():
 
 @click.command()
 def runserver():
+    """Runs the Flask app."""
     app = create_app()
     app.run()
 
@@ -50,9 +54,6 @@ def lint():
     lint = subprocess.call(
         ["flake8", "--ignore=E402", "server/", "manager.py", "tests/"]
     )
-
-    if lint:
-        print("OK")
     sys.exit(lint)
 
 

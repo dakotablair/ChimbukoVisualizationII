@@ -1,6 +1,6 @@
 import os
 from flask import abort
-from . import db
+from .core import db
 from .utils import timestamp
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import backref

@@ -35,9 +35,9 @@ class ProvDB:
         )
         self.pdb_ninstance = int(pdb_ninstance)
 
-        if (
-            pdb_addr == "" and pdb_addr_path == ""
-        ):  # Standalone mode, need to create engine provider
+        # Standalone mode, need to create engine provider
+        if (pdb_addr == "" and pdb_addr_path == ""):
+            print("PDB stand alone mode")
             # Argument of number of server instances is ignored here
             self.pdb_engine = [Engine("ofi+tcp", mode=pymargo.server)]
             self.pdb_provider = [SonataProvider(self.pdb_engine[0], 0)]
@@ -60,12 +60,11 @@ class ProvDB:
                     # For offline mode all shards are attached to server
                     # instance 0, provider 0
                     self.pdb_shard_map.append((0, 0))
-
+        # Another Chimbuko module created the engine
+        # Either an address is supplied as pdb_addr (#instance must be 1)
+        # or a pdb_addr_path is set to the directory containing the provDB
+        # setup output (in which case pbd_addr is ignored)
         else:
-            # Other Chimbuko module created the engine
-            # Either an address is supplied as pdb_addr (#instance must be 1)
-            # or a pdb_addr_path is set to the directory containing the provDB
-            # setup output (in which case pbd_addr is ignored)
             if self.pdb_ninstance == 1 and pdb_addr != "":
                 # pdb_addr is the address of the server
                 self.pdb_engine = [
