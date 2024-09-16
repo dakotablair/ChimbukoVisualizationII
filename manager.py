@@ -1,27 +1,13 @@
+# needed for using redis in this configuration
+from gevent import monkey
+monkey.patch_all()
 
-# import eventlet
-
-# eventlet.monkey_patch()
-
-import click
-# click = eventlet.import_patched("click")
+import click  # noqa: E402
 import subprocess  # noqa: E402
 import sys  # noqa: E402
-import os  # noqa: E402, F401
+import os  # noqa: E402
 
 from server import create_app  # noqa: E402
-
-# def create_app():
-#     pass
-
-
-# manager = Manager(create_app)
-class M:
-    def add_command(*args):
-        print(args)
-
-
-manager = M()
 
 
 @click.group()
@@ -29,11 +15,12 @@ def cli():
     pass
 
 
-@click.command()
-def runserver():
+@cli.command()
+@click.option('--host', default='0.0.0.0', help='The interface to bind to.')
+def runserver(host):
     """Runs the Flask app."""
     app = create_app()
-    app.run()
+    app.run(host=host)
 
 
 @click.command()

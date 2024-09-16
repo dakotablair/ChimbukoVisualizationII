@@ -1,9 +1,13 @@
-import os
-from flask import Flask
-from config import config
+# needed (?) for using redis in this configuration
+from gevent import monkey
+monkey.patch_all()
 
-from .core import db, celery, pdb, socketio
-from .datamodel import DataModel
+import os  # noqa: E402
+from flask import Flask  # noqa: E402
+from config import config  # noqa: E402
+
+from .core import db, celery, pdb, socketio  # noqa: E402
+from .datamodel import DataModel  # noqa: E402
 
 # Flask extensions
 dm = DataModel()
