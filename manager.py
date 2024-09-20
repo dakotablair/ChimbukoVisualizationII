@@ -1,7 +1,3 @@
-# needed for using redis in this configuration
-from gevent import monkey
-monkey.patch_all()
-
 import click  # noqa: E402
 import subprocess  # noqa: E402
 import sys  # noqa: E402
