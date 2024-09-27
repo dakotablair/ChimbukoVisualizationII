@@ -12,6 +12,12 @@ const config = {
     rules: [
       {
         test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
+        test: /\.m?js$/,
         exclude: /node_modules/,
         resolve: {
           fullySpecified: false,

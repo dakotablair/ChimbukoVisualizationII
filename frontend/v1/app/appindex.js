@@ -17,7 +17,6 @@ import {
 } from "./selectors";
 
 import io from "socket.io-client";
-
 window.io = io;
 
 import { withStyles } from "@material-ui/core/styles";
@@ -111,6 +110,7 @@ class ChimbukoApp extends React.Component {
     console.log({ uri }); // eslint-disable-line no-console
 
     if (this.socketio == null) this.socketio = io(uri);
+    window.client = this.socketio;
 
     this.socketio.on("connect", () => {
       console.log("socket.on.connect");
