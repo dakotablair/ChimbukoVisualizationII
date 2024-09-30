@@ -12,5 +12,4 @@ if __name__ == "__main__":
 	print("port: ", port)
 
 	app = create_app()
-	socketio.run(app, host=host, port=port, debug=False, use_reloader=False)
-
+	socketio.init_app(app, host=host, port=port, debug=False, use_reloader=False)

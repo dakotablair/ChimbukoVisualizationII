@@ -21,6 +21,7 @@ def create_app(config_name=None, main=True):
         config_name = os.environ.get("SERVER_CONFIG", "development")
 
     # print(config_name, config[config_name].SQLALCHEMY_BINDS)
+    print(f"config: {config_name} --- {config[config_name]().__repr__()}")
 
     app = Flask(__name__)
     app.config.from_object(config[config_name])

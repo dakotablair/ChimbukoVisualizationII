@@ -1,9 +1,13 @@
+# needed (?) for using redis in this configuration
+from gevent import monkey
+monkey.patch_all()
+
 import click  # noqa: E402
 import subprocess  # noqa: E402
 import sys  # noqa: E402
 import os  # noqa: E402
 
-from server import create_app  # noqa: E402
+from server import create_app, socketio  # noqa: E402
 
 
 @click.group()
@@ -16,7 +20,7 @@ def cli():
 def runserver(host):
     """Runs the Flask app."""
     app = create_app()
-    app.run(host=host)
+    socketio.run(app, host=host)
 
 
 @click.command()
