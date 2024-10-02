@@ -17,10 +17,11 @@ def cli():
 
 @cli.command()
 @click.option('--host', default='0.0.0.0', help='The interface to bind to.')
-def runserver(host):
+@click.option('--port', default='5000', help='The listening port.')
+def runserver(host, port):
     """Runs the Flask app."""
     app = create_app()
-    socketio.run(app, host=host)
+    socketio.run(app, host=host, port=port)
 
 
 @click.command()
