@@ -1,13 +1,15 @@
 # needed (?) for using redis in this configuration
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 
 import click  # noqa: E402
 import subprocess  # noqa: E402
 import sys  # noqa: E402
 import os  # noqa: E402
 
-from server import create_app, socketio  # noqa: E402
+from flask_socketio import SocketIO, emit, send
+
+from server import create_app  # , socketio  # noqa: E402
 
 
 @click.group()
@@ -21,6 +23,25 @@ def cli():
 def runserver(host, port):
     """Runs the Flask app."""
     app = create_app()
+    socketio = SocketIO(app, engineio_logger=True)
+
+    @socketio.on("connect")
+    def connect():
+        print("client connected")
+
+    @socketio.on("disconnect")
+    def disconnect():
+        print("client disconnected")
+
+    @socketio.on("message")
+    def echo(data):
+        print(f"received message: {data}")
+        emit("received data", brodcast=True)
+
+    @socketio.on("ping")
+    def ping(data=None):
+        send(f"pong! ;) {data=}")
+
     socketio.run(app, host=host, port=port)
 
 

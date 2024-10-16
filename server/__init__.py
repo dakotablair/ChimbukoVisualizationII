@@ -1,6 +1,6 @@
 # needed (?) for using redis in this configuration
-from gevent import monkey
-monkey.patch_all()
+# from gevent import monkey
+# monkey.patch_all()
 
 import os  # noqa: E402
 from flask import Flask  # noqa: E402
@@ -28,6 +28,7 @@ def create_app(config_name=None, main=True):
 
     # Initialize flask extensions
     db.init_app(app)
+    """
     if main:
         # Initialize socketio server and attach it to the message queue, so
         # that everything works even when there are multiple servers or
@@ -45,6 +46,7 @@ def create_app(config_name=None, main=True):
             message_queue=app.config["SOCKETIO_MESSAGE_QUEUE"],
             async_mode="threading",
         )
+    """
     celery.conf.update(config[config_name].CELERY_CONFIG)
 
     # Register web application routes
@@ -70,4 +72,4 @@ def create_app(config_name=None, main=True):
     return app
 
 
-__ALL__ = [db, socketio, celery, pdb]
+__ALL__ = [db, celery, pdb, socketio]
