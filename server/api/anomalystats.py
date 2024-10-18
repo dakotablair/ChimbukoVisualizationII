@@ -19,6 +19,12 @@ import math
 import glob
 
 
+@api.route('/socket.io', methods=['GET', 'POST'])
+def socketio():
+    """ socket.io routes"""
+    pass
+
+
 def process_on_anomaly(data: list, ts):
     """
     process on anomaly data before adding to database
@@ -574,7 +580,7 @@ def new_anomalymetrics():
             })
             db.session.add(q)
             db.session.commit()
-        
+
         if len(anomaly_metrics):
             push_anomaly_metrics(q, anomaly_metrics, ts)
 

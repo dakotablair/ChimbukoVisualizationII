@@ -1,5 +1,5 @@
 import time
-from flask import url_for as _url_for, current_app, _request_ctx_stack
+from flask import url_for as _url_for, current_app  # , _request_ctx_stack
 
 
 def timestamp():
@@ -13,7 +13,8 @@ def url_for(*args, **kwargs):
     """
     if '_external' not in kwargs:
         kwargs['_external'] = False
-    reqctx = _request_ctx_stack.top
+    # reqctx = _request_ctx_stack.top
+    reqctx = True
     if reqctx is None:
         if kwargs['_external']:
             raise RuntimeError('Cannot generate external URLs without a '

@@ -1,30 +1,35 @@
-const webpack = require('webpack');
-const resolve = require('path').resolve;
+const path = require("path");
 
 const config = {
-    devtool: 'eval-source-map',
-    entry: __dirname + '/app/index.js',
-    output: {
-        path: resolve('../../server/static/js'),
-        filename: 'bundle.js',
-        publicPath: ""
-    },
-    resolve: {
-        extensions: ['.js', '.jsx', '.css']
-    },
-    module: {
-        rules: [
-            {
-                test: /\.js?/,
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            },
-            {
-                test: /\.css$/,
-                loader: 'style-loader!css-loader?modules'
-            }
-        ]
-    }
+  devtool: "eval-source-map",
+  entry: "./app/index.js",
+  output: {
+    path: path.resolve("../../server/static/js"),
+    filename: "bundle.js",
+    publicPath: "",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        resolve: {
+          fullySpecified: false,
+        },
+        use: ["babel-loader"],
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader?modules"],
+      },
+    ],
+  },
 };
 
 module.exports = config;

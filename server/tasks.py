@@ -8,7 +8,7 @@ from flask import Blueprint, abort, g, request
 from werkzeug.exceptions import InternalServerError
 from celery import states
 
-from . import celery
+from .core import celery
 from .utils import url_for
 
 text_types = (str, bytes)

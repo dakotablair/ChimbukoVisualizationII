@@ -123,7 +123,6 @@ data/backup/
 data/grid/
 *.unqlite
 *.json
-*.txt
 *.xlsx
 *.address.*
 *.map
