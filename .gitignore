@@ -71,7 +71,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
+# *.ipynb
 
 # pyenv
 .python-version
@@ -121,10 +121,10 @@ node_modules/
 data/*.tar.gz
 data/backup/
 data/grid/
-*.unqlite
+data/*.unqlite
 *.json
 *.txt
-*.xlsx
+data/*.xlsx
 *.address.*
 *.map
 
