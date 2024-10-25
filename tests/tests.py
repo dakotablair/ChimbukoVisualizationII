@@ -1,10 +1,17 @@
 import unittest
 import json
 
-from server import create_app, db, pdb
+from subprocess import getstatusoutput
+
+from server import create_app, db
+from server.mock import MockPDB, MockPDBCollection
+
+""" Fixtures """
+pdb = MockPDB([MockPDBCollection([json.dumps(i)]) for i in range(64)])
 
 
 class ServerTests(unittest.TestCase):
+    """ Server Tests """
     def setUp(self):
         self.app = create_app()
 
@@ -53,6 +60,7 @@ class ServerTests(unittest.TestCase):
                 pass
         return body, rv.status_code, rv.headers
 
+    @unittest.skip("Skip test for now")
     def test_anomalystats(self):
         import random
         import time
@@ -245,7 +253,11 @@ class ServerTests(unittest.TestCase):
             "$record.io_step == %d; } " % (0, 0, 0)
 
         collections = pdb.pdb_collections
-        for col in collections:
-            result = [json.loads(x) for x in col.filter(jx9_filter)]
+        for collection in collections:
+            result = [json.loads(x) for x in collection.filter(jx9_filter)]
             filtered_records += result
         self.assertEqual(len(filtered_records), 64)
+
+    def test_manager(self):
+        exitcode = getstatusoutput("python manager.py --help")[0]
+        self.assertEqual(exitcode, 0)

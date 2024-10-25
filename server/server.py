@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, Response, json
+from flask import Blueprint, jsonify, render_template  # , Response, json
 # render_template, json, request, current_app
 
 from . import stats as req_stats
@@ -9,10 +9,12 @@ from .utils import url_for
 main = Blueprint('main', __name__)
 
 
+"""
 @main.before_app_first_request
 def before_first_request():
     # for future usages
     pass
+"""
 
 
 @main.before_app_request

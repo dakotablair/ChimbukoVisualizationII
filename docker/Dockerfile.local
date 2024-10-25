@@ -32,3 +32,6 @@ RUN bash /install_python_requirements.large.sh
 COPY requirements.txt /requirements.txt
 COPY docker/install_python_requirements.sh /install_python_requirements.sh
 RUN bash /install_python_requirements.sh
+
+COPY docker/entrypoint.sh /entrypoint.sh
+CMD ["/bin/bash", "--rcfile", "/entrypoint.sh"]

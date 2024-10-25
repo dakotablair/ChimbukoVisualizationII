@@ -1,3 +1,4 @@
+import json
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -48,6 +49,15 @@ class Config(object):
         os.environ.get('CELERY_BROKER_URL', 'redis://')
     )
     # EXECUTION_PATH = os.environ.get('EXECUTION_PATH', None)
+
+    def __repr__(self):
+        def predicate(name):
+            return not name.startswith("__")
+        attrs = filter(predicate, dir(self))
+        return json.dumps({
+            attr: getattr(self, attr)
+            for attr in attrs
+        }, indent=4)
 
 
 class DevelopmentConfig(Config):
