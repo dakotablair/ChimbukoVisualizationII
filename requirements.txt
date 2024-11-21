@@ -24,8 +24,8 @@ MarkupSafe==2.1.5
 pkgconfig==1.5.5
 pybind11==2.13.4
 pycparser==2.21
-python-engineio==2.0.2
-python-socketio==1.8.4
+python-engineio==4.10.1
+python-socketio==5.11.4
 pytz==2023.3
 redis==4.5.4
 requests==2.32.3
@@ -37,4 +37,3 @@ vine==5.1.0
 werkzeug==0.16.0
 zope.event==4.6
 zope.interface==5.4.0
-
