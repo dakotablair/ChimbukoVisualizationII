@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack -p --progress --config webpack.config.js && ncp index.html ../../server/templates",
-    "dev-build": "webpack --progress -d --config webpack.config.js",
-    "watch": "webpack --progress -d --config webpack.config.js --watch"
+    "build": "webpack --mode production --progress --config webpack.config.js && ncp index.html ../../server/templates",
+    "dev-build": "webpack --mode development --progress --config webpack.config.js",
+    "watch": "webpack --mode development --progress --config webpack.config.js --watch"
   },
   "author": "Sungsoo Ha, Wei Xu",
   "license": "ISC",
@@ -22,7 +22,7 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "style-loader": "^1.0.0",
-    "webpack": "^5.92.0",
+    "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
@@ -40,6 +40,7 @@
     "moment": "^2.29.4",
     "ncp": "^2.0.0",
     "node-gyp": "^8.0.0",
+    "path-to-regexp": "^8.2.0",
     "react-chartjs-2": "^2.7.6",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
@@ -49,6 +50,6 @@
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^2.2.0"
+    "socket.io-client": "^4.8.1"
   }
 }
