@@ -122,12 +122,10 @@ data/*.tar.gz
 data/backup/
 data/grid/
 data/*.unqlite
-*.json
-*.txt
 data/*.xlsx
 *.address.*
 *.map
+*.json
 
 # MacOS
 .DS_Store
-
