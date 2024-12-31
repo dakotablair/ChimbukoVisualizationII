@@ -9,7 +9,7 @@ from .datamodel import DataModel
 
 # Flask extensions
 db = SQLAlchemy()
-socketio = SocketIO()
+socketio = SocketIO(async_mode='gevent', engineio_logger=True)
 dm = DataModel()
 pdb = ProvDB(pdb_path=os.environ.get('PROVENANCE_DB', ''),
              pdb_sharded_num=int(os.environ.get('SHARDED_NUM', 0)),

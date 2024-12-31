@@ -8,13 +8,12 @@ charset-normalizer==3.3.0
 click==8.1.7
 Cython==3.0.4
 dnspython==2.6.1
-eventlet==0.35.2
 Flask==1.1.2
 Flask-Script==2.0.6
 Flask-SocketIO==2.9.6
 Flask-SQLAlchemy==2.5.1
 flit_core==3.9.0
-gevent==23.7.0
+gevent==24.2.1
 greenlet==2.0.2
 idna==3.7
 itsdangerous==2.0.1

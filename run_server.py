@@ -1,6 +1,8 @@
+# needed for using redis in this configuration
+from gevent import monkey
+monkey.patch_all()
+
 import sys
-import eventlet
-eventlet.monkey_patch()
 
 from server import create_app, socketio
 

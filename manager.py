@@ -1,9 +1,10 @@
+# needed for using redis in this configuration
+from gevent import monkey
+monkey.patch_all()
+
 import subprocess
 import sys
 import os
-
-import eventlet
-eventlet.monkey_patch()
 
 from flask_script import Manager, Command, Server as _Server, Option
 
