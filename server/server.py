@@ -1,18 +1,16 @@
-from flask import Blueprint, jsonify, render_template, Response, json
-# render_template, json, request, current_app
+from flask import (
+    Blueprint,
+    Response,
+    current_app,
+    jsonify,
+    render_template,
+)
 
 from . import stats as req_stats
 from . import socketio, celery as mycelery
 from . import pdb
-from .utils import url_for
 
 main = Blueprint('main', __name__)
-
-
-@main.before_app_first_request
-def before_first_request():
-    # for future usages
-    pass
 
 
 @main.before_app_request
@@ -27,7 +25,7 @@ def stop():
 
     def get_inspect():
         from requests import get
-        resp = get(url_for('tasks.get_info', _external=True))
+        resp = get(current_app.url_for('tasks.get_info', _external=True))
         info = resp.json()
         return info
 

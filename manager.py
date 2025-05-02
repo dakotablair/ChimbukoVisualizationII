@@ -2,9 +2,21 @@
 from gevent import monkey
 monkey.patch_all()
 
+import types
 import subprocess
 import sys
 import os
+
+# monkey patch flask to support old version of flask_script
+import flask
+
+module_name = 'flask._compat'
+my_submodule = types.ModuleType(module_name)
+_compat = types.ModuleType(module_name)
+_compat.text_type = str
+sys.modules[module_name] = _compat
+setattr(flask, '_compat', _compat)
+flask._request_ctx_stack = None
 
 from flask_script import Manager, Command, Server as _Server, Option
 
