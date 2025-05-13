@@ -4,12 +4,11 @@ try:
 except ImportError:  # pragma:  no cover
     from cStringIO import StringIO as BytesIO
 
-from flask import Blueprint, abort, g, request
+from flask import Blueprint, abort, current_app, g, request
 from werkzeug.exceptions import InternalServerError
 from celery import states
 
 from . import celery
-from .utils import url_for
 
 text_types = (str, bytes)
 try:
@@ -81,7 +80,14 @@ def make_async(f):
         # to obtain task status
         if t.state == states.PENDING or t.state == states.RECEIVED or \
                 t.state == states.STARTED:
-            return '', 202, {'Location': url_for('tasks.get_status', id=t.id)}
+            app = Flask(__name__)
+            app.register_blueprint(tasks_bp)
+            with app.app_context() as actx:
+                url = current_app.url_for('tasks.get_status', id=t.id)
+                output = (
+                    '', 202, {'Location': url}
+                )
+            return output
 
         # If the task already finished, return its return value as response
         # if isinstance(t.info, list):

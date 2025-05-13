@@ -5,7 +5,6 @@ from .. import db, dm
 from ..models import AnomalyStat, AnomalyData, FuncStat, AnomalyStatQuery
 from . import api
 from ..tasks import make_async
-from ..utils import timestamp, url_for
 from requests import post
 from ..events import push_data
 
