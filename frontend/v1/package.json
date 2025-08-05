@@ -1,6 +1,6 @@
 {
   "name": "chimbuko-vis",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Front-end package of Chimbuko visualization",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "dev-build": "webpack --mode development --progress --config webpack.config.js",
     "watch": "webpack --mode development --progress --config webpack.config.js --watch"
   },
-  "author": "Sungsoo Ha, Wei Xu",
+  "author": "David Dakota Blair, Sungsoo Ha, Wei Xu",
   "license": "ISC",
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -26,16 +26,19 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.6",
     "@material-ui/core": "^4.4.0",
     "@material-ui/icons": "^4.2.1",
     "@material-ui/lab": "^4.0.0-alpha.29",
     "@material-ui/styles": "^4.3.3",
     "axios": "^1.8.4",
+    "brace-expansion": "^1.1.12",
     "chart.js": "^2.9.4",
     "chartjs-plugin-streaming": "1.8.0",
     "chartjs-plugin-zoom": "^0.7.7",
     "clsx": "^1.0.4",
     "d3": "^5.12.0",
+    "form-data": "^4.0.4",
     "history": "^4.9.0",
     "moment": "^2.29.4",
     "ncp": "^2.0.0",
