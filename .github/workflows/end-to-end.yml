@@ -28,9 +28,8 @@ jobs:
     - name: Build PerformanceAnalysis container
       shell: bash
       run: |
+        ls -halF
+        ls -halF ChimubkoVisualizationII
         docker build \
-        -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
-        PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env
-
-
-
+          -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
+          PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env
