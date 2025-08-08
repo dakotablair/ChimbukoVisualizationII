@@ -21,9 +21,9 @@ jobs:
     - name: Check out the PerformanceAnalysis repo
       uses: actions/checkout@v4
       with:
-        path: 'ChimbukoVisualizationII'
+        path: 'PerformanceAnalysis'
         ref: 'ckelly_develop'
-        repository: 'CODARcode/ChimbukoVisualizationII'
+        repository: 'CODARcode/PerformanceAnalysis'
 
     - name: Build PerformanceAnalysis container
       shell: bash
