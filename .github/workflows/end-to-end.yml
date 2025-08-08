@@ -30,7 +30,7 @@ jobs:
       run: |
         docker build \
         -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
-        docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env
+        PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env
 
 
 
