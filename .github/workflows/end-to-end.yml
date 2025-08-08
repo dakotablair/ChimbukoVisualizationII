@@ -1,0 +1,35 @@
+name: Chimbuko Visualization II End-to-end Tests
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
+
+jobs:
+  end_to_end_tests:
+    runs-on: ubuntu-latest
+    steps:
+
+    # Check out ChimubkoVisualizationII (CV2) repo.
+    - name: Check out the CV2 repo
+      uses: actions/checkout@v4
+
+    - name: Check out the PerformanceAnalysis repo
+      uses: actions/checkout@v4
+      with:
+        path: 'ChimbukoVisualizationII'
+        ref: 'ckelly_develop'
+        repository: 'CODARcode/ChimbukoVisualizationII'
+
+    - name: Build PerformanceAnalysis container
+      shell: bash
+      run: |
+        docker build \
+        -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env \
+        -t chimbuko/chimbuko-spack-env:ubuntu18.04
+
+
