@@ -25,7 +25,7 @@ jobs:
         ref: 'ckelly_develop'
         repository: 'CODARcode/PerformanceAnalysis'
 
-    - name: Build PerformanceAnalysis container
+    - name: Build PerformanceAnalysis image
       shell: bash
       run: |
         cd PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack
@@ -34,3 +34,10 @@ jobs:
           -f Dockerfile.spack_env \
           -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
           .
+        git checkout ckelly_develop_ddb
+        docker build \
+          -f Dockerfile.cv2 \
+          -t chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          .
+
+          
