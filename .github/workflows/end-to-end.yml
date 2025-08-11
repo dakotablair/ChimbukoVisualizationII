@@ -29,6 +29,7 @@ jobs:
       shell: bash
       run: |
         cd PerformanceAnalysis
+        ls -halF
         docker build \
           -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.spack_env \
           -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
