@@ -27,6 +27,8 @@ jobs:
 
     - name: Build PerformanceAnalysis image
       shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         docker pull ghcr.io/dakotablair/chimbuko/chimbuko-spack-dev-ddb:latest
         docker run --rm -it --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
