@@ -34,9 +34,12 @@ jobs:
           -f Dockerfile.spack_env \
           -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
           .
+        cd -
+        cd PerformanceAnalysis
+        ls -halF
         git checkout ckelly_develop_ddb
         docker build \
-          -f Dockerfile.cv2 \
+          -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.cv2 \
           -t chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
           .
 
