@@ -39,5 +39,5 @@ jobs:
           -v $(pwd):$(pwd) \
           --name ddb-csd \
           --entrypoint '["/bin/bash", "-c"]' \
-          dakotablair/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          ghcr.io/dakotablair/chimbuko/chimbuko-spack-dev-ddb:latest \
           "curl wttr.in/Moon"
