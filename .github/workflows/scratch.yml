@@ -1,0 +1,43 @@
+name: Scratch action
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
+
+jobs:
+  scratch:
+    runs-on: ubuntu-latest
+    steps:
+
+    # Check out ChimubkoVisualizationII (CV2) repo.
+    - name: Check out the CV2 repo
+      uses: actions/checkout@v4
+
+    - name: Check out the PerformanceAnalysis repo
+      uses: actions/checkout@v4
+      with:
+        path: 'PerformanceAnalysis'
+        ref: 'ckelly_develop'
+        repository: 'CODARcode/PerformanceAnalysis'
+
+    - name: Build PerformanceAnalysis image
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        docker pull ghcr.io/dakotablair/chimbuko/chimbuko-spack-dev-ddb:latest
+        docker images
+        docker run --rm \
+          --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+          --privileged \
+          -p 5002:5002 \
+          -v $(pwd):$(pwd) \
+          --name ddb-csd \
+          --entrypoint "" \
+          ghcr.io/dakotablair/chimbuko/chimbuko-spack-dev-ddb:latest \
+          bash -c "curl wttr.in/Moon"
