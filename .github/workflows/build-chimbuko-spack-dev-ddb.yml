@@ -41,7 +41,15 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build PerformanceAnalysis image
+    - name: Pull chimbuko/chimbuko-spack-env docker image
+      shell: bash
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-env:ubuntu18.04  
+        docker image tag \
+          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-env:ubuntu18.04 \
+          chimbuko/chimbuko-spack-env:ubuntu18.04
+
+    - name: Build test environment image
       shell: bash
       run: |
         cd PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack
