@@ -52,9 +52,9 @@ jobs:
     - name: Build test environment image
       shell: bash
       run: |
-        cd PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack
+        cd PerformanceAnalysis/
         docker build \
-          -f Dockerfile.cv2 \
+          -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.cv2 \
           -t chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
           .
 
