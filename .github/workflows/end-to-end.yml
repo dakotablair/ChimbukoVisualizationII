@@ -25,22 +25,21 @@ jobs:
         ref: 'ckelly_develop'
         repository: 'CODARcode/PerformanceAnalysis'
 
-    - name: Build PerformanceAnalysis image
+    - name: Pull chimbuko/chimbuko-spack-dev-ddb docker image
       shell: bash
       run: |
-        cd PerformanceAnalysis/docker/ubuntu18.04/openmpi4.0.4/all_spack
-        ls -halF
-        docker build \
-          -f Dockerfile.spack_env \
-          -t chimbuko/chimbuko-spack-env:ubuntu18.04 \
-          .
-        cd -
-        cd PerformanceAnalysis
-        ls -halF
-        git checkout ckelly_develop_ddb
-        docker build \
-          -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.cv2 \
-          -t chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
-          .
+        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04  
+        docker image tag \
+          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+
+    - name: Run tests in container
+      shell: bash
+      run: |
+          docker run --rm -it --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+              --privileged \
+              -p 5002:5002 \
+              -v $(pwd):$(pwd) \
+              chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
 
           
