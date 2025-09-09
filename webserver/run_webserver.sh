@@ -27,7 +27,7 @@ export DATABASE_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/main.sqlite"
 export ANOMALY_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/anomaly_stats.sqlite"
 export ANOMALY_DATA_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/anomaly_data.sqlite"
 export FUNC_STATS_URL="sqlite:///${WORK_DIR}/${DATA_NAME}/viz/func_stats.sqlite"
-export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/stats/"
+export SIMULATION_JSON="${WORK_DIR}/${DATA_NAME}/viz/"
 
 # Provide parameters for provenance database
 export PROVDB_NINSTANCE=${provdb_ninstances}
