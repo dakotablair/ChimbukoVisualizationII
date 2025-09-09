@@ -36,7 +36,7 @@ jobs:
     - name: Run tests in container
       shell: bash
       run: |
-          docker run --rm -it --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+          docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
               --privileged \
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
