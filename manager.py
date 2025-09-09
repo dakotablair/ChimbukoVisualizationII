@@ -2,10 +2,11 @@
 from gevent import monkey
 monkey.patch_all()
 
-import types
+import collections
+import os
 import subprocess
 import sys
-import os
+import types
 
 # monkey patch flask to support old version of flask_script
 import flask
@@ -16,7 +17,9 @@ _compat = types.ModuleType(module_name)
 _compat.text_type = str
 sys.modules[module_name] = _compat
 setattr(flask, '_compat', _compat)
-flask._request_ctx_stack = None
+mock_request_ctx_stack = collections.namedtuple("mock", ["top"])
+mock_request_ctx_stack.top = collections.namedtuple("top", ["app"])
+flask._request_ctx_stack = mock_request_ctx_stack
 
 from flask_script import Manager, Command, Server as _Server, Option
 

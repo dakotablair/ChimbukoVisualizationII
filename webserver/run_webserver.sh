@@ -44,7 +44,7 @@ else
 fi
 
 echo "create db ..."
-python3.8 manager.py createdb
+python3.8 manager.py createdb &
 
 echo "run redis ..."
 webserver/run-redis.sh &

@@ -1,3 +1,6 @@
+import json
+import os
+
 from flask import (
     Blueprint,
     Response,
@@ -13,6 +16,15 @@ from . import pdb
 main = Blueprint('main', __name__)
 
 
+@main.route('/build')
+def build():
+    with open("./frontend/v1/package.json") as f:
+        npm_package = json.load(f)
+    return jsonify({
+        "npm_package_version": npm_package["version"]
+    })
+
+
 @main.before_app_request
 def before_request():
     """Update requests per second stats."""
@@ -22,6 +34,8 @@ def before_request():
 @main.route('/stop')
 def stop():
     import time
+
+    global pdb
 
     def get_inspect():
         from requests import get
@@ -63,7 +77,7 @@ def stop():
     socketio.stop()
     print("Shutting down SocketIO web server!")
 
-    if pdb:
+    if 'pdb' in globals():
         del pdb
     print("Shutting down provdb!")
 

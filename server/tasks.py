@@ -4,7 +4,7 @@ try:
 except ImportError:  # pragma:  no cover
     from cStringIO import StringIO as BytesIO
 
-from flask import Blueprint, abort, current_app, g, request
+from flask import Blueprint, Flask, abort, current_app, g, request
 from werkzeug.exceptions import InternalServerError
 from celery import states
 
