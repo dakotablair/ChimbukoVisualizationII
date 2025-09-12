@@ -44,7 +44,7 @@ jobs:
               --privileged \
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
-              --entrypoint '["/bin/bash", "-c"]' \
+              --entrypoint /bin/bash" -c \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
               ls -halF /Downloads/ChimbukoVisualizationII
 
