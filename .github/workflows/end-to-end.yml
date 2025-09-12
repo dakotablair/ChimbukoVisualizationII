@@ -17,6 +17,8 @@ jobs:
     # Check out ChimubkoVisualizationII (CV2) repo.
     - name: Check out the CV2 repo
       uses: actions/checkout@v4
+      with:
+        ref: 'actions_unstable'
 
     - name: Check out the PerformanceAnalysis repo
       uses: actions/checkout@v4
