@@ -39,7 +39,7 @@ jobs:
       shell: bash
       run: |
           echo $(pwd)
-          ls -halF
+          ls -halF ./docker
           docker run --rm \
               --privileged \
               -p 5002:5002 \
