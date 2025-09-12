@@ -36,6 +36,8 @@ jobs:
     - name: Run tests in container
       shell: bash
       run: |
+          echo $(pwd)
+          ls -halF
           docker run --rm \
               --privileged \
               -p 5002:5002 \
