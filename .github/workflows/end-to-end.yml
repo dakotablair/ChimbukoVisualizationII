@@ -45,6 +45,6 @@ jobs:
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
-              ./docker/e2e-test.sh
+              /Downloads/ChimbukoVisualizationII/docker/e2e-test.sh
 
 
