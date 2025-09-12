@@ -6,7 +6,7 @@ pushd /Downloads
 git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
 
 pushd ChimbukoVisualizationII
-git checkout dependency_upgrades_unstable
+git checkout actions_unstable
 
 mkdir -p data/grid
 ln -s /Downloads/repeat_1rank data/grid/
