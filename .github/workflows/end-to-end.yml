@@ -28,7 +28,7 @@ jobs:
     - name: Pull chimbuko/chimbuko-spack-dev-ddb docker image
       shell: bash
       run: |
-        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04  
+        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
         docker image tag \
           ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
           chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
@@ -36,10 +36,11 @@ jobs:
     - name: Run tests in container
       shell: bash
       run: |
-          docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+          docker run --rm \
               --privileged \
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
-              chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+              chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+              ./ChimbukoVisualizationII/docker/e2e-test.sh
 
-          
+
