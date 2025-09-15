@@ -43,7 +43,7 @@ jobs:
               --entrypoint /bin/bash \
               --env RUN_DIR=$(pwd) \
               --publish 5002:5002 \
-              -volume $(pwd):$(pwd) \
+              --volume $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
               -c "$(pwd)/docker/e2e-test.sh"
 
