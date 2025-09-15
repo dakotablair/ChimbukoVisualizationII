@@ -42,10 +42,10 @@ jobs:
           ls -halF ./docker
           docker run --rm \
               --privileged \
+              --entrypoint /bin/bash \
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
-              --entrypoint $(echo '["/bin/bash", "-c"]') \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
-              ls -halF /Downloads/ChimbukoVisualizationII
+              -c ls -halF /Downloads/ChimbukoVisualizationII
 
 
