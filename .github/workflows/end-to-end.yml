@@ -38,14 +38,12 @@ jobs:
     - name: Run tests in container
       shell: bash
       run: |
-          echo $(pwd)
-          ls -halF ./docker
           docker run --rm \
               --privileged \
               --entrypoint /bin/bash \
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
-              -c ls -halF /Downloads/ChimbukoVisualizationII
+              -c ./docker/e2e-test.sh
 
 
