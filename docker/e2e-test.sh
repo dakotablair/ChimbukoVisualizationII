@@ -6,24 +6,23 @@ env
 
 ls -halF $RUN_DIR
 
-pushd /Downloads
-git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
-
 pushd $RUN_DIR
 git config --global --add safe.directory $RUN_DIR
 git checkout actions_unstable
 
 mkdir -p data/grid
 ln -s /Downloads/repeat_1rank data/grid/
-popd
+
+# Install Redis
+./webserver/run-redis.sh
 
 pushd /opt/spack-environment/ && \
     source /spack/spack/share/spack/setup-env.sh && \
     spack env activate .
 popd
 
-# python -m pip install -r requirements.large.txt
-# python -m pip install -r requirements.txt
+python -m pip install -r requirements.large.txt
+python -m pip install -r requirements.txt
 
 popd
 
