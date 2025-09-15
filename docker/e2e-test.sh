@@ -2,6 +2,8 @@
 
 set -eux pipefail
 
+env
+
 pushd /Downloads
 git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
 
