@@ -44,6 +44,6 @@ jobs:
               -p 5002:5002 \
               -v $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
-              -c "ls -halF $(pwd)"  # $(pwd)/docker/e2e-test.sh
+              -c "$(pwd)/docker/e2e-test.sh"
 
 
