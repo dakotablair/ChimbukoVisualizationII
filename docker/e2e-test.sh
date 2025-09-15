@@ -10,6 +10,7 @@ pushd /Downloads
 git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
 
 pushd $RUN_DIR
+git config --global --add safe.directory $RUN_DIR
 git checkout actions_unstable
 
 mkdir -p data/grid
