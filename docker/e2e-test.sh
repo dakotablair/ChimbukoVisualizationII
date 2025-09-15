@@ -9,7 +9,7 @@ ls -halF $RUN_DIR
 pushd /Downloads
 git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
 
-pushd ChimbukoVisualizationII
+pushd $RUN_DIR
 git checkout actions_unstable
 
 mkdir -p data/grid
@@ -26,6 +26,6 @@ popd
 
 popd
 
-CHIMBUKO_VIZ_ROOT=/Downloads/ChimbukoVisualizationII ./run.sh
+CHIMBUKO_VIZ_ROOT=$RUN_DIR ./run.sh
 
 set +ex
