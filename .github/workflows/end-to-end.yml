@@ -41,8 +41,9 @@ jobs:
           docker run --rm \
               --privileged \
               --entrypoint /bin/bash \
-              -p 5002:5002 \
-              -v $(pwd):$(pwd) \
+              --env RUN_DIR=$(pwd)
+              --publish 5002:5002 \
+              -volume $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
               -c "$(pwd)/docker/e2e-test.sh"
 
