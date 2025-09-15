@@ -4,6 +4,8 @@ set -eux pipefail
 
 env
 
+ls -halF $RUN_DIR
+
 pushd /Downloads
 git clone https://github.com/dakotablair/ChimbukoVisualizationII.git
 
