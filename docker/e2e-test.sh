@@ -14,7 +14,7 @@ mkdir -p data/grid
 ln -s /Downloads/repeat_1rank data/grid/
 
 # Install Redis
-./webserver/run-redis.sh
+./webserver/run-redis.sh &
 
 pushd /opt/spack-environment/ && \
     source /spack/spack/share/spack/setup-env.sh && \
