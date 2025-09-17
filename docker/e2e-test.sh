@@ -27,10 +27,10 @@ ln -s /Downloads/repeat_1rank data/grid/
 
 ls -halF ./
 
-REDIS_CLI="../redis-stable/src/redis-cli"
+REDIS_CLI="./redis-stable/src/redis-cli"
 function hold_for_redis () {
   OUTPUT="";
-  while [ "$OUTPUT" != "PONG" ]; do
+  while [[ ! -d redis-stable && "$OUTPUT" != "PONG" ]]; do
     OUTPUT=`$REDIS_CLI PING`;
     echo hold on 1 sec
     sleep 1
