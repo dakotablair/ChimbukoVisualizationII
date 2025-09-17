@@ -29,10 +29,14 @@ ls -halF ./
 
 REDIS_CLI="./redis-stable/src/redis-cli"
 function hold_for_redis () {
-  OUTPUT="";
-  while [[ ! -d redis-stable && "$OUTPUT" != "PONG" ]]; do
+  while [[ ! -x $REDIS_CLI ]]; do
+    echo wait for redis-cli: hold on 1 sec
+    sleep 1
+  done
+  OUTPUT="";  
+  while [["$OUTPUT" != "PONG" ]]; do
     OUTPUT=`$REDIS_CLI PING`;
-    echo hold on 1 sec
+    echo wait for redis: hold on 1 sec
     sleep 1
   done
 }
