@@ -17,13 +17,15 @@ ln -s /Downloads/repeat_1rank data/grid/
 
 ./webserver/run-redis.sh &
 
-pushd /opt/spack-environment/ && \
-    source /spack/spack/share/spack/setup-env.sh && \
-    spack env activate .
-popd
+# pushd /opt/spack-environment/ && \
+#     source /spack/spack/share/spack/setup-env.sh && \
+#     spack env activate .
+# popd
 
-python -m pip install -r requirements.large.txt
-python -m pip install -r requirements.txt
+# python -m pip install -r requirements.large.txt
+# python -m pip install -r requirements.txt
+
+ls -halF ../
 
 REDIS_CLI="../redis-stable/src/redis-cli"
 function hold_for_redis () {
