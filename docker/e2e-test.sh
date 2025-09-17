@@ -25,7 +25,7 @@ ln -s /Downloads/repeat_1rank data/grid/
 # python -m pip install -r requirements.large.txt
 # python -m pip install -r requirements.txt
 
-ls -halF ../
+ls -halF ./
 
 REDIS_CLI="../redis-stable/src/redis-cli"
 function hold_for_redis () {
