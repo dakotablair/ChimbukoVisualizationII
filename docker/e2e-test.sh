@@ -33,7 +33,7 @@ function hold_for_redis () {
     echo wait for redis-cli: hold on 1 sec
     sleep 1
   done
-  OUTPUT="";  
+  OUTPUT="----";  
   while [["$OUTPUT" != "PONG" ]]; do
     OUTPUT=`$REDIS_CLI PING`;
     echo wait for redis: hold on 1 sec
