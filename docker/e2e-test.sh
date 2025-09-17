@@ -15,15 +15,6 @@ ln -s /Downloads/repeat_1rank data/grid/
 
 # Install Redis
 
-function hold_for_redis () {
-  OUTPUT="";
-  while [ "$OUTPUT" != "PONG" ]; do
-    OUTPUT=`./redis-stable/src/redis-cli PING`;
-    echo hold on 1 sec
-    sleep 1
-  done
-}
-
 ./webserver/run-redis.sh &
 
 pushd /opt/spack-environment/ && \
@@ -33,6 +24,16 @@ popd
 
 python -m pip install -r requirements.large.txt
 python -m pip install -r requirements.txt
+
+REDIS_CLI="../../redis-stable/src/redis-cli"
+function hold_for_redis () {
+  OUTPUT="";
+  while [ "$OUTPUT" != "PONG" ]; do
+    OUTPUT=`$REDIS_CLI PING`;
+    echo hold on 1 sec
+    sleep 1
+  done
+}
 
 hold_for_redis
 
