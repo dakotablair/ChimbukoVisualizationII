@@ -25,7 +25,7 @@ popd
 python -m pip install -r requirements.large.txt
 python -m pip install -r requirements.txt
 
-REDIS_CLI="../../redis-stable/src/redis-cli"
+REDIS_CLI="../redis-stable/src/redis-cli"
 function hold_for_redis () {
   OUTPUT="";
   while [ "$OUTPUT" != "PONG" ]; do
