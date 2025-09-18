@@ -45,9 +45,16 @@ hold_for_redis
 
 set -e
 
-sed -i '422s/^/# /' ./redis-stable/redis.conf
-sed -i '2017s/^/# /' ./redis-stable/redis.conf
-sed -i '2018s/^/# /' ./redis-stable/redis.conf
+# Fix configuration
+CONF="./redis-stable/redis.conf"
+sed -i '422s/^/# /' $CONF
+sed -i '2017s/^/# /' $CONF
+sed -i '2018s/^/# /' $CONF
+sed -i "s/^protected-mode yes/protected-mode no/" $CONF
+sed -i "s/^bind 127.0.0.1/bind 0.0.0.0/" $CONF
+sed -i "s/^daemonize no/daemonize yes/" $CONF
+sed -i "s|^dir ./|dir $RUN_DIR/|" $CONF
+sed -i "s|^pidfile /var/run/redis_6379.pid|pidfile $RUN_DIR/redis.pid|" $CONF
 
 popd
 
