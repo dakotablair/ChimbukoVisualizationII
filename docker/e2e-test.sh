@@ -30,8 +30,8 @@ ls -halF ./
 REDIS_CLI="./redis-stable/src/redis-cli"
 function hold_for_redis () {
   while [[ ! -x $REDIS_CLI ]]; do
-    echo wait for redis-cli: hold on 1 sec
-    sleep 1
+    echo wait for redis-cli: hold on 10 s
+    sleep 10
   done
   OUTPUT="";  
   while [[ "$OUTPUT" != "PONG" ]]; do
@@ -41,8 +41,11 @@ function hold_for_redis () {
   done
 }
 
+set +e
+
 hold_for_redis
 
+set -e
 popd
 
 CHIMBUKO_VIZ_ROOT=$RUN_DIR ./run.sh
