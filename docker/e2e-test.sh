@@ -44,6 +44,11 @@ set +e
 hold_for_redis
 
 set -e
+
+sed -i '422s/^/# /' ./redis-stable/redis.conf
+sed -i '2017s/^/# /' ./redis-stable/redis.conf
+sed -i '2018s/^/# /' ./redis-stable/redis.conf
+
 popd
 
 CHIMBUKO_VIZ_ROOT=$RUN_DIR ./run.sh
