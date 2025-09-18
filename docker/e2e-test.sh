@@ -59,7 +59,7 @@ killall -r '.*redis.*'
 
 popd
 
-$RUN_SCRIPT="./run.sh"
+RUN_SCRIPT="./run.sh"
 sed -i "s/^ranks=4/ranks=1/" $RUN_SCRIPT
 sed -i "s/^cycles=200/cycles=10/" $RUN_SCRIPT
 
