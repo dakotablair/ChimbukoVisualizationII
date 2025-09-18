@@ -55,7 +55,7 @@ sed -i "s/^bind 127.0.0.1/bind 0.0.0.0/" $CONF
 sed -i "s/^daemonize no/daemonize yes/" $CONF
 sed -i "s|^dir ./|dir $RUN_DIR/|" $CONF
 sed -i "s|^pidfile /var/run/redis_6379.pid|pidfile $RUN_DIR/redis.pid|" $CONF
-killall -e '.*redis.*'
+killall -r '.*redis.*'
 
 popd
 
