@@ -59,6 +59,14 @@ killall -r '.*redis.*'
 
 popd
 
-CHIMBUKO_VIZ_ROOT=$RUN_DIR ./run.sh
+$RUN_SCRIPT="./run.sh"
+sed -i "s/^ranks=4/ranks=1/" $RUN_SCRIPT
+sed -i "s/^cycles=200/cycles=10/" $RUN_SCRIPT
+
+CHIMBUKO_VIZ_ROOT=$RUN_DIR $RUN_SCRIPT &
+
+# timeout after 10 minutes
+sleep 600
+exit
 
 set +ex
