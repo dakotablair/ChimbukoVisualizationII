@@ -66,7 +66,7 @@ sed -i "s/mpirun/mpirun --oversubscribe/" $RUN_SCRIPT
 CHIMBUKO_VIZ_ROOT=$RUN_DIR $RUN_SCRIPT &
 
 # timeout after 10 minutes
-sleep 600
+sleep 300
 exit
 
 set +ex
