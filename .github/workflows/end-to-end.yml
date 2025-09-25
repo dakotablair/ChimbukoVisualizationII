@@ -41,7 +41,8 @@ jobs:
           docker run --rm \
               --privileged \
               --entrypoint /bin/bash \
-              --env NGROK_TOKEN=${{ secrets.NGROK_TOKEN }} RUN_DIR=$(pwd) \
+              --env NGROK_TOKEN=${{ secrets.NGROK_TOKEN }} \
+              --env RUN_DIR=$(pwd) \
               --publish 5002:5002 \
               --volume $(pwd):$(pwd) \
               chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
