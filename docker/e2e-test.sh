@@ -72,8 +72,10 @@ RUN_SCRIPT="./run.sh"
 sed -i "s/^cycles=200/cycles=10/" $RUN_SCRIPT
 sed -i "s/mpirun/mpirun --oversubscribe/" $RUN_SCRIPT
 
+ngrok http 5002 &
+
 CHIMBUKO_VIZ_ROOT=$RUN_DIR $RUN_SCRIPT &
 
-timeout 300 ngrok http 5002
+sleep 300
 
 set +ex
