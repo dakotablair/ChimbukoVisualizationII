@@ -1,0 +1,51 @@
+name: Chimbuko Visualization II End-to-end Tests
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
+
+jobs:
+  end_to_end_tests:
+    runs-on: ubuntu-latest
+    steps:
+
+    # Check out ChimubkoVisualizationII (CV2) repo.
+    - name: Check out the CV2 repo
+      uses: actions/checkout@v4
+      with:
+        ref: 'actions_unstable'
+
+    - name: Check out the PerformanceAnalysis repo
+      uses: actions/checkout@v4
+      with:
+        path: 'PerformanceAnalysis'
+        ref: 'ckelly_develop'
+        repository: 'CODARcode/PerformanceAnalysis'
+
+    - name: Pull chimbuko/chimbuko-spack-dev-ddb docker image
+      shell: bash
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+        docker image tag \
+          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+
+    - name: Run tests in container
+      shell: bash
+      run: |
+          docker run --rm \
+              --privileged \
+              --entrypoint /bin/bash \
+              --env NGROK_TOKEN=${{ secrets.NGROK_TOKEN }} \
+              --env RUN_DIR=$(pwd) \
+              --publish 5002:5002 \
+              --volume $(pwd):$(pwd) \
+              chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+              -c "$(pwd)/docker/e2e-test.sh"
+
+

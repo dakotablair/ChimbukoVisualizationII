@@ -1,0 +1,66 @@
+name: Build and push chimbuko-spack-dev-ddb image
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Check out this repo
+      uses: actions/checkout@v5
+      with:
+        path: 'ChimbukoVisualizationII'
+        ref: 'actions_unstable'
+
+    - name: Check out the PerformanceAnalysis repo
+      uses: actions/checkout@v5
+      with:
+        path: 'PerformanceAnalysis'
+        ref: 'ckelly_develop_ddb'
+        repository: 'CODARcode/PerformanceAnalysis'
+
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        # note that the calling workflow must set `secrets: inherit`
+        username: '${{ github.actor }}'
+        password: '${{ secrets.GITHUB_TOKEN }}'
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Pull chimbuko/chimbuko-spack-env docker image
+      shell: bash
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-env:ubuntu18.04
+        docker image tag \
+          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-env:ubuntu18.04 \
+          chimbuko/chimbuko-spack-env:ubuntu18.04
+
+    - name: Build test environment image
+      shell: bash
+      run: |
+        cd PerformanceAnalysis/
+        docker build \
+          -f docker/ubuntu18.04/openmpi4.0.4/all_spack/Dockerfile.cv2 \
+          -t chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          .
+
+    - name: Push chimbuko-spack-dev-ddb image
+      shell: bash
+      run: |
+        docker image tag chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+        docker image push ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04

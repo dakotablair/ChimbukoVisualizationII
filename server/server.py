@@ -80,6 +80,7 @@ def stop():
     if 'pdb' in globals():
         del pdb
     print("Shutting down provdb!")
+    return jsonify({})
 
 
 @main.route('/')
