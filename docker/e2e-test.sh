@@ -61,11 +61,11 @@ popd
 
 # Install ngrok
 curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-    | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+    | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
       && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
-    | sudo tee /etc/apt/sources.list.d/ngrok.list \
-      && sudo apt update \
-      && sudo apt install -y ngrok
+    | tee /etc/apt/sources.list.d/ngrok.list \
+      && apt update \
+      && apt install -y ngrok
 ngrok config add-authtoken $NGROK_TOKEN
 
 RUN_SCRIPT="./run.sh"
@@ -74,6 +74,6 @@ sed -i "s/mpirun/mpirun --oversubscribe/" $RUN_SCRIPT
 
 CHIMBUKO_VIZ_ROOT=$RUN_DIR $RUN_SCRIPT &
 
-ngrok http 5002
+timeout 300 --kill-after=60 ngrok http 5002
 
 set +ex
