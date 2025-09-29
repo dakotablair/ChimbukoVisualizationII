@@ -28,9 +28,12 @@ jobs:
     - name: Pull chimbuko/chimbuko-spack-dev-ddb docker image
       shell: bash
       run: |
-        docker pull ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
+        export OWNER_LOWER="$(\
+            echo ${{ github.repository_owner }} tr '[:upper:]' '[:lower:]'\
+        )"
+        docker pull ghcr.io/$OWNER_LOWER/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
         docker image tag \
-          ghcr.io/${{ github.repository_owner }}/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
+          ghcr.io/$OWNER_LOWER/chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04 \
           chimbuko/chimbuko-spack-dev-ddb:ubuntu18.04
 
     - name: Run tests in container
